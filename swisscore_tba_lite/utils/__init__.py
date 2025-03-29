@@ -45,6 +45,9 @@ def dumps(obj) -> str:
 def replace_word(text: str, word: str, new_word: str, count: int = 0) -> str:
     return re.sub(rf"\b{re.escape(word)}\b", new_word, text, count=count)
 
+def startswith_word(text: str, word: str) -> bool:
+    return bool(re.match(rf"^{word}(?:\s|$)", text))
+
 def is_local_file(path: str | Path) -> bool:
     """Check if a string represents a valid local file path."""
     path = path if isinstance(path, Path) else Path(path)
