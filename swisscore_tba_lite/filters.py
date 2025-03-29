@@ -43,7 +43,7 @@ def from_users(user_ids: int | list[int]):
     
     The filter returns `True` if obj["from"]["id"] is in `user_ids`
     """
-    ids = utils.to_list(ids)
+    user_ids = utils.to_list(user_ids)
     def f(obj: dict[str, t.Any]):
         from_id = obj.get("from", {}).get("id")
         return from_id in user_ids
