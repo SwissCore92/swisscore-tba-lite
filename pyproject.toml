@@ -1,0 +1,26 @@
+[project]
+name = "swisscore-tba-lite"
+version = "0.1.0"
+description = "Very basic asynchronous Telegram Bot API wrapper. Handles just in dicts."
+authors = [
+    { name = "Patrick Schweizer (SwissCorePy)", email = "swisscore.py@gmail.com" }
+]
+dependencies = [
+    "aiohttp",
+    "aiofiles"
+]
+readme = "README.md"
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+dev = [
+    "beautifulsoup",
+    "html-to-markdown"
+]
+
+[tool.setuptools]
+packages = ["swisscore_tba_lite"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
