@@ -6,7 +6,7 @@ import aiohttp
 
 from .. import utils
 from .logger import logger
-from .event import EventManager
+from .event import EventManager, EventHandlerError, FilterEvaluationError
 
 class FailedRequestError(Exception): ...
 class MaxRetriesExeededError(Exception): ...
@@ -130,7 +130,7 @@ class BotAPI:
         
         self.session: aiohttp.ClientSession | None = None
         """
-        The client session when the bot api is started.  
+        The client session is initialized when the bot is started.  
         
         You can savely use this to make your own requests.
         """
@@ -193,27 +193,64 @@ class BotAPI:
         **For internal use**
         """
         if self._tasks:
-            logger.debug(f"Gathering {len(self._tasks)} pending task(s): {[tsk.get_name() for tsk in self._tasks]}")
-            return await asyncio.gather(*self._tasks)
+            logger.debug(f"Waiting for {len(self._tasks)} pending task(s) to complete: {[tsk.get_name() for tsk in self._tasks]}")
+            await asyncio.gather(*self._tasks)
+        logger.debug("All pending tasks completed")
     
     
     def start_polling(self) -> None:
-        asyncio.run(self.polling_main_loop())
+        """
+        Start the bot in [long polling](https://en.wikipedia.org/wiki/Push_technology#Long_polling) mode.  
+        
+        Uses the [`getUpdates`](https://core.telegram.org/bots/api#getupdates) API method to get [Updates](https://core.telegram.org/bots/api#update).  
+        
+        **Note:**
+        * *`offset`* is calculated automatically
+        * *`limit`* can be set using `bot.update_limit = <limit>` (defaults to `None` which is 100)
+        * *`timeout`* can be set using `bot.polling_timeout = <timeout>` (defaults to 20)
+        * *`allowed_updates`* are automatically set, based on your event handlers
+        
+        Is just a shortcut for
+        ```python
+        asyncio.run(bot._polling_main_loop())
+        ```
+        
+        """
+        logger.debug("Start asycnc event loop")
+        
+        asyncio.run(self._polling_main_loop())
+        
+        logger.debug("Closed asycnc event loop")
     
-    async def polling_main_loop(self) -> None:
-        async for update_type, obj in self.get_future_updates():
-            await self.event._trigger_event(update_type, obj)
     
-    async def get_future_updates(
+    async def _polling_main_loop(self) -> None:
+        """
+        Iterates over incoming updates and triggers event handlers.  
+        
+        To start polling use 
+        ```python
+        bot.start_polling()
+        ```
+        > *or*
+        ```python
+        asyncio.run(bot._polling_main_loop())
+        ```
+        """
+        async for update_type, obj in self._get_future_updates():
+            try:
+                await self.event._trigger_event(update_type, obj)
+            
+            except (FilterEvaluationError, EventHandlerError) as e:
+                logger.error(f"Failed to process update of type '{update_type}'. Update was dropped. ({e})", exc_info=True)
+    
+    async def _get_future_updates(
         self,
         drop_pending_updates: bool = False
     ) -> t.AsyncGenerator[tuple[str, dict[str, t.Any]], None]:
         """
-        **Note:**
-        * *`offset`* is calculated automatically
-        * *`limit`* can be set using `api.update_limit = <limit>` (defaults to `None` which is 100)
-        * *`timeout`* can be set using `api.polling_timeout = <timeout>` (defaults to 20)
-        * *`allowed_updates`* are automatically set, based on your event handlers
+        Generator that asks repeatedly (in an interval of `bot.polling_timeout`) for new updates and yields them.  
+        
+        **Is used internally**
         """
         exit_code: int = 0
         
@@ -287,6 +324,18 @@ class BotAPI:
         timeout: int = 30,
         convert_func: t.Callable[[t.Any], t.Any] | None = None,
     ) -> asyncio.Task[dict[str] | t.Any]:
+        """
+        Use this method to make [API](https://core.telegram.org/bots/api) requests.
+
+        **Ussage:**
+        ```python
+        bot("sendMessage", {"chat_id": chat_id, "text": "Hello world!"})
+        me = await bot("getMe") 
+        ```
+        
+        Returns a asyncio.Task which can be awaited to get the result.
+        
+        """
         
         if self.session is None:
             raise RuntimeError("Client session is not initialized.")
