@@ -3,6 +3,7 @@
 
 A very basic and lightweight asynchronous [Telegram Bot API](https://core.telegram.org/bots/api) wrapper for **python 3.11+**.
 
+> ⚠️ **Note:** *This project is work in progress!*  
 
 Handles just in *dictionaries*. 
 
