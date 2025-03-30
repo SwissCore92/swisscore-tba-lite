@@ -18,7 +18,7 @@ def task_wrapper(func):
         try:
             return await func(*args, **kwargs)
         
-        except Exception as e:
+        except (FailedRequestError, MaxRetriesExeededError) as e:
             logger.error(f"Task failed: {e}")
     
     return wrapper
