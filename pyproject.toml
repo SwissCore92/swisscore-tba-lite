@@ -5,6 +5,7 @@ description = "Very basic asynchronous Telegram Bot API wrapper. Handles just in
 authors = [
     { name = "Patrick Schweizer (SwissCorePy)", email = "swisscore.py@gmail.com" }
 ]
+license = { text = "UNLICENSE" }
 dependencies = [
     "aiohttp",
     "aiofiles"
