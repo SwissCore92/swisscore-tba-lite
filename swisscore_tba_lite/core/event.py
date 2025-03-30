@@ -1,5 +1,4 @@
 import typing as t
-import asyncio
 from inspect import iscoroutinefunction
 from copy import deepcopy
 
