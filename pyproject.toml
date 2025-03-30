@@ -14,8 +14,7 @@ requires-python = ">=3.11"
 
 [project.optional-dependencies]
 dev = [
-    "beautifulsoup",
-    "html-to-markdown"
+    "pytest"
 ]
 
 [tool.setuptools]
