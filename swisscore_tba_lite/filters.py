@@ -1,3 +1,5 @@
+"""Provides some filter generators and some preconfigured filters."""
+
 import re
 import typing as t
 
