@@ -1,5 +1,6 @@
 import asyncio
 import typing as t
+from functools import wraps
 from json import JSONDecodeError
  
 import aiohttp
@@ -10,6 +11,18 @@ from .event import EventManager, EventHandlerError, FilterEvaluationError
 
 class FailedRequestError(Exception): ...
 class MaxRetriesExeededError(Exception): ...
+
+def task_wrapper(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        
+        except Exception as e:
+            logger.error(f"Task failed: {e}")
+    
+    return wrapper
+        
 
 def api_method(
     name: str | None = None,
@@ -241,7 +254,7 @@ class BotAPI:
                 await self.event._trigger_event(update_type, obj)
             
             except (FilterEvaluationError, EventHandlerError) as e:
-                logger.error(f"Failed to process update of type '{update_type}'. Update was dropped. ({e})", exc_info=True)
+                logger.error(f"Failed to fully process update of type '{update_type}'. Update was dropped. ({e})", exc_info=True)
     
     async def _get_future_updates(
         self,
@@ -272,8 +285,13 @@ class BotAPI:
                     logger.debug("Dropped pending updates.")
                     params["offset"] = updates[-1]["update_id"] + 1
             
-            await self.event._trigger_event("startup")
-            await self._gather_pending_tasks()
+            try:
+                await self.event._trigger_event("startup")
+                await self._gather_pending_tasks()
+                
+            except (FilterEvaluationError, EventHandlerError) as e:
+                logger.error(f"Failed to fully execute 'startup' event handler. ({e})", exc_info=True)
+    
             
             logger.info(f"Start Bot in long polling mode. Press {utils.kb_interrupt()} to quit.")
             
@@ -305,9 +323,13 @@ class BotAPI:
                     exit_code = 1
                     logger.critical("A critical, unexpected error occured. Shutting down.", exc_info=True)
                     break
-
-            await self.event._trigger_event("shutdown", exit_code)
-            await self._gather_pending_tasks()
+            
+            try:
+                await self.event._trigger_event("shutdown", exit_code)
+                await self._gather_pending_tasks()
+            
+            except (FilterEvaluationError, EventHandlerError) as e:
+                logger.error(f"Failed to fully execute 'shutdown' event handler. ({e})", exc_info=True)
 
         self.session = None
         logger.debug("Closed client session")
@@ -340,6 +362,7 @@ class BotAPI:
         if self.session is None:
             raise RuntimeError("Client session is not initialized.")
 
+        @task_wrapper
         async def request():
             nonlocal params
 
