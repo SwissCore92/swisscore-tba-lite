@@ -43,7 +43,8 @@ TOKEN = os.environ.get("API_TOKEN", "<YOUR_API_TOKEN>")
 # Get your Telegram user ID
 # (if you don't know it,
 #   you can use the `/myid` command below in private chat with your bot)
-# Set it in an environment variable (ADMIN_ID) or manually replace 1234 below
+# Set it in an environment variable (ADMIN_ID) 
+#   or manually replace 1234 below
 ADMIN_ID = int(os.environ.get("ADMIN_ID", 1234))
 
 bot = Bot(TOKEN)
