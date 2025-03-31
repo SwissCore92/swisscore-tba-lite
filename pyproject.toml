@@ -1,7 +1,7 @@
 [project]
 name = "swisscore-tba-lite"
 version = "0.1.0"
-description = "Very basic asynchronous Telegram Bot API wrapper. Handles just in dicts."
+description = "Very basic and lightweight asynchronous Telegram Bot API wrapper with focus on core functionality and easy expandability."
 authors = [
     { name = "Patrick Schweizer (SwissCorePy)", email = "swisscore.py@gmail.com" }
 ]
