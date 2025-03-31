@@ -4,7 +4,7 @@ from pathlib import Path
 
 LOG_FILE = Path("swissore_tba_lite.log")
 
-# _API_RESPONE = 5
+_CRITICAL_WARNING = logging.CRITICAL - 5
 
 try:
     import colorama
@@ -14,11 +14,11 @@ try:
 
     class ColoredFormatter(logging.Formatter):
         COLORS = {
-            # _API_RESPONE: Back.BLACK + Fore.LIGHTCYAN_EX,
             logging.DEBUG: Back.BLACK + Fore.LIGHTBLACK_EX,
             logging.INFO: Back.BLACK + Fore.WHITE,
             logging.WARNING: Back.BLACK + Fore.YELLOW, 
             logging.ERROR: Back.BLACK + Fore.RED,
+            _CRITICAL_WARNING: Back.YELLOW + Fore.BLACK,
             logging.CRITICAL: Back.RED + Fore.WHITE,
         }
 
@@ -32,16 +32,16 @@ except ModuleNotFoundError:
 
 class Logger(logging.Logger):
     """Custom logger that adds API_RESPONSE level. """
-    # API_RESPONSE = _API_RESPONE
     DEBUG = logging.DEBUG
     INFO = logging.INFO
     WARNING = logging.WARNING
     ERROR = logging.INFO
+    CRITICAL_WARNING = logging.CRITICAL - 5
     CRITICAL = logging.CRITICAL
     
     def __init__(self, name: str, level=logging.DEBUG):
         super().__init__(name, level)
-        # logging.addLevelName(self.API_RESPONSE, "API_RESPONSE")
+        logging.addLevelName(Logger.CRITICAL_WARNING, "CRITICAL_WARNING")
         
         self.console_handler = logging.StreamHandler(sys.stdout)
         self.console_handler.setLevel(Logger.DEBUG)
@@ -57,9 +57,9 @@ class Logger(logging.Logger):
         )
         self.addHandler(self.file_handler)
 
-    # def api_response(self, message: str, *args, **kwargs):
-    #     if self.isEnabledFor(self.API_RESPONSE):
-    #         self._log(self.API_RESPONSE, message, args, **kwargs)
+    def critical_warning(self, message: str, *args, **kwargs):
+        if self.isEnabledFor(Logger.CRITICAL_WARNING):
+            self._log(Logger.CRITICAL_WARNING, message, args, **kwargs)
     
     def set_level(self, level: int):
         """set logger level (only affects console handler)."""
