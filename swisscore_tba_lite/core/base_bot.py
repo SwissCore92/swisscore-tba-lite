@@ -1,30 +1,16 @@
 import asyncio
 import typing as t
 from functools import wraps
-from enum import Enum
  
 import aiohttp
 
 from .. import utils
 from .logger import logger
 from .event import EventManager
+from .exit_codes import ExitCodes
 from . import exceptions
 
 T = t.TypeVar("T")
-
-class ExitCodes(Enum):
-    TERMITATED_BY_USER = 0
-    """Bot was shut down manually by the user."""
-    
-    UNEXPECTED_ERROR = 1
-    """Bot was shut down by an unexpected error."""
-    
-    CRITICAL_TELEGRAM_ERROR = 2
-    """Bot was shut down by a critical Telegram API error while getting updates. (403: Forbidden or 409: Conflict)"""
-
-    UNEXPECTED_TELEGRAM_ERROR = 3
-    """Bot was shut down by a unexpected Telegram API error while getting updates. (Should not happen in theory)"""
-
 
 # decorator
 def request_task_wrapper(catch_errors: bool):
@@ -505,6 +491,8 @@ class BaseBot:
         if self.session is None:
             # TODO: Maybe use custom exception for uninitialized session  
             raise RuntimeError("Client session is not initialized.")
+        
+        timeout = timeout or self.default_timeout
 
         @request_task_wrapper(catch_errors=catch_errors)
         async def request():
@@ -526,7 +514,7 @@ class BaseBot:
 
             while retries < self.max_retries:
                 
-                timeout = min(timeout or self.default_timeout, self.max_timeout)
+                timeout = min(timeout, self.max_timeout)
             
                 try:
                     async with self.session.post(
@@ -589,6 +577,7 @@ class BaseBot:
                     continue
                 
                 except Exception as e:
+                    # Unexpected Error. raise.  
                     raise
             
             raise exceptions.MaxRetriesExeededError(f"'{method_name}' Max retries exceeded. Request failed.")
