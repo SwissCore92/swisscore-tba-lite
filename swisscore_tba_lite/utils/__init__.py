@@ -33,6 +33,10 @@ def snake_to_camel(name: str, capitalized=False) -> str:
         return camel
     return f"{camel[0].lower()}{camel[1:]}"
 
+def is_valid_bot_api_token(token: str) -> bool:
+    pattern = r"^\d{10}:[A-Za-z0-9_-]+$"
+    return bool(re.match(pattern, token))
+
 def get_update_type(update_obj: dict[str, t.Any]) -> str:
     return [k for k in update_obj.keys() if not k == "update_id"][0]
 
@@ -40,7 +44,7 @@ def to_list(l: T | list[T]) -> list[T]:
     return l if isinstance(l, list) else [l]
 
 def dumps(obj) -> str:
-    return json.dumps(obj, indent=None)
+    return json.dumps(obj, indent=None, separators=(",", ":"))
 
 def replace_word(text: str, word: str, new_word: str, count: int = 0) -> str:
     return re.sub(rf"\b{re.escape(word)}\b", new_word, text, count=count)

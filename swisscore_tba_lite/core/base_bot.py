@@ -1,30 +1,95 @@
 import asyncio
 import typing as t
 from functools import wraps
-from json import JSONDecodeError
+from enum import Enum
  
 import aiohttp
 
 from .. import utils
 from .logger import logger
-from .event import EventManager, EventHandlerError, FilterEvaluationError
+from .event import EventManager
+from . import exceptions
 
-class FailedRequestError(Exception): ...
-class MaxRetriesExeededError(Exception): ...
+T = t.TypeVar("T")
 
-def task_wrapper(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        try:
-            return await func(*args, **kwargs)
-        
-        except (FailedRequestError, MaxRetriesExeededError) as e:
-            logger.error(f"Task failed: {e}")
+class ExitCodes(Enum):
+    TERMITATED_BY_USER = 0
+    """Bot was shut down manually by the user."""
+    
+    UNEXPECTED_ERROR = 1
+    """Bot was shut down by an unexpected error."""
+    
+    CRITICAL_TELEGRAM_ERROR = 2
+    """Bot was shut down by a critical Telegram API error while getting updates. (403: Forbidden or 409: Conflict)"""
+
+    UNEXPECTED_TELEGRAM_ERROR = 3
+    """Bot was shut down by a unexpected Telegram API error while getting updates. (Should not happen in theory)"""
+
+
+# decorator
+def request_task_wrapper(catch_errors: bool):
+    """
+    *decorator* for the request task coroutine.
+    
+    **Is used internally**
+    """
+    def wrapper(func):
+        @wraps(func)
+        async def inner(*args, **kwargs):
+            try:
+                return await func(*args, **kwargs)
+            
+            # TODO: Maybe use custom exception for uninitialized session  
+            except RuntimeError as e:
+                logger.critical(e, exc_info=True)
+                # Always raise this exception
+                raise
+
+            except (
+                exceptions.FileProcessingError, 
+                exceptions.InvalidParamsError,
+                exceptions.ResultConversionError
+            ) as e:
+                # mostly user caused error 
+                logger.error(e, exc_info=True)
+                
+                if not catch_errors:
+                    raise
+            
+            except (exceptions.TelegramAPIError) as e:
+                if e.critical:
+                    logger.critical(e)
+                     
+                    if isinstance(e, exceptions.Conflict):
+                        logger.warning(
+                            "If this conflict wasn't caused by you, it means that somebody else may have access to your API_TOKEN. "
+                            "Consider to revoke your API_TOKEN via @BotFather in this case!"
+                        )
+                        
+                else:
+                    logger.error(e)
+                
+                if not catch_errors:
+                    raise
+            
+            except exceptions.MaxRetriesExeededError as e:
+                logger.error(e)
+                
+                if not catch_errors:
+                    raise
+            
+            except Exception as e:
+                logger.critical(e, exc_info=True)
+                
+                if not catch_errors:
+                    raise
+                
+        return inner
     
     return wrapper
         
-
-def api_method(
+# decorator
+def api_method_wrapper(
     name: str | None = None,
     *,
     check_input_files: list[str] | None = None,
@@ -32,21 +97,21 @@ def api_method(
     convert_func: t.Callable[[t.Any], t.Any] | None = None,
 ):
     """
-    decorator for api methods
+    **decorator** for api methods
     
-    **❌ CAN ONLY BE APPLIED TO METHODS OF `BotAPI` OR IT'S SUBCLASSES**
+    ⚠️ ***Can only be applied to methods of `BaseBot` or is's subclasses***
     
-    It's purpose is to make it very easy to extend the `BotAPI` class.
+    It's purpose is to make it very easy to extend the `BaseBot` class.
     
     **Ussage:**
     ```python
     
-    class Bot(BotAPI):
-        @api_method()
+    class Bot(BaseBot):
+        @api_method_wrapper()
         def send_message(self, chat_id, text, ...):
             \"""No Code needed, the decorator handles the request\"""
         
-        @api_method(check_input_files=["photo"])
+        @api_method_wrapper(check_input_files=["photo"])
         def send_photo(self, chat_id, photo, ...):
             \"""No Code needed, the decorator handles the request\"""
         
@@ -62,10 +127,10 @@ def api_method(
             params = dict(zip(func.__code__.co_varnames, args))
             params.update(kwargs)
             
-            bot: BotAPI = params.pop("self")
+            bot: BaseBot = params.pop("self")
             
-            if not isinstance(bot, BotAPI):
-                raise TypeError(f"This decorator can only be applied to instances of BotAPI.")
+            if not isinstance(bot, BaseBot):
+                raise TypeError(f"This decorator can only be applied to instances of BaseBot.")
             
             return bot(
                 method_name, 
@@ -79,7 +144,7 @@ def api_method(
     
     return wrapper
 
-
+# helper function
 async def prepare_files(
     params: dict[str, t.Any], 
     check_input_files: list[str] | None = None, 
@@ -91,21 +156,57 @@ async def prepare_files(
     check_input_media = check_input_media or []
     
     if check_input_files or check_input_media:
-    
-        input_files = await utils.process_input_files(params, check_input_files)
-        media_files, input_media = await utils.process_input_media(params, check_input_media)
-        input_files.update(media_files) 
+        try:
+            input_files = await utils.process_input_files(params, check_input_files)
+            media_files, input_media = await utils.process_input_media(params, check_input_media)
+            input_files.update(media_files) 
 
-        if input_files:
-            form_data = await utils.create_form_data(params, input_files)
+            if input_files:
+                form_data = await utils.create_form_data(params, input_files)
+        
+        except FileNotFoundError as e:
+            raise exceptions.FileProcessingError(
+                f"Provided file was not found."
+            ) from e
+        
+        except IOError as e:
+            raise exceptions.FileProcessingError(
+                f"Error occured while reading file."
+            ) from e
+        
+        except Exception as e:
+            raise exceptions.FileProcessingError(
+                f"A unexcepted error occured while preparing files."
+            ) from e
 
     if form_data is not None:
         return None, form_data
     
     return params, None
 
+# helper function
+def serialize_params(params: dict[str]) -> dict[str]:
+    try:
+        params = {
+            k: utils.dumps(v) if isinstance(v, (dict, list, tuple)) else v
+            for k, v in params.items() 
+            if v is not None
+        }
+    except TypeError as e:
+        raise exceptions.InvalidParamsError(
+            f"Exception while preparing params. "
+            "Did you forgot to set 'check_input_files' / 'check_input_media'? {e}"
+        ) from e
 
-class BotAPI:
+
+class BaseBot:
+    """
+    ## The Base Telegram Bot.  
+    
+    * Only core functionality
+    * Requests must be made using `bot("<method_name>", {<params>})`
+    * Handles only in dicts
+    """
     def __init__(
         self, 
         token: str, 
@@ -115,16 +216,15 @@ class BotAPI:
         event_manager: EventManager | None = None
     ) -> None:
         
+        # Checking for valid bot api token
+        if not utils.is_valid_bot_api_token(token):
+            raise TypeError(f"'{token}' is not a valid Telegram Bot API Token!")
+        
         self.event = event_manager or EventManager()
         """
         The event manager.
         
-        Use this decorator to register events:
-        
-        **Ussage**
-        ```python
-        
-        ```
+        Use this decorator to register events
         """
         
         self.api_url = f"{base_api_url}/bot{token}"
@@ -169,19 +269,34 @@ class BotAPI:
         
         self.max_retries: int = 5
         """
-        Max retries for transient request errors (`TooManyRequests`, `TimeoutError`).
+        Max retries for transient request errors (`TooManyRequests`, `TimeoutError`, etc.).
         """
         
-        self.max_connection_retries: int = 20
-        """
-        Max retries for connection errors.
+        # # Not used at the moment. currently using `max_retries` for connection errors
+        # self.max_connection_retries: int = 10
+        # """
+        # Max retries for connection errors.
+        # """
         
-        *currently not used*
+        self.default_timeout: int = 30
+        """
+        Default timeout to use if not provided.
+        """
+        
+        self.max_timeout: int = 60
+        """
+        Limits the max timeout for retrying timed out requests.
+        """
+        
+        self.max_concurrent_tasks: int = 50
+        """
+        Max amount of concurrent tasks.  
+        If the limit is exceeded, the bot will automatically gather all pending tasks before it continues processing updates.
         """
         
         self._tasks: list[asyncio.Task] = []
         """
-        Stores currently running tasks to protect them from the garbage collector.  
+        Stores currently running tasks to protect them from beeing collected by the garbage collector.  
         
         **Is used internally to manage tasks**
         """
@@ -206,6 +321,7 @@ class BotAPI:
         **For internal use**
         """
         if self._tasks:
+            # TODO: Maybe catch errors here. Bot can crash if an unawaited pending task raises an error outside an event handler
             logger.debug(f"Waiting for {len(self._tasks)} pending task(s) to complete: {[tsk.get_name() for tsk in self._tasks]}")
             await asyncio.gather(*self._tasks)
         logger.debug("All pending tasks completed")
@@ -229,16 +345,16 @@ class BotAPI:
         ```
         
         """
-        logger.debug("Start asycnc event loop")
+        logger.debug("Start async event loop")
         
         asyncio.run(self._polling_main_loop())
         
-        logger.debug("Closed asycnc event loop")
+        logger.debug("Closed async event loop")
     
     
     async def _polling_main_loop(self) -> None:
         """
-        Iterates over incoming updates and triggers event handlers.  
+        Iterates over incoming updates and triggers the matching event handlers.  
         
         To start polling use 
         ```python
@@ -249,19 +365,34 @@ class BotAPI:
         asyncio.run(bot._polling_main_loop())
         ```
         """
-        async for update_type, obj in self._get_future_updates():
+        async for update in self._get_future_updates():
             try:
-                await self.event._trigger_event(update_type, obj)
+                update_id = update["update_id"]
+                update_type = utils.get_update_type(update)
+                update_object = update[update_type]
+                
+                await self.event._trigger_event(update_type, update_object)
+                
+                if len(self._tasks) >= self.max_concurrent_tasks:
+                    logger.info(
+                        f"Max amount of concurrent tasks exceeded ({self.max_concurrent_tasks}). "
+                        "Gathering all pending tasks before processing further updates..."
+                    )
+                    await self._gather_pending_tasks()
             
-            except (FilterEvaluationError, EventHandlerError) as e:
-                logger.error(f"Failed to fully process update of type '{update_type}'. Update was dropped. ({e})", exc_info=True)
+            except exceptions.FilterEvaluationError as e:
+                logger.error(f"Failed to process update of type '{update_type}'. Update was dropped. ({e})", exc_info=True)
+            
+            except exceptions.EventHandlerError as e:
+                logger.error(f"A event handler processing an update of type '{update_type}' crashed. ({e})", exc_info=True)
+    
     
     async def _get_future_updates(
         self,
         drop_pending_updates: bool = False
-    ) -> t.AsyncGenerator[tuple[str, dict[str, t.Any]], None]:
+    ) -> t.AsyncGenerator[dict[str, t.Any], None]:
         """
-        Generator that asks repeatedly (in an interval of `bot.polling_timeout`) for new updates and yields them.  
+        Generator that asks repeatedly for new updates and yields them one by one.  
         
         **Is used internally**
         """
@@ -289,47 +420,54 @@ class BotAPI:
                 await self.event._trigger_event("startup")
                 await self._gather_pending_tasks()
                 
-            except (FilterEvaluationError, EventHandlerError) as e:
-                logger.error(f"Failed to fully execute 'startup' event handler. ({e})", exc_info=True)
-    
+            except (exceptions.FilterEvaluationError, exceptions.EventHandlerError) as e:
+                logger.error(f"Error in 'startup' event handler. ({e})", exc_info=True)
             
             logger.info(f"Start Bot in long polling mode. Press {utils.kb_interrupt()} to quit.")
             
             while True:
                 try: 
-                    if updates := await self.__call__("getUpdates", params=params, auto_prepare=False):
+                    if updates := await self.__call__("getUpdates", params=params, auto_prepare=False, catch_errors=False):
+                        logger.debug(f"Received {len(updates)} new update(s).")
                         for update in updates:
-                            update_type = utils.get_update_type(update)
-                            yield update_type, update[update_type]
+                            yield update
                     
                         params["offset"] = updates[-1]["update_id"] + 1
 
-                except MaxRetriesExeededError as e:
+                except exceptions.MaxRetriesExeededError as e:
                     logger.error(f"Failed to get updates. Check your Internet Connection. Retrying in 60 seconds...")
                     await asyncio.sleep(60)
                     continue
                 
                 except asyncio.exceptions.CancelledError:
-                    exit_code = 0
-                    logger.info(f"{utils.kb_interrupt()} pressed. Shutting down.")
+                    exit_code = ExitCodes.TERMITATED_BY_USER
+                    logger.info(f"{utils.kb_interrupt()} pressed. Shutting down with {exit_code=}.")
                     break
                 
-                except FailedRequestError as e:
-                    # Should not happen. (The getUpdate request was invalid)
-                    logger.critical(f"Failed to get updates. {repr(e)}", exc_info=True)
-                    exit_code = 4
+                except exceptions.TelegramAPIError as e:
+                    if e.critical:
+                        # Only happens when '409: Conflict' or '403: Forbidden' is raised
+                        exit_code = ExitCodes.CRITICAL_TELEGRAM_ERROR
+                        logger.critical(f"Shutting down with {exit_code=}.")
+                            
+                    else:
+                        # Should not happen in theory. (The getUpdate request was invalid, logging with exc_info)
+                        logger.critical(f"Failed to get updates due an unexpected Telegram API Error. {repr(e)}", exc_info=True)
+                        exit_code = ExitCodes.UNEXPECTED_TELEGRAM_ERROR
+                        
+                    break
                 
                 except Exception as e:
-                    exit_code = 1
-                    logger.critical("A critical, unexpected error occured. Shutting down.", exc_info=True)
+                    exit_code = ExitCodes.UNEXPECTED_ERROR
+                    logger.critical(f"A critical, unexpected error occured. Shutting down with {exit_code=}.", exc_info=True)
                     break
             
             try:
                 await self.event._trigger_event("shutdown", exit_code)
                 await self._gather_pending_tasks()
             
-            except (FilterEvaluationError, EventHandlerError) as e:
-                logger.error(f"Failed to fully execute 'shutdown' event handler. ({e})", exc_info=True)
+            except (exceptions.FilterEvaluationError, exceptions.EventHandlerError) as e:
+                logger.error(f"Error in 'shutdown' event handler. ({e})", exc_info=True)
 
         self.session = None
         logger.debug("Closed client session")
@@ -342,10 +480,11 @@ class BotAPI:
         *,
         auto_prepare: bool = True,
         check_input_files: list[str] | None = None, 
-        check_input_media: list[str] |None = None,
-        timeout: int = 30,
-        convert_func: t.Callable[[t.Any], t.Any] | None = None,
-    ) -> asyncio.Task[dict[str] | t.Any]:
+        check_input_media: list[str] | None = None,
+        timeout: int | None = None,
+        convert_func: t.Callable[[t.Any], T] | None = None,
+        catch_errors: bool = True,
+    ) -> asyncio.Task[dict[str] | T]:
         """
         Use this method to make [API](https://core.telegram.org/bots/api) requests.
 
@@ -354,49 +493,40 @@ class BotAPI:
         bot("sendMessage", {"chat_id": chat_id, "text": "Hello world!"})
         me = await bot("getMe") 
         ```
-        
+
         Returns a asyncio.Task which can be awaited to get the result.
+        
+        > ⚠️ ***Warning:***  
+        > * *Using this method when the bot isn't yet started will raise a `RuntimeError` even if `catch_errors` is set to `True`! Use the 'startup' event if you need to make requests on startup!*  
+        > * *If you set `catch_errors` to `False` **you must await the Task**! If you don't, the bot **may crash** if an Error occures!* 
         
         """
         
         if self.session is None:
+            # TODO: Maybe use custom exception for uninitialized session  
             raise RuntimeError("Client session is not initialized.")
 
-        @task_wrapper
+        @request_task_wrapper(catch_errors=catch_errors)
         async def request():
             nonlocal params
+            nonlocal timeout
 
             data: aiohttp.FormData | None = None
             if params and (check_input_files or check_input_media):
-                try:
-                    params, data = await prepare_files(params, check_input_files, check_input_media)
-
-                except FileNotFoundError:
-                    logger.error(f"Provided file in was not found. - {method_name}({params=}", exc_info=True)
-                    raise
-                
-                except IOError:
-                    logger.error(f"Error occured while reading file. - {method_name}({params=}", exc_info=True)
-                    raise
-                
-                except Exception as e:
-                    logger.critical(f"A unexcepted error occured while preparing files. - {method_name}({params=}", exc_info=True)
-                    raise
+                # may raise a FileProcessingError
+                params, data = await prepare_files(params, check_input_files, check_input_media)
                     
             if auto_prepare and params:
-                params = {
-                    k: utils.dumps(v) if isinstance(v, (dict, list, tuple)) else v
-                    for k, v in params.items() 
-                    if v is not None
-                }
-            
+                # may raise an InvalidParamsError
+                serialize_params(params)
+
             url = f"{self.api_url}/{method_name}"
-            
-            request_info = f"{method_name}({params=}, {data=})"
             
             retries = 0
 
             while retries < self.max_retries:
+                
+                timeout = min(timeout or self.default_timeout, self.max_timeout)
             
                 try:
                     async with self.session.post(
@@ -405,75 +535,63 @@ class BotAPI:
                         data=data, 
                         timeout=timeout,
                     ) as r:
+                        
+                        await exceptions.raise_for_telegram_error(method_name, r)
+                        
                         response: dict[str] = await r.json()
+
+                        if self.log_successful_requests:
+                            logger.debug(f"'{method_name}' -> HTTP {r.status}: OK")
                         
-                        if response["ok"]:
-                            result = response["result"]
+                        result = response["result"]
+                        
+                        if callable(convert_func):
+                            try:
+                                result = convert_func(result)
                             
-                            if self.log_successful_requests:
-                                logger.debug(f"Succeeded Request: {request_info} -> {result}")
-                                
-                            if callable(convert_func):
-                                try:
-                                    result = convert_func(result)
-                                except Exception as e:
-                                    logger.error(f"Conversion of result failed! ", exc_info=True)
-                                    raise 
-                            else:
-                                return result 
-                        
+                            except Exception as e:
+                                raise exceptions.ResultConversionError(
+                                    f"Error in '{convert_func.__name__}'. Conversion of result failed: {e}"
+                                ) from e
                         else:
-                            if parameters := response.get("parameters"):
-                                if wait_time := parameters.get("retry_after"):
-                                    if retries < self.max_retries:
-                                        logger.warning(f"Rate-limited! Retrying after {wait_time} seconds...")
-                                        await asyncio.sleep(wait_time)
-                                        retries += 1
-                                        continue
-                            
-                                elif migrate_to_chat_id := parameters.get("migrate_to_chat_id"):
-                                    # TODO: try handle migrate_to_chat_id instead of raising failed request error
-                                    raise FailedRequestError(f"Failed Request: {request_info} -> {migrate_to_chat_id=}")
-                            
-                            elif description := response.get("description"):
-                                raise FailedRequestError(f"Failed Request: {request_info} -> {description=}")
-                            
-                            else:
-                                # Should never happen. But to be save we raise failed request error here, to avoid infinite loop.
-                                raise FailedRequestError(f"Failed Request: {request_info} -> {response}")
+                            return result 
                 
-                except JSONDecodeError as e:
-                    logger.error(f"{request_info} - Error while decoding response json. {repr(e)}")
-                    raise FailedRequestError(f"{request_info} - Error while decoding response json. {repr(e)}") from e
-                
-                except FailedRequestError as e:
-                    logger.error(repr(e), exc_info=True)
+                except exceptions.FileProcessingError as e:
                     raise
                 
-                except TimeoutError as e:
+                except exceptions.InvalidParamsError as e:
+                    raise
+                
+                except exceptions.TelegramAPIError as e:
+                    if e.retryable and e.retry_after:
+                        logger.warning(f"'{method_name}' -> {e} - Retrying after {e.retry_after} seconds...")
+                        await asyncio.sleep(e.retry_after)
+                        retries += 1
+                        continue
+                    
+                    e.message = f"'{method_name}' -> {e.message}"
+                    raise
+                
+                except asyncio.TimeoutError as e:
                     wait_time = 2**retries
-                    logger.warning(f"{request_info} timed out. Retrying after {wait_time} seconds...")
+                    logger.warning(f"'{method_name}' timed out. - Retrying after {wait_time} seconds...")
                     await asyncio.sleep(wait_time)
+                    timeout += 10
                     retries += 1
                     continue
                 
-                except (
-                    aiohttp.ClientConnectionError, 
-                    aiohttp.ServerConnectionError, 
-                    aiohttp.ClientOSError
-                ) as e:
+                except aiohttp.ClientOSError as e:
                     wait_time = 2**retries
-                    logger.warning(f"{request_info} network error. Retrying after {wait_time} seconds...")
+                    logger.warning(f"'{method_name}' Network issue detected. Check your internet connection. Retrying in {wait_time} seconds...")
                     await asyncio.sleep(wait_time)
+                    timeout += 10
                     retries += 1
                     continue
                 
                 except Exception as e:
-                    logger.critical(f"{request_info} - An unecpected error ocured: ", exc_info=True)
                     raise
             
-            logger.error(f"Max retries reached for {request_info}. Request failed.")
-            raise MaxRetriesExeededError(f"Max retries reached for {request_info}. Request failed.")
+            raise exceptions.MaxRetriesExeededError(f"'{method_name}' Max retries exceeded. Request failed.")
         
         return self._create_task(request(), name=method_name)
     

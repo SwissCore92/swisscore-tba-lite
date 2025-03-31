@@ -2,10 +2,9 @@ import typing as t
 from inspect import iscoroutinefunction
 from copy import deepcopy
 
-from ..core.logger import logger
+from .logger import logger
+from . import exceptions
 
-class EventHandlerError(Exception): ...
-class FilterEvaluationError(Exception): ...
 
 TELEGRAM_EVENT_TYPES: frozenset[str] = frozenset({
     "message",
@@ -33,19 +32,6 @@ TELEGRAM_EVENT_TYPES: frozenset[str] = frozenset({
     "removed_chat_boost",
 })
 
-def raise_for_not_coro(func) -> None:
-    if not iscoroutinefunction(func):
-        raise TypeError(f"event handlers must be coroutine functions. replace `def {func.__name__}()` with `async def {func.__name__}`")
-
-def raise_for_coro(func) -> None:
-    if iscoroutinefunction(func):
-        raise TypeError(f"filters must be regular functions. replace `async def {func.__name__}()` with `def {func.__name__}` or use a lambda")
-
-def raise_for_non_matching_arg_count(func: t.Callable, expected_arg_count=0) -> None:
-    if func.__code__.co_argcount != expected_arg_count:
-        raise TypeError(
-            f"{func.__name__} must take exactly {expected_arg_count} positional arguments."
-        )
 
 
 class EventManager:
@@ -83,7 +69,7 @@ class EventManager:
                             await handler(obj)
                             return True
 
-                logger.warning(f"No matching event handler found for update of type '{event_name}' Update was dropped.")
+                logger.warning(f"No matching event handler found for update of type '{event_name}'. Update was dropped.")
                 
 
     def __call__(self, event_name: str, filters: list[t.Callable[[dict[str, t.Any]], t.Any]] | None = None):
@@ -148,13 +134,13 @@ class EventManager:
         """
 
         def register(func: t.Callable[[dict], t.Any]):
-            raise_for_not_coro(func)
+            exceptions.raise_for_not_coro(func)
             
             match event_name:
                 case "startup":
                     if filters:
                         raise TypeError("'startup' event handler takes no filters.")
-                    raise_for_non_matching_arg_count(func, 0)
+                    exceptions.raise_for_non_matching_arg_count(func, 0)
                     if self.__startup_handler is not None:
                         raise TypeError("There can only be one 'startup' event handler.")
                     self.__startup_handler = EventHandler("startup", func)
@@ -162,7 +148,7 @@ class EventManager:
                 case "shutdown":
                     if filters:
                         raise TypeError("'shutdown' event handler takes no filters.")
-                    raise_for_non_matching_arg_count(func, 1)
+                    exceptions.raise_for_non_matching_arg_count(func, 1)
                     if self.__shutdown_handler is not None:
                         raise TypeError("There can only be one 'shutdown' event handler.")
                     self.__shutdown_handler = EventHandler("shutdown", func)
@@ -178,7 +164,7 @@ class EventManager:
                                 f"'{func.__name__}' (line: {func.__code__.co_firstlineno}) will never be triggered!"
                             )
                     
-                    raise_for_non_matching_arg_count(func, 1)
+                    exceptions.raise_for_non_matching_arg_count(func, 1)
                     
                     self.__update_handlers[event_name].append(EventHandler(event_name, func, filters))
                     
@@ -200,8 +186,8 @@ class EventHandler:
         
         if self.filters:
             for f in filters:
-                raise_for_coro(f)
-                raise_for_non_matching_arg_count(f, 1)
+                exceptions.raise_for_coro(f)
+                exceptions.raise_for_non_matching_arg_count(f, 1)
         
         self.__name__ = func.__name__
     
@@ -212,7 +198,7 @@ class EventHandler:
 
         except Exception as e:
             logger.error(f"Exception in '{self.type}' event handler {self.__name__}(...): {e}", exc_info=True)
-            raise EventHandlerError(
+            raise exceptions.EventHandlerError(
                 f"Error in '{self.type}' event handler {self.__name__}({args=}, {kwargs=})"
             ) from e
     
@@ -226,7 +212,7 @@ class EventHandler:
         
         except Exception as e:
             logger.error(f"Exception while evaluating `{self.type}` event handler {self.__name__}(...): {e}", exc_info=True)
-            raise FilterEvaluationError(
+            raise exceptions.FilterEvaluationError(
                 f"Error in '{self.type}' event handler evaluation."
             ) from e
 

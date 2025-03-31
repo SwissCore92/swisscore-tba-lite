@@ -1,4 +1,2 @@
-
-from .core.base_bot import BotAPI as Bot
-
+from .core.base_bot import BaseBot as Bot, ExitCodes
 from .core.logger import logger
