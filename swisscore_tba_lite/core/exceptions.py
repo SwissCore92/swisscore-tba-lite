@@ -144,6 +144,9 @@ async def raise_for_telegram_error(method_name: str, response: _ClientResponse) 
     if response.status == 429:
         raise TooManyRequests(method_name, response.status, description, response_json.get("retry_after", 5))
     
+    if response.status == 404:
+        raise NotFound(method_name, response.status, description + f" URL: '{response.url}'")
+    
     else:
         exception = error_map.get(response.status, TelegramAPIError)
         raise exception(method_name, response.status, description)
