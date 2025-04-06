@@ -7,13 +7,20 @@ def keys(*keys: str):
     """
     Generates a filter that checks for matching `keys`.  
     
-    The filter returns `True` if any of `keys` is in `obj.keys()`
-    
-    
-    ``````
+    The filter returns `True` if **any** of `keys` is in `obj.keys()`
     """
     def f(obj: dict[str, t.Any]):
         return any(k in obj for k in keys)
+    return f
+
+def all_keys(*keys: str):
+    """
+    Generates a filter that checks for matching `keys`.  
+    
+    The filter returns `True` if **all** of `keys` is in `obj.keys()`
+    """
+    def f(obj: dict[str, t.Any]):
+        return all(k in obj for k in keys)
     return f
 
 def regex(*patterns: str, caption: bool = False):
