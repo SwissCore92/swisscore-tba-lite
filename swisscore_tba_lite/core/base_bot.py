@@ -178,6 +178,7 @@ def serialize_params(params: dict[str]) -> dict[str]:
             for k, v in params.items() 
             if v is not None
         }
+        return params
     except TypeError as e:
         raise exceptions.InvalidParamsError(
             f"Exception while preparing params. "
@@ -470,7 +471,6 @@ class BaseBot:
         self.session = None
         logger.debug("Closed client session")
 
-
     def __call__(
         self, 
         method_name: str, 
@@ -518,7 +518,7 @@ class BaseBot:
                     
             if auto_prepare and params:
                 # may raise an InvalidParamsError
-                serialize_params(params)
+                params = serialize_params(params)
 
             url = f"{self.api_url}/{method_name}"
             
