@@ -17,7 +17,7 @@ def all_keys(*keys: str):
     """
     Generates a filter that checks for matching `keys`.  
     
-    The filter returns `True` if **all** of `keys` is in `obj.keys()`
+    The filter returns `True` if **all** of `keys` are in `obj.keys()`
     """
     def f(obj: dict[str, t.Any]):
         return all(k in obj for k in keys)
@@ -92,6 +92,19 @@ def from_users(*user_ids: int):
     def f(obj: dict[str, t.Any]):
         from_id = obj.get("from", {}).get("id")
         return from_id in user_ids
+    return f
+
+def callback_data(*data: str):
+    """
+    This filter generator is meant to use for `callback_query` updates.
+    
+    Generates a filter that checks for matching `data`.  
+    
+    The filter returns `True` if obj["data"] is in `data`
+    """
+    def f(obj: dict[str, t.Any]):
+        cb_data = obj.get("data", "")
+        return cb_data in data
     return f
 
 
