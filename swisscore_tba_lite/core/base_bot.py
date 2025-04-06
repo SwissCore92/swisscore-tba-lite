@@ -1,5 +1,6 @@
 import asyncio
 import typing as t
+import sys
 from functools import wraps
  
 import aiohttp
@@ -7,7 +8,7 @@ import aiohttp
 from .. import utils
 from .logger import logger
 from .event import EventManager
-from .exit_codes import ExitCodes
+from . import exit_codes
 from . import exceptions
 
 T = t.TypeVar("T")
@@ -401,7 +402,7 @@ class BaseBot:
             "offset": 0, 
             "limit": self.update_limit, 
             "timeout": self.polling_timeout,
-            "allowed_updates": self.event._get_handled_event_types()
+            "allowed_updates": utils.dumps(self.event._get_handled_event_types())
         }
         params = {k: v for k, v in params.items() if v is not None}
         
@@ -424,6 +425,8 @@ class BaseBot:
             
             logger.info(f"Start Bot in long polling mode. Press {utils.kb_interrupt()} to quit.")
             
+            logger.debug(f"Allowed updates: {params["allowed_updates"]}")
+            
             while True:
                 try: 
                     if updates := await self.__call__("getUpdates", params=params, auto_prepare=False, catch_errors=False):
@@ -439,25 +442,25 @@ class BaseBot:
                     continue
                 
                 except asyncio.exceptions.CancelledError:
-                    exit_code = ExitCodes.TERMITATED_BY_USER
+                    exit_code = exit_codes.TERMITATED_BY_USER
                     logger.info(f"{utils.kb_interrupt()} pressed. Shutting down with {exit_code=}.")
                     break
                 
                 except exceptions.TelegramAPIError as e:
                     if e.critical:
                         # Only happens when '409: Conflict' or '403: Forbidden' is raised
-                        exit_code = ExitCodes.CRITICAL_TELEGRAM_ERROR
+                        exit_code = exit_codes.CRITICAL_TELEGRAM_ERROR
                         logger.critical(f"Shutting down with {exit_code=}.")
                             
                     else:
                         # Should not happen in theory. (The getUpdate request was invalid, logging with exc_info)
                         logger.critical(f"Failed to get updates due an unexpected Telegram API Error. {repr(e)}", exc_info=True)
-                        exit_code = ExitCodes.UNEXPECTED_TELEGRAM_ERROR
+                        exit_code = exit_codes.UNEXPECTED_TELEGRAM_ERROR
                         
                     break
                 
                 except Exception as e:
-                    exit_code = ExitCodes.UNEXPECTED_ERROR
+                    exit_code = exit_codes.UNEXPECTED_ERROR
                     logger.critical(f"A critical, unexpected error occured. Shutting down with {exit_code=}.", exc_info=True)
                     break
             
@@ -541,7 +544,10 @@ class BaseBot:
                         response: dict[str] = await r.json()
 
                         if self.log_successful_requests:
-                            logger.debug(f"'{method_name}' -> HTTP {r.status}: OK")
+                            if "--debug" in sys.argv:
+                                logger.debug(f"'{method_name}'({params=}) -> HTTP {r.status}: OK ({response=})")
+                            else:
+                                logger.debug(f"'{method_name}' -> HTTP {r.status}: OK")
                         
                         result = response["result"]
                         
