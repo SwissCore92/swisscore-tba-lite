@@ -189,7 +189,7 @@ class BaseBot:
     """
     ## The Base Telegram Bot.  
     
-    * Only core functionality
+    * Focus on core functionality amd expandability
     * Requests must be made using `bot("<method_name>", {<params>})`
     * Handles only in dicts
     """
@@ -201,14 +201,26 @@ class BaseBot:
         base_file_url: str = "https://api.telegram.org/file",
         event_manager: EventManager | None = None
     ) -> None:
+        """
+        Initialize your bot.  
+        
+        Args:
+            token (str): The token you received from @BotFather
+            base_api_url (str, optional): The base url for api calls; **Only change this if you're using your own Telegram Bot API**.  
+            base_file_url (str, opional): The base url for files to download; **Only change this if you're using your own Telegram Bot API**. 
+            event_manager (EventManager, optional): The `EventManager` to use; **Only set this if you are expanding the bot and need a more advanced event manager.**
+        """
         
         # Checking for valid bot api token
         if not utils.is_valid_bot_api_token(token):
             raise TypeError(f"'{token}' is not a valid Telegram Bot API Token!")
         
+        if event_manager and not isinstance(event_manager, EventManager):
+            raise TypeError("`event_manager` has to be an instance of `EventManager`")
+        
         self.event = event_manager or EventManager()
         """
-        The event manager.
+        The event manager of the bot.
         
         Use this decorator to register events
         """
