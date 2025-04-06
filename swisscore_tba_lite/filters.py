@@ -53,7 +53,7 @@ def commands(*commands: str, prefix: str = "/", caption: bool = False):
     ```
     
     """
-    commands = [f"{prefix}{c.lstrip(prefix)}" for c in commands]
+    commands = [rf"{prefix}{c.lstrip(prefix)}\b" for c in commands]
     return regex(*commands, caption=caption)
 
 def chat_ids(*chat_ids: int):
