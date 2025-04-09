@@ -46,6 +46,16 @@ def to_list(l: T | list[T]) -> list[T]:
 def dumps(obj) -> str:
     return json.dumps(obj, indent=None, separators=(",", ":"))
 
+def read_json_file(path: str | Path) -> dict:
+    path = path if isinstance(path, Path) else Path(path)
+    with path.open("r") as f:
+        return json.load(f)
+
+def write_json_file(path: str | Path, data) -> None:
+    path = path if isinstance(path, Path) else Path(path)
+    with path.open("w") as f:
+        json.dump(data, f, indent=4)
+
 def replace_word(text: str, word: str, new_word: str, count: int = 0) -> str:
     return re.sub(rf"\b{re.escape(word)}\b", new_word, text, count=count)
 
@@ -101,8 +111,13 @@ async def process_input_media(params: dict, check_input_media: list[str]) -> t.T
             continue
         
         media_items = params[key]
-        if not isinstance(media_items, list):
+        if not isinstance(media_items, (list, dict)):
             continue
+        
+        is_single = False
+        if isinstance(media_items, dict):
+            is_single = True
+            media_items = [media_items]
 
         for media in media_items:
             if isinstance(media, dict) and "media" in media:
@@ -123,7 +138,7 @@ async def process_input_media(params: dict, check_input_media: list[str]) -> t.T
                     input_files[id] = file_ref
                     media["media"] = f"attach://{id}"
         
-        input_media = json.dumps(media_items)
+        input_media = json.dumps(media_items[0] if is_single else media_items)
 
     return input_files, input_media
 

@@ -407,7 +407,7 @@ class BaseBot:
         params = {k: v for k, v in params.items() if v is not None}
         
         logger.debug("Start client session")
-        
+
         async with aiohttp.ClientSession() as session:
             self.session = session
 
@@ -578,7 +578,7 @@ class BaseBot:
                     e.message = f"'{method_name}' -> {e.message}"
                     raise
                 
-                except asyncio.TimeoutError as e:
+                except (asyncio.TimeoutError, aiohttp.ServerConnectionError) as e:
                     wait_time = 2**retries
                     logger.warning(f"'{method_name}' timed out. - Retrying after {wait_time} seconds...")
                     await asyncio.sleep(wait_time)

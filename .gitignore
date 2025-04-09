@@ -16,6 +16,8 @@ dist/
 
 scripts/
 
+.tmp/
+
 templates/
 
 logs/
