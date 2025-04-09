@@ -40,6 +40,7 @@ def text_startswith(*substrings, caption: bool = False):
     def f(obj: dict[str, t.Any]):
         text: str = obj.get("text", "") if not caption else obj.get("caption", "")
         return any(text.startswith(s) for s in substrings)
+    return f
 
 
 def commands(*commands: str, prefix: str = "/", caption: bool = False):
