@@ -65,7 +65,7 @@ class EventManager:
                 obj_copy = deepcopy(obj)
                 if handlers := self.__update_handlers.get(event_name):
                     for handler in handlers:
-                        if handler.matches(obj_copy):
+                        if await handler.matches(obj_copy):
                             await handler(obj)
                             return True
 
@@ -186,7 +186,7 @@ class EventHandler:
         
         if self.filters:
             for f in filters:
-                exceptions.raise_for_coro(f)
+                # exceptions.raise_for_coro(f) # <- we allow coro now for more flexible filters
                 exceptions.raise_for_non_matching_arg_count(f, 1)
         
         self.__name__ = func.__name__
@@ -205,11 +205,11 @@ class EventHandler:
                 f"Error in '{self.type}' event handler {self.__name__}({args=}, {kwargs=})"
             ) from e
     
-    def matches(self, update_obj: dict[str, t.Any]) -> bool:
+    async def matches(self, update_obj: dict[str, t.Any]) -> bool:
         try:
             if self.filters:
                 return all([
-                    f(update_obj) for f in self.filters
+                    await f(update_obj) if iscoroutinefunction(f) else f(update_obj) for f in self.filters
                 ])
             return True
         
