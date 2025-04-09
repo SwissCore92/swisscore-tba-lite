@@ -196,6 +196,9 @@ class EventHandler:
             logger.debug(f"Running '{self.type}' event handler: {self.__name__}")
             return await self.func(*args, **kwargs)
 
+        except exceptions.RestartBotException as e:
+            raise
+
         except Exception as e:
             logger.error(f"Exception in '{self.type}' event handler {self.__name__}(...): {e}", exc_info=True)
             raise exceptions.EventHandlerError(

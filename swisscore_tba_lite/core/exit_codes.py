@@ -10,3 +10,6 @@ CRITICAL_TELEGRAM_ERROR = 2
 
 UNEXPECTED_TELEGRAM_ERROR = 3
 """Bot was shut down by a unexpected Telegram API error while getting updates. (Should not happen in theory)"""
+
+RESTART = 4
+"""Bot was forced to restart by `RestartBotException`"""

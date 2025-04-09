@@ -43,6 +43,13 @@ class EventHandlerError(Exception):
 class FilterEvaluationError(Exception): 
     """raised on any Exception while evaluating event handler filters."""
 
+class RestartBotException(Exception):
+    """raise this exception in an event handler to force the bot to restart.  
+    
+    **Note**: Cannot be used in startup or shutdown event handler!   
+    
+    Shuts down with ``exit_code`` 4
+    """
 
 class TelegramAPIError(Exception):
     """Base exception for all Telegram API errors."""

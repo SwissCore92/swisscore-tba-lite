@@ -1,5 +1,6 @@
 import asyncio
 import typing as t
+import subprocess
 import sys
 from functools import wraps
  
@@ -327,7 +328,7 @@ class BaseBot:
         logger.debug("All pending tasks completed")
     
     
-    def start_polling(self) -> None:
+    def start_polling(self, drop_pending_updates: bool = False) -> None:
         """
         Start the bot in [long polling](https://en.wikipedia.org/wiki/Push_technology#Long_polling) mode.  
         
@@ -347,12 +348,12 @@ class BaseBot:
         """
         logger.debug("Start async event loop")
         
-        asyncio.run(self._polling_main_loop())
+        asyncio.run(self._polling_main_loop(drop_pending_updates))
         
         logger.debug("Closed async event loop")
     
     
-    async def _polling_main_loop(self) -> None:
+    async def _polling_main_loop(self, drop_pending_updates: bool = False) -> None:
         """
         Iterates over incoming updates and triggers the matching event handlers.  
         
@@ -365,7 +366,7 @@ class BaseBot:
         asyncio.run(bot._polling_main_loop())
         ```
         """
-        async for update in self._get_future_updates():
+        async for update in self._get_future_updates(drop_pending_updates):
             try:
                 update_id = update["update_id"]
                 update_type = utils.get_update_type(update)
@@ -380,12 +381,16 @@ class BaseBot:
                     )
                     await self._gather_pending_tasks()
             
+            except exceptions.RestartBotException as e:
+                logger.debug(f"{repr(e)} raised. Preparing Shutdown.")
+                setattr(self, "restart_flag", True)
+            
             except exceptions.FilterEvaluationError as e:
                 logger.error(f"Failed to process update of type '{update_type}'. Update was dropped. ({e})", exc_info=True)
             
             except exceptions.EventHandlerError as e:
                 logger.error(f"A event handler processing an update of type '{update_type}' crashed. ({e})", exc_info=True)
-    
+
     
     async def _get_future_updates(
         self,
@@ -419,6 +424,9 @@ class BaseBot:
             try:
                 await self.event._trigger_event("startup")
                 await self._gather_pending_tasks()
+            
+            except exceptions.RestartBotException:
+                logger.error("RestartBotExcepiton not allowed in 'startup' event handler!")
                 
             except (exceptions.FilterEvaluationError, exceptions.EventHandlerError) as e:
                 logger.error(f"Error in 'startup' event handler. ({e})", exc_info=True)
@@ -433,8 +441,14 @@ class BaseBot:
                         logger.debug(f"Received {len(updates)} new update(s).")
                         for update in updates:
                             yield update
-                    
-                        params["offset"] = updates[-1]["update_id"] + 1
+                            params["offset"] = update["update_id"] + 1
+                        
+                        
+                        if getattr(self, "restart_flag", False):
+                            await self.__call__("getUpdates", {"offset": params["offset"], "timeout": 0})
+                            exit_code = exit_codes.RESTART
+                            logger.info(f"RestartBotException raised. Shutting down with {exit_code=}.")
+                            break
 
                 except exceptions.MaxRetriesExeededError as e:
                     logger.error(f"Failed to get updates. Check your Internet Connection. Retrying in 60 seconds...")
@@ -468,11 +482,18 @@ class BaseBot:
                 await self.event._trigger_event("shutdown", exit_code)
                 await self._gather_pending_tasks()
             
+            except exceptions.RestartBotException:
+                logger.error("RestartBotExcepiton not allowed in 'shutdown' event handler!")
+            
             except (exceptions.FilterEvaluationError, exceptions.EventHandlerError) as e:
                 logger.error(f"Error in 'shutdown' event handler. ({e})", exc_info=True)
 
         self.session = None
         logger.debug("Closed client session")
+        if getattr(self, "restart_flag", False):
+            python = sys.executable
+            subprocess.run([python] + sys.argv)
+            exit()
 
     def __call__(
         self, 
