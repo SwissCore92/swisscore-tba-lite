@@ -48,7 +48,7 @@ class RestartBotException(Exception):
     
     **Note**: Cannot be used in startup or shutdown event handler!   
     
-    Shuts down with ``exit_code`` 4
+    Shuts down with ``exit_code`` 1
     """
 
 class TelegramAPIError(Exception):
