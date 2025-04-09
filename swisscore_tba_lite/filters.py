@@ -36,6 +36,12 @@ def regex(*patterns: str, caption: bool = False):
     return f
 
 
+def text_startswith(*substrings, caption: bool = False):
+    def f(obj: dict[str, t.Any]):
+        text: str = obj.get("text", "") if not caption else obj.get("caption", "")
+        return any(text.startswith(s) for s in substrings)
+
+
 def commands(*commands: str, prefix: str = "/", caption: bool = False):
     """
     Generates a filter that checks for matching `commands`.  
@@ -107,7 +113,7 @@ def callback_data(*data: str):
         return cb_data in data
     return f
 
-def cb_data_startswith(*substrings: str):
+def callback_data_startswith(*substrings: str):
     """
     This filter generator is meant to use for `callback_query` updates.
     
