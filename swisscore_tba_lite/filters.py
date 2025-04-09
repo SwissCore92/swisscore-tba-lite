@@ -107,7 +107,18 @@ def callback_data(*data: str):
         return cb_data in data
     return f
 
-
+def cb_data_startswith(*substrings: str):
+    """
+    This filter generator is meant to use for `callback_query` updates.
+    
+    Generates a filter that checks if `data` startswith any of the provided substrings.  
+    
+    The filter returns `True` if obj["data"] startswith any of the provided substrings
+    """
+    def f(obj: dict[str, t.Any]):
+        cb_data: str = obj.get("data", "")
+        return any(cb_data.startswith(s) for s in substrings)
+    return f
 
 is_text = keys("text")
 """`True` if "text" is in obj.keys()"""
