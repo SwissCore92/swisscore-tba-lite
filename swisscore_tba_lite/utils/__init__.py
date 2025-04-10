@@ -46,16 +46,6 @@ def to_list(l: T | list[T]) -> list[T]:
 def dumps(obj) -> str:
     return json.dumps(obj, indent=None, separators=(",", ":"))
 
-def read_json_file(path: str | Path) -> dict:
-    path = path if isinstance(path, Path) else Path(path)
-    with path.open("r") as f:
-        return json.load(f)
-
-def write_json_file(path: str | Path, data) -> None:
-    path = path if isinstance(path, Path) else Path(path)
-    with path.open("w") as f:
-        json.dump(data, f, indent=4)
-
 def replace_word(text: str, word: str, new_word: str, count: int = 0) -> str:
     return re.sub(rf"\b{re.escape(word)}\b", new_word, text, count=count)
 
@@ -71,6 +61,16 @@ def get_file_size(file: str | Path | bytes) -> int:
     if isinstance(file, bytes):
         return len(file)
     return os.stat(file).st_size
+
+async def read_json_file(path: str | Path) -> dict | t.Any:
+    path = path if isinstance(path, Path) else Path(path)
+    async with aiofiles.open(path, "r") as f:
+        return json.loads(await f.read())
+
+async def write_json_file(path: str | Path, data, *, indent: int | str | None = None, separators: tuple[str, str] = None) -> None:
+    path = path if isinstance(path, Path) else Path(path)
+    async with aiofiles.open(path, "w") as f:
+        await f.write(json.dump(data, f, indent=4, indent=indent, separators=separators))
 
 async def read_file(path: Path) -> bytes | t.AsyncGenerator[bytes, None]:
     """Read file as bytes asynchronously."""
@@ -125,16 +125,16 @@ async def process_input_media(params: dict, check_input_media: list[str]) -> t.T
                 if isinstance(file_ref, str) and is_local_file(file_ref):
                     file_ref = Path(file_ref)
                     
-                id = token_urlsafe()
-                
                 if isinstance(file_ref, Path):
+                    id = token_urlsafe(4)
                     if file_ref.exists():
-                        input_files[id] = await read_file(file_ref)
-                        media["media"] = f"attach://{id}"
+                        input_files[f"{file_ref.stem}_{id}{file_ref.suffix}"] = await read_file(file_ref)
+                        media["media"] = f"attach://{file_ref.stem}_{id}{file_ref.suffix}"
                     else:
                         raise FileNotFoundError(f"'{file_ref} not found!'")
                     
                 elif isinstance(file_ref, bytes):
+                    id = token_urlsafe()
                     input_files[id] = file_ref
                     media["media"] = f"attach://{id}"
         
