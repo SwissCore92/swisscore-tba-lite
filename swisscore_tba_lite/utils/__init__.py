@@ -74,7 +74,7 @@ async def write_json_file(path: str | Path, data, *, indent: int | str | None = 
     """asynchonously write json file"""
     path = path if isinstance(path, Path) else Path(path)
     async with aiofiles.open(path, "w") as f:
-        await f.write(json.dumps(data, f, indent=indent, separators=separators))
+        await f.write(json.dumps(data, indent=indent, separators=separators))
 
 async def read_file(path: Path) -> bytes | t.AsyncGenerator[bytes, None]:
     """Read file as bytes asynchronously."""
