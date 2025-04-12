@@ -56,6 +56,10 @@ class Logger(logging.Logger):
             logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
         )
         self.addHandler(self.file_handler)
+    
+    def flush_file(self):
+        self.debug(f"Flushing log file")
+        self.file_handler.flush()
 
     def critical_warning(self, message: str, *args, **kwargs):
         if self.isEnabledFor(Logger.CRITICAL_WARNING):
