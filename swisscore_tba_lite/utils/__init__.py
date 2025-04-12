@@ -50,6 +50,7 @@ def replace_word(text: str, word: str, new_word: str, count: int = 0) -> str:
     return re.sub(rf"\b{re.escape(word)}\b", new_word, text, count=count)
 
 def startswith_word(text: str, word: str) -> bool:
+    """Check if a str starts with a specific word or substring (with boundary)"""
     return bool(re.match(rf"^{word}(?:\s|$)", text))
 
 def is_local_file(path: str | Path) -> bool:
@@ -58,19 +59,22 @@ def is_local_file(path: str | Path) -> bool:
     return path.exists() and path.is_file()
 
 def get_file_size(file: str | Path | bytes) -> int:
+    """Get size of a file in bytes"""
     if isinstance(file, bytes):
         return len(file)
     return os.stat(file).st_size
 
 async def read_json_file(path: str | Path) -> dict | t.Any:
+    """asynchonously read json file"""
     path = path if isinstance(path, Path) else Path(path)
     async with aiofiles.open(path, "r") as f:
         return json.loads(await f.read())
 
 async def write_json_file(path: str | Path, data, *, indent: int | str | None = None, separators: tuple[str, str] = None) -> None:
+    """asynchonously write json file"""
     path = path if isinstance(path, Path) else Path(path)
     async with aiofiles.open(path, "w") as f:
-        await f.write(json.dump(data, f, indent=4, indent=indent, separators=separators))
+        await f.write(json.dumps(data, f, indent=indent, separators=separators))
 
 async def read_file(path: Path) -> bytes | t.AsyncGenerator[bytes, None]:
     """Read file as bytes asynchronously."""
@@ -95,8 +99,8 @@ async def process_input_files(params: dict, check_input_files: list[str]) -> dic
                 input_files[key] = await read_file(val)
             else:
                 raise FileNotFoundError(f"'{val} not found!'")
-        elif isinstance(val, bytes):
             
+        elif isinstance(val, bytes):
             input_files[key] = val
     
     return input_files
