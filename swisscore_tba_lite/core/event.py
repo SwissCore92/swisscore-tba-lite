@@ -202,7 +202,7 @@ class EventHandler:
         except Exception as e:
             logger.error(f"Exception in '{self.type}' event handler {self.__name__}(...): {e}", exc_info=True)
             raise exceptions.EventHandlerError(
-                f"Error in '{self.type}' event handler {self.__name__}({args=}, {kwargs=})"
+                f"Error in '{self.type}' event handler {self.__name__}"
             ) from e
     
     async def matches(self, update_obj: dict[str, t.Any]) -> bool:
