@@ -33,19 +33,30 @@ def sub_keys(*key_sequence: str):
     # checks if obj has key "chat" and obj["chat"] has key "is_forum"
     is_forum = sub_keys("chat", "is_forum")
     
-    is_premium_user
-    from
+    # checks if obj has key "from" and obj["from"] has key "is_premium"
+    is_premium_user = sub_keys("from", "is_premium")
+    
+    # checks if obj has key "reply_to_message" 
+    #   and obj["reply_to_message"] has key "photo" 
+    #   and obj["reply_to_message"]["photo"] has key "caption"
+    is_reply_to_photo_with_caption = sub_keys("reply_to_message", "photo", "caption")
+    
     ```
     
+    **Note:** The filter only checks for the **presence** of the `key_sequence` in `obj`. **Not** for their value.  
+    So its perfect to check for flags which are always `True` if present. like 'is_premium' in user or 'is_forum' in chat.
+
     """
     def f(obj: JsonDict):
         o = obj
         for k in key_sequence:
-            if k in o:
+            if isinstance(o, dict) and k in o:
                 o = o[k]
                 continue
             return False
+        return True
     return f
+
 
 def regex(*patterns: str, caption: bool = False):
     """
@@ -97,7 +108,7 @@ def chat_ids(*chat_ids: int):
         return obj.get("chat", {}).get("id") in chat_ids
     return f
 
-def chat_types(*chat_types: str):
+def chat_types(*chat_types: t.Literal["private", "group", "supergroup", "channel"]):
     """
     Generates a filter that checks for matching `chat_types`.  
     
