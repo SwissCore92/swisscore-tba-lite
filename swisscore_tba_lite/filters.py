@@ -2,10 +2,9 @@
 
 import re
 import typing as t
-from functools import wraps
 from inspect import iscoroutinefunction
 
-def false_on_key_error(func: t.Callable[[dict[str, t.Any]], bool]):
+def false_on_key_error(func):
     """
     This is a decorator that returns false if a `KeyError` is raised during filter evaluation.  
     
@@ -20,19 +19,17 @@ def false_on_key_error(func: t.Callable[[dict[str, t.Any]], bool]):
     ```
     """
     if iscoroutinefunction(func):
-        @wraps(func)
-        async def async_wrapper(obj: dict[str, t.Any]):
+        async def async_wrapper(obj):
             try:
-                return await func(obj)
+                return bool(await func(obj))
             except KeyError:
                 return False
         
         return async_wrapper
 
-    @wraps(func)
-    def wrapper(obj: dict[str, t.Any]):
+    def wrapper(obj):
         try:
-            return func(obj)
+            return bool(func(obj))
         except KeyError:
             return False
         
