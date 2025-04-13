@@ -2,6 +2,41 @@
 
 import re
 import typing as t
+from functools import wraps
+from inspect import iscoroutinefunction
+
+def false_on_key_error(func: t.Callable[[dict[str, t.Any]], bool]):
+    """
+    This is a decorator that returns false if a `KeyError` is raised during filter evaluation.  
+    
+    Can be used for both regular and coroutine functions.
+    
+    Ussage  
+    ```python
+    @false_on_key_error
+    def my_filter(obj):
+        # if a KeyError is raised, False is returned. 
+        return obj["chat"] 
+    ```
+    """
+    if iscoroutinefunction(func):
+        @wraps(func)
+        async def async_wrapper(obj: dict[str, t.Any]):
+            try:
+                return await func(obj)
+            except KeyError:
+                return False
+        
+        return async_wrapper
+
+    @wraps(func)
+    def wrapper(obj: dict[str, t.Any]):
+        try:
+            return func(obj)
+        except KeyError:
+            return False
+        
+    return wrapper
 
 def keys(*keys: str):
     """
