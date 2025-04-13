@@ -1,5 +1,7 @@
 """Provides some filter generators and some preconfigured filters."""
 
+from .helpers import false_on_key_error
+
 from .generators import keys
 from .generators import all_keys
 from .generators import sub_keys

@@ -1,6 +1,6 @@
 import typing as t
 
-JsonDict = dict[str, t.Any]
+from .helpers import JsonDict
 
 
 def not_(filter: t.Callable[[JsonDict], bool]):
