@@ -2,6 +2,7 @@ import asyncio
 import typing as t
 import subprocess
 import sys
+import os
 from functools import wraps
 from pathlib import Path
  
@@ -497,6 +498,7 @@ class BaseBot:
             subprocess.run([python] + sys.argv)
             exit()
 
+
     def download(
         self, 
         file_obj: dict[str, t.Any], 
@@ -504,15 +506,20 @@ class BaseBot:
         file_name: str | None = None,
         *,
         overwrite_existing: bool = False, 
-        bs: int = 16
+        bs: int | None = None,
     ) -> asyncio.Task[Path]:
         """Download a file from telegram server.
         
         **Note: The file must be fetched from telegram first using the `getFile` method**
         
-        Ussage:
+        Example Usage:
         ```python
-        file_path = await bot.download(await bot("getFile", {"file_id": file_id}))
+        # filtering messages with document 
+        @bot.event("message", filters=[is_document, lambda m: m["document"].get("file_name")])
+        async def on_document_message(msg: dict[str]):
+            doc = msg["document"]
+            file_obj = await bot("getFile", {"file_id": doc["file_id"]})
+            file_path = await bot.download(file_obj, Path.cwd() / ".tmp", doc["file_name"], overwrite_existing=True)
         ```
 
         Args:
@@ -520,16 +527,16 @@ class BaseBot:
             dest_dir (str | Path | None, optional): The destination directory. Defaults to Current working directory `Path.cwd()` (Usually the location of your script).
             file_name (str | None, optional): The destination file name (**with suffix** eg. *'document.txt' **not** 'document'*). Defaults to `file_obj['file_name'] if present else the name in file_obj['file_path']`.
             overwrite_existing (bool, optional): If set to `True` and the file already exists, the file is overwritten. Else a `FileExistsError` is raised. Defaults to `False`.
-
+            bs (int, optional): The chunk size for the download in bytes. If `bs <= 0`, the file is downloaded as a whole. Defaults to 16KiB (16384)
         Raises:
             KeyError: if `file_path` not found in `file_obj`
             NotADirectoryError: if dest_dir is not a directory
             FileNotFoundError: if dest_dir is not found
             FileExistsError: if destination file already exists and `overwrite_existing` is `False`
-            TelegramError: if the download failes for some reason
+            TelegramError: if the download fails for some reason
 
         Returns:
-            Path: the downloaded file Path
+            Task[Path]: A scheduled task that downloads the file.
         """
         if not "file_path" in file_obj:
             raise KeyError("'file_path' is not present in file_obj. Did you get the file correctly using 'getFile'?")
@@ -551,22 +558,42 @@ class BaseBot:
             
         dest_file = dest_dir / file_name
         
-        if dest_file.exists() and not overwrite_existing:
-            raise FileExistsError(f"{dest_file=} already exists and overwriting is not allowed.")
+        if dest_file.exists():
+            if not overwrite_existing:
+                raise FileExistsError(f"{dest_file=} already exists and overwriting is not allowed.")
+            # No warning needed. the user decided to overwrite
+            # logger.warning(f"'<dest_dir>/{file_name}' will be overwritten!")
         
+        bs = bs or 16*utils.KiB
+        
+        file_size = file_obj.get("file_size", 0)
+
         async def _download_file():
             async with aiofiles.open(dest_file, "wb") as f:
                 
                 async with self.session.get(f"{self.file_url}/{tg_file_path}") as r:
                     
+                    logger.debug(f"Start downloading '<dest_dir>/{file_name}' "
+                        f"(Predicted Size: {utils.readable_file_size(file_size)})"
+                    )
+                    
                     await exceptions.raise_for_telegram_error("DownloadFile", r)
                     
-                    async for chunk in r.content.iter_chunked(16*utils.KiB):
-                        await f.write(chunk)
+                    if bs <= 0:
+                        await f.write(await r.content.read())
+                    
+                    else:
+                        async for chunk in r.content.iter_chunked(bs):
+                            await f.write(chunk)
+                
+                logger.debug(f"Successfully downloaded '<dest_dir>/{file_name}' "
+                    f"(Size: {utils.readable_file_size(os.stat(dest_file).st_size)})"
+                )
         
             return dest_file
 
         return self._create_task(_download_file())
+
 
     def __call__(
         self, 
