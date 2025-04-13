@@ -33,6 +33,9 @@ def snake_to_camel(name: str, capitalized=False) -> str:
         return camel
     return f"{camel[0].lower()}{camel[1:]}"
 
+def sanitize_token(text: str) -> str:
+    return re.sub(r"\d{10}:[A-Za-z0-9_-]{28,}\b", "<token>", str(text))
+
 def is_valid_bot_api_token(token: str) -> bool:
     pattern = r"^\d{10}:[A-Za-z0-9_-]+$"
     return bool(re.match(pattern, token))

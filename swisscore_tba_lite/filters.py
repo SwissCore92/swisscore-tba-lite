@@ -220,6 +220,9 @@ is_photo = keys("photo")
 is_video = keys("video")
 """`True` if "video" is in obj.keys()"""
 
+is_document = keys("document")
+"""`True` if "document" is in obj.keys()"""
+
 is_reply = keys("reply_to_message")
 """`True` if "reply_to_message" is in obj.keys()"""
 

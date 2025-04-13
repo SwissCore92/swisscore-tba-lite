@@ -3,6 +3,8 @@ from inspect import iscoroutinefunction
 
 from aiohttp import ClientResponse as _ClientResponse
 
+from ..utils import sanitize_token
+
 def raise_for_not_coro(func: t.Callable) -> None:
     if not iscoroutinefunction(func):
         raise TypeError(
@@ -147,14 +149,18 @@ async def raise_for_telegram_error(method_name: str, response: _ClientResponse) 
         502: BadGateway,
         504: GatewayTimeout,
     }
+    
+    exc: Exception | None = None
 
     if response.status == 429:
-        raise TooManyRequests(method_name, response.status, description, response_json.get("retry_after", 5))
+        exc = TooManyRequests(method_name, response.status, description, response_json.get("retry_after", 5))
     
     if response.status == 404:
-        raise NotFound(method_name, response.status, description + f" URL: '{response.url}'")
+        exc = NotFound(method_name, response.status, description + f" URL: '{sanitize_token(response.url)}'")
     
     else:
         exception = error_map.get(response.status, TelegramAPIError)
-        raise exception(method_name, response.status, description)
+        exc = exception(method_name, response.status, description)
+    
+    raise exc
 
