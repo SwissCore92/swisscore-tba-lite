@@ -1,9 +1,33 @@
 import typing as t
-from inspect import iscoroutinefunction
+from asyncio import iscoroutinefunction
+from functools import wraps
 
 from aiohttp import ClientResponse as _ClientResponse
 
 from ..utils import sanitize_token
+from .logger import logger
+
+def deprecated(new_func):
+    def decorator(func):
+        msg = f"{func.__name__} is deprecated and will be removed in the future. Use {new_func.__name__} instead!"
+        
+        if iscoroutinefunction(func):
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                logger.warning(msg)
+                return await func(*args, **kwargs)
+            
+            return async_wrapper
+        
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            logger.warning(msg)
+            return func(*args, **kwargs)
+        
+        return wrapper 
+    
+    return decorator
+            
 
 def raise_for_not_coro(func: t.Callable) -> None:
     if not iscoroutinefunction(func):
@@ -37,7 +61,7 @@ class MaxRetriesExeededError(Exception):
     """raised when a request exceeded `max_retries`."""
 
 class ResultConversionError(Exception):
-    """raised on any Exception in ."""
+    """raised on any Exception in result convertion function."""
 
 class EventHandlerError(Exception): 
     """raised on any Exception in an event handler."""
