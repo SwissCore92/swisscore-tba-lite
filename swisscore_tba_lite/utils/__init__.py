@@ -15,6 +15,18 @@ KiB = 1024
 MiB = KiB * KiB
 GiB = MiB * KiB
 
+def readable_file_size(b: int) -> str:
+    if b <= 0:
+        return "Unknown"
+    if b < KiB:
+        return f"{b}Bytes"
+    if b < MiB:
+        return f"{b/KiB:.2f}KiB"
+    if b < GiB:
+        return f"{b/MiB:.2f}MiB"
+    
+    return f"{b/GiB:2f}MiB"
+
 def is_mac_os():
     return platform.system() == "Darwin"
 
