@@ -3,7 +3,8 @@ import typing as t
 
 from .helpers import JsonDict, false_on_key_error
 
-def keys(*keys: str):
+
+def any_keys(*keys: str):
     """
     Generates a filter that checks for matching `keys`.  
     
