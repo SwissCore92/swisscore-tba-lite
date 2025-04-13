@@ -3,8 +3,10 @@ import typing as t
 import subprocess
 import sys
 from functools import wraps
+from pathlib import Path
  
 import aiohttp
+import aiofiles
 
 from .. import utils
 from .logger import logger
@@ -494,6 +496,77 @@ class BaseBot:
             python = sys.executable
             subprocess.run([python] + sys.argv)
             exit()
+
+    def download(
+        self, 
+        file_obj: dict[str, t.Any], 
+        dest_dir: str | Path | None = None, 
+        file_name: str | None = None,
+        *,
+        overwrite_existing: bool = False, 
+        bs: int = 16
+    ) -> asyncio.Task[Path]:
+        """Download a file from telegram server.
+        
+        **Note: The file must be fetched from telegram first using the `getFile` method**
+        
+        Ussage:
+        ```python
+        file_path = await bot.download(await bot("getFile", {"file_id": file_id}))
+        ```
+
+        Args:
+            file_obj (dict[str, t.Any]): The file object received by using `getFile` api method.
+            dest_dir (str | Path | None, optional): The destination directory. Defaults to Current working directory `Path.cwd()` (Usually the location of your script).
+            file_name (str | None, optional): The destination file name (**with suffix** eg. *'document.txt' **not** 'document'*). Defaults to `file_obj['file_name'] if present else the name in file_obj['file_path']`.
+            overwrite_existing (bool, optional): If set to `True` and the file already exists, the file is overwritten. Else a `FileExistsError` is raised. Defaults to `False`.
+
+        Raises:
+            KeyError: if `file_path` not found in `file_obj`
+            NotADirectoryError: if dest_dir is not a directory
+            FileNotFoundError: if dest_dir is not found
+            FileExistsError: if destination file already exists and `overwrite_existing` is `False`
+            TelegramError: if the download failes for some reason
+
+        Returns:
+            Path: the downloaded file Path
+        """
+        if not "file_path" in file_obj:
+            raise KeyError("'file_path' is not present in file_obj. Did you get the file correctly using 'getFile'?")
+        
+        if dest_dir is None:
+            dest_dir = Path.cwd()
+        elif isinstance(dest_dir, str):
+            dest_dir = Path(dest_dir)
+        
+        if not dest_dir.exists():
+            raise FileNotFoundError(f"{dest_dir=} was not found.")
+        if not dest_dir.is_dir():
+            raise NotADirectoryError(f"{dest_dir=} is not a directory.")
+        
+        tg_file_path: str = file_obj["file_path"]
+        
+        if file_name is None:
+            file_name: str = file_obj.get("file_name", tg_file_path.rsplit("/", 1)[-1])
+            
+        dest_file = dest_dir / file_name
+        
+        if dest_file.exists() and not overwrite_existing:
+            raise FileExistsError(f"{dest_file=} already exists and overwriting is not allowed.")
+        
+        async def _download_file():
+            async with aiofiles.open(dest_file, "wb") as f:
+                
+                async with self.session.get(f"{self.file_url}/{tg_file_path}") as r:
+                    
+                    await exceptions.raise_for_telegram_error("DownloadFile", r)
+                    
+                    async for chunk in r.content.iter_chunked(16*utils.KiB):
+                        await f.write(chunk)
+        
+            return dest_file
+
+        return self._create_task(_download_file())
 
     def __call__(
         self, 
