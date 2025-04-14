@@ -60,7 +60,7 @@ set API_TOKEN=<token>
 
 ### Installation
 
-Since there is no PyPI release ath the moment, you have to install it from source using `pip` + `git`
+Since there is no PyPI release at the moment, you have to install it from source using `pip` + `git`
 ```sh
 pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
 ```
