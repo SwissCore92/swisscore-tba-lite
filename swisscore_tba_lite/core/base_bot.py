@@ -16,6 +16,7 @@ from . import exit_codes
 from . import exceptions
 
 T = t.TypeVar("T")
+JsonDict = dict[str, t.Any]
 
 # decorator
 def request_task_wrapper(catch_errors: bool):
@@ -137,10 +138,10 @@ def api_method_wrapper(
 
 # helper function
 async def prepare_files(
-    params: dict[str, t.Any], 
+    params: JsonDict, 
     check_input_files: list[str] | None = None, 
     check_input_media: list[str] | None = None,
-) -> tuple[dict[str, t.Any] | None, aiohttp.FormData | None]:
+) -> tuple[JsonDict | None, aiohttp.FormData | None]:
     form_data: aiohttp.FormData | None = None
     
     check_input_files = check_input_files or []
@@ -176,7 +177,7 @@ async def prepare_files(
     return params, None
 
 # helper function
-def serialize_params(params: dict[str]) -> dict[str]:
+def serialize_params(params: JsonDict) -> JsonDict:
     try:
         params = {
             k: utils.dumps(v) if isinstance(v, (dict, list, tuple)) else v
@@ -217,7 +218,6 @@ class BaseBot:
             event_manager (EventManager, optional): The `EventManager` to use; **Only set this if you are expanding the bot and need a more advanced event manager.**
         """
         
-        # Checking for valid bot api token
         if not utils.is_valid_bot_api_token(token):
             raise TypeError(f"'{token}' is not a valid Telegram Bot API Token!")
         
@@ -275,12 +275,6 @@ class BaseBot:
         """
         Max retries for transient request errors (`TooManyRequests`, `TimeoutError`, etc.).
         """
-        
-        # # Not used at the moment. currently using `max_retries` for connection errors
-        # self.max_connection_retries: int = 10
-        # """
-        # Max retries for connection errors.
-        # """
         
         self.default_timeout: int = 30
         """
@@ -398,7 +392,7 @@ class BaseBot:
     async def _get_future_updates(
         self,
         drop_pending_updates: bool = False
-    ) -> t.AsyncGenerator[dict[str, t.Any], None]:
+    ) -> t.AsyncGenerator[JsonDict, None]:
         """
         Generator that asks repeatedly for new updates and yields them one by one.  
         
@@ -501,7 +495,7 @@ class BaseBot:
 
     def download(
         self, 
-        file_obj: dict[str, t.Any], 
+        file_obj: JsonDict, 
         dest_dir: str | Path | None = None, 
         file_name: str | None = None,
         *,
@@ -523,7 +517,7 @@ class BaseBot:
         ```
 
         Args:
-            file_obj (dict[str, t.Any]): The file object received by using `getFile` api method.
+            file_obj (JsonDict): The file object received by using `getFile` api method.
             dest_dir (str | Path | None, optional): The destination directory. Defaults to Current working directory `Path.cwd()` (Usually the location of your script).
             file_name (str | None, optional): The destination file name (**with suffix** eg. *'document.txt' **not** 'document'*). Defaults to `file_obj['file_name'] if present else the name in file_obj['file_path']`.
             overwrite_existing (bool, optional): If set to `True` and the file already exists, the file is overwritten. Else a `FileExistsError` is raised. Defaults to `False`.
@@ -598,37 +592,39 @@ class BaseBot:
     def __call__(
         self, 
         method_name: str, 
-        params: dict[str] | None = None,
-        *,
-        auto_prepare: bool = True,
+        params: JsonDict | None = None,
+        *, 
         check_input_files: list[str] | None = None, 
         check_input_media: list[str] | None = None,
-        timeout: int | None = None,
         convert_func: t.Callable[[t.Any], T] | None = None,
-        catch_errors: bool = True,
-    ) -> asyncio.Task[dict[str] | T]:
+        timeout: int | None = None,
+        **kwargs
+    ) -> asyncio.Task[T]:
         """
         Use this method to make [API](https://core.telegram.org/bots/api) requests.
+        
+        Returns a asyncio.Task which can be awaited to get actual result.  
 
         **Ussage:**
         ```python
         bot("sendMessage", {"chat_id": chat_id, "text": "Hello world!"})
         me = await bot("getMe") 
         ```
-
-        Returns a asyncio.Task which can be awaited to get the result.
         
+        Note: `JsonDict` is just a shorthand for `dict[str, Any]`
+
         > ⚠️ ***Warning:***  
-        > * *Using this method when the bot isn't yet started will raise a `RuntimeError` even if `catch_errors` is set to `True`! Use the 'startup' event if you need to make requests on startup!*  
-        > * *If you set `catch_errors` to `False` **you must await the Task**! If you don't, the bot **may crash** if an Error occures!* 
+        > * *Using this method when the bot isn't yet started will raise a `RuntimeError`! Use the 'startup' event if you need to make requests on startup!*  
         
         """
-        
+
         if self.session is None:
             # TODO: Maybe use custom exception for uninitialized session  
             raise RuntimeError("Client session is not initialized.")
         
         timeout = timeout or self.default_timeout
+        auto_prepare: bool = kwargs.get("auto_prepare", True)
+        catch_errors: bool = kwargs.get("catch_errors", True)
 
         @request_task_wrapper(catch_errors=catch_errors)
         async def request():
@@ -665,10 +661,7 @@ class BaseBot:
                         response: dict[str] = await r.json()
 
                         if self.log_successful_requests:
-                            if "--debug" in sys.argv:
-                                logger.debug(f"'{method_name}'({params=}) -> HTTP {r.status}: OK ({response=})")
-                            else:
-                                logger.debug(f"'{method_name}' -> HTTP {r.status}: OK")
+                            logger.debug(f"'{method_name}' -> HTTP {r.status}: OK")
                         
                         result = response["result"]
                         
