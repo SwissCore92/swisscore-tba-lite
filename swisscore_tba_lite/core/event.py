@@ -5,6 +5,7 @@ from copy import deepcopy
 from .logger import logger
 from . import exceptions
 
+class UnhandledEventType: ...
 
 TELEGRAM_EVENT_TYPES: frozenset[str] = frozenset({
     "message",
@@ -35,6 +36,29 @@ TELEGRAM_EVENT_TYPES: frozenset[str] = frozenset({
 
 
 class EventManager:
+    UNHANDLED = UnhandledEventType
+    """
+    Return this in an event handler to mark the event as unhandled and continue processing the update.
+    
+    Usage:
+    ```python
+    
+    from swisscore_tba_lite.filters import sub_keys
+    
+    @bot.event("message", filters=[sub_keys("document", "file_name")]]):
+    async def handle_pdf(msg):
+        if not msg["document"]["file_name"].endswith(".pdf):
+            return bot.event.UNHANDLED
+        
+        # Handle pdf document
+    
+    @bot.event("message", filters=[sub_keys("document", "file_name")]]):
+    async def handle_file(msg):
+        ...
+        # Continue handling the document (which is no pdf file)
+    ```
+    """
+    
     def __init__(self):
         self.__startup_handler: EventHandler = None
         self.__shutdown_handler: EventHandler = None
@@ -62,14 +86,20 @@ class EventManager:
             
             case _:
                 obj: dict = args[0]
-                obj_copy = deepcopy(obj)
                 if handlers := self.__update_handlers.get(event_name):
                     for handler in handlers:
-                        if await handler.matches(obj_copy):
-                            await handler(obj)
+                        if await handler.matches(deepcopy(obj)):
+                            if await handler(deepcopy(obj)) is EventManager.UNHANDLED:
+                                logger.debug(f"{repr(handler)} returned EventManager.UNHANDLED! "
+                                    "The event is considered unhandled. "
+                                    "Continue checking for matching handlers."
+                                )
+                                continue
+                                
                             return True
 
                 logger.warning(f"No matching event handler found for update of type '{event_name}'. Update was dropped.")
+                return False
                 
 
     def __call__(self, event_name: str, filters: list[t.Callable[[dict[str, t.Any]], t.Any]] | None = None):
@@ -96,7 +126,7 @@ class EventManager:
         
         `event_name` must be one of:  
         * "startup" (*Triggered on startup right after the client session is started but before updates are received*)
-        * "shutdown" (*Triggered on shutdown right before the client session is closed*)
+        * "shutdown" (*Triggered on shutdown right after receiving updates but before the client session is closed*)
         * "message" (*Triggered when a update of type "message" is received*)
         * "edited_message" (*Triggered when a update of type "edited_message" is received*)
         * "channel_post" (*Triggered when a update of type "channel_post" is received*)
@@ -122,10 +152,11 @@ class EventManager:
         * "removed_chat_boost" (*Triggered when a update of type "removed_chat_boost" is received*)
         
         **Note:**
+        * Both Coroutine and regular functions are supported.
         * A filter **must match** the signature `func(obj: dict)` where `obj` is *always* a `dict`!
         * A filter is satisfied if `bool(your_filter(obj)) == True`
-        * The filters are checked in order
-        * Event handlers are checked in order you defined them from top to bottom.
+        * The filters are checked in order. Eg. `filters=[first_filter, second_filter, ..., last_filter]`
+        * Event handlers are checked in the order you defined them from top to bottom.
         * Event handlers without filters should always be defined at the bottom of all other handlers of the same type (`event_name`).
 
         Args:
@@ -156,18 +187,19 @@ class EventManager:
                 case _:
                     if event_name not in TELEGRAM_EVENT_TYPES:
                         raise KeyError(f"'{event_name}' is an invalid event_name")
-                    
-                    for f in reversed(self.__update_handlers[event_name]):
-                        if not f.filters:
-                            logger.warning(
-                                f"A '{event_name}' event handler '{f.__name__}' (line: {f.func.__code__.co_firstlineno}) without filters is defined above. "
-                                f"'{func.__name__}' (line: {func.__code__.co_firstlineno}) will never be triggered!"
-                            )
-                    
+
                     exceptions.raise_for_non_matching_arg_count(func, 1)
                     
-                    self.__update_handlers[event_name].append(EventHandler(event_name, func, filters))
+                    handler = EventHandler(event_name, func, filters)
+                    self.__update_handlers[event_name].append(handler)
                     
+                    for previous_handler in reversed(self.__update_handlers[event_name]):
+                        if not previous_handler.filters:
+                            logger.warning(
+                                f"{repr(handler)} may never be triggered because "
+                                f"{repr(previous_handler)} has no filters and is defined above it."
+                            )
+
             return func
         
         return register
@@ -186,23 +218,28 @@ class EventHandler:
         
         if self.filters:
             for f in filters:
-                # exceptions.raise_for_coro(f) # <- we allow coro now for more flexible filters
                 exceptions.raise_for_non_matching_arg_count(f, 1)
         
         self.__name__ = func.__name__
     
-    async def __call__(self, *args, **kwargs) -> t.Any:
+    def __str__(self):
+        return self.__name__
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(type='{self.type}', func={self.func.__module__}.{self.__name__}@line={self.func.__code__.co_firstlineno})"
+    
+    async def __call__(self, *args, **kwargs) -> t.Awaitable[t.Any | UnhandledEventType]:
         try:
-            logger.debug(f"Running '{self.type}' event handler: {self.__name__}")
+            logger.debug(f"Running {repr(self)}")
             return await self.func(*args, **kwargs)
 
         except exceptions.RestartBotException as e:
             raise
 
         except Exception as e:
-            logger.error(f"Exception in '{self.type}' event handler {self.__name__}(...): {e}", exc_info=True)
+            logger.error(f"Exception in {repr(self)}: {e}", exc_info=True)
             raise exceptions.EventHandlerError(
-                f"Error in '{self.type}' event handler {self.__name__}"
+                f"Error in '{self.type}' event handler {self.__name__}. Error: {repr(e)}"
             ) from e
     
     async def matches(self, update_obj: dict[str, t.Any]) -> bool:
@@ -214,8 +251,8 @@ class EventHandler:
             return True
         
         except Exception as e:
-            logger.error(f"Exception while evaluating `{self.type}` event handler {self.__name__}(...): {e}", exc_info=True)
+            logger.error(f"Exception while evaluating {self}: {repr(e)}", exc_info=True)
             raise exceptions.FilterEvaluationError(
-                f"Error in '{self.type}' event handler evaluation."
+                f"Error in {repr(self)} filter evaluation. Error: {e}"
             ) from e
 
