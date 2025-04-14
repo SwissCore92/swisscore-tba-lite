@@ -2,97 +2,25 @@
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)  
 
 A very basic and lightweight asynchronous [Telegram Bot API](https://core.telegram.org/bots/api) wrapper for **python 3.11+**.  
-Focuses on core functionality and easy expandability.  
+Main focus on core functionality without all the bloat. Just *dictionaries*.  
 
-> ⚠️ **Note:** *This project is work in progress!*  
+✅ **Very flexible**  
+✅ **Very fast**  
+✅ **No bloat**  
+✅ **Easy to extend**  
+More about [Features](#features) 
 
-Handles just in *dictionaries*. 
+> ⚠️ **Note:** *This project is still work in progress!*  
+> *A production ready release will follow soon.*
 
+
+* [Installation](#installation)
+* [Quick Start](#quick-start)
 * [Features](#features)
     * [Automatc file processing](#automatc-file-processing)
     * [Expandability](#expandability)
-* [Installation](#installation)
-* [Quick Start](#quick-start)
+    * [Flexible Event System with Filter Composition](#flexible-event-system-with-filter-composition)
 
-## Features
-
-The purpose of this Repository is to build a stable and powerful base for Telegram Bots. But it can also be used directly by advanced users, well knowing the Telegram Bot API. It is completely written in python 3.13, using modern python techniques.
-
-### Automatc file processing
-
-Simple things like file processing are done automatically by the bot. Eg. `InputFile` and the `media` field of `InputMedia` can just be a `str` representing a Path, a `pathlib.Path` or just `bytes`. The bot will process this automatically if the `check_input_files` or `check_input_media` are set properly.
-
-Eg.
-```python
-from pathlib import Path
-
-m = await bot("sendPhoto", {
-    "chat_id": chat_id,
-    "photo": "path/to/photo.png",
-    "caption": "My beautiful picture"
-}, check_input_files=["photo"])
-
-bot("editMessageMedia", {
-    "chat_id": chat_id,
-    "message_id": m["message_id"],
-    "media": {
-        "type": "photo", 
-        "media": "path/to/another_photo.png"
-    }
-}, check_input_media=["media"])
-
-bot("sendMediaGroup", {
-    "chat_id" chat_id,
-    "media": [
-        {"type": "photo", "media": "path/to/photo1.png"},
-        {"type": "photo", "media": photo2_bytes},
-        {"type": "photo", "media": Path("path/to/photo3.png")},
-        {"type": "photo", "media": "path/to/photo4.png"},
-    ]
-}, check_input_media=["media"])
-```
-
-### Expandability
-
-It's very easy to make a user friendlier bot, using this Bot as base.
-
-Eg.
-```python
-from swisscore_tba_lite.core.base_bot import BaseBot, api_method
-
-# Make a class representing a Message
-class Message:
-    def __init__(self, message_id: int, ...):
-        ...
-
-# Make a class inheriting from `BaseBot` to add user frendlier methods
-class Bot(BaseBot):
-    @api_method(
-        check_input_files=["photo"], 
-        convert_func=lambda m: m if m is True else Message(**m)
-    )
-    def send_photo(chat_id: int, photo: str | Path | bytes, ...) -> Message | Literal[True]:
-        """
-        No code required. the decorator handles the request.
-        The method name is automatically converted to camel case.
-        Due to `check_input_files=["photo"]`, 
-          the photo is automatically processed.
-        If it is a valid strPath, Path or bytes. 
-        A str representing a Telegram file_id 
-          or an url can still be passed. 
-        convert_func converts the api call result
-          to a Message instance. 
-        You can pass any convertion function you like.
-        """
-
-bot = Bot(<TOKEN>)
-
-@bot.event("startup")
-async def startup()
-    msg = await bot.send_photo(...)
-
-bot.start_polling()
-```
 
 ## Installation
 
@@ -173,3 +101,102 @@ async def on_shutdown(exit_code: int):
 # Start the bot in long polling mode
 # This starts an async event loop and blocks the code.
 bot.start_polling()
+```
+
+## Features
+
+The purpose of this Repository is to build a stable and powerful base for Telegram Bots. But it can also be used directly by advanced users, well knowing the Telegram Bot API. It is completely written in python 3.13, using modern python techniques.
+
+### Automatc file processing
+
+Simple things like file processing are done automatically by the bot. Eg. `InputFile` and the `media` field of `InputMedia` can just be a `str` representing a Path, a `pathlib.Path` or just `bytes`. The bot will process this automatically if the `check_input_files` or `check_input_media` are set properly.
+
+Eg.
+```python
+from pathlib import Path
+
+m = await bot("sendPhoto", {
+    "chat_id": chat_id,
+    "photo": "path/to/photo.png",
+    "caption": "My beautiful picture"
+}, check_input_files=["photo"])
+
+bot("editMessageMedia", {
+    "chat_id": chat_id,
+    "message_id": m["message_id"],
+    "media": {
+        "type": "photo", 
+        "media": "path/to/another_photo.png"
+    }
+}, check_input_media=["media"])
+
+bot("sendMediaGroup", {
+    "chat_id" chat_id,
+    "media": [
+        {"type": "photo", "media": "path/to/photo1.png"},
+        {"type": "photo", "media": photo2_bytes},
+        {"type": "photo", "media": Path("path/to/photo3.png")},
+        {"type": "photo", "media": "path/to/photo4.png"},
+    ]
+}, check_input_media=["media"])
+```
+
+It also comes with a builtin `download` method. Allowing you to quickly download files from the telegram server.
+
+Example Usage:
+```python
+# filtering messages with document and a file name
+@bot.event("message", filters=[sub_keys("document", "file_name")])
+async def on_document_message(msg: dict[str]):
+    doc = msg["document"]
+    file_obj = await bot("getFile", {"file_id": doc["file_id"]})
+    file_path = await bot.download(file_obj, Path.cwd() / ".tmp", doc["file_name"], overwrite_existing=True)
+```
+
+### Expandability
+
+Since this library comes without the bloat and is made for users very familiar to the Telegram Bot API, this is not a very userfriendly bot.  
+
+It's very easy to make a user friendlier bot, using this bot as base.
+
+Eg.
+```python
+from swisscore_tba_lite.core.base_bot import BaseBot, api_method
+
+# Make a user friendly class representing a Message
+class Message:
+    def __init__(self, message_id: int, ...):
+        ...
+
+# Make a class inheriting from `BaseBot` to add user frendlier methods
+class Bot(BaseBot):
+    @api_method(
+        check_input_files=["photo"], 
+        convert_func=lambda m: m if m is True else Message(**m)
+    )
+    def send_photo(chat_id: int, photo: str | Path | bytes, ...) -> Message | Literal[True]:
+        """
+        No code required. the decorator handles the request.
+        The method name is automatically converted to camel case.
+        Due to `check_input_files=["photo"]`, 
+          the photo is automatically processed.
+        If it is a valid strPath, Path or bytes. 
+        A str representing a Telegram file_id 
+          or an url can still be passed. 
+        convert_func converts the api call result
+          to a Message instance. 
+        You can pass any convertion function you like.
+        """
+
+bot = Bot(<TOKEN>)
+
+@bot.event("startup")
+async def startup()
+    msg = await bot.send_photo(...)
+
+bot.start_polling()
+```
+
+### Flexible Event System With Filter Composition
+
+More about this topic later.
