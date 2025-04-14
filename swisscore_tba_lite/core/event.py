@@ -38,21 +38,23 @@ TELEGRAM_EVENT_TYPES: frozenset[str] = frozenset({
 class EventManager:
     UNHANDLED = UnhandledEventType
     """
-    Return this in an event handler to mark the event as unhandled and continue processing the update.
+    Return this in an event handler to mark the event as unhandled and continue processing the update.  
+    
+    This allows you to make small, single purpose handlers without filter spaghetti.
     
     Usage:
     ```python
     
     from swisscore_tba_lite.filters import sub_keys
     
-    @bot.event("message", filters=[sub_keys("document", "file_name")]]):
+    @bot.event("message", filters=[sub_keys("document", "mime_type")]]):
     async def handle_pdf(msg):
-        if not msg["document"]["file_name"].endswith(".pdf):
+        if msg["document"]["mime_type"] != "application/pdf":
             return bot.event.UNHANDLED
         
         # Handle pdf document
     
-    @bot.event("message", filters=[sub_keys("document", "file_name")]]):
+    @bot.event("message", filters=[sub_keys("document", "mime_type")]]):
     async def handle_file(msg):
         ...
         # Continue handling the document (which is no pdf file)
