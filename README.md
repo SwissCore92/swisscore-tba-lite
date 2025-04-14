@@ -1,40 +1,79 @@
 # **SwissCore TBA Lite**
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)  
 
-A very basic and lightweight asynchronous [Telegram Bot API](https://core.telegram.org/bots/api) wrapper for **python 3.11+**.  
+A very lightweight *asynchronous* [Telegram Bot API](https://core.telegram.org/bots/api) wrapper for **python 3.11+**.  
 Main focus on core functionality without all the bloat. Just *dictionaries*.  
 
 ✅ **Very flexible**  
 ✅ **Very fast**  
 ✅ **No bloat**  
 ✅ **Easy to extend**  
-More about [Features](#features) 
+✅ **Builin colored Logger** *(requires colorama)*  
 
-> ⚠️ **Note:** *This project is still work in progress!*  
-> *A production ready release will follow soon.*
+> ⚠️ **Note:** *This project and it's documentation are still work in progress!*  
+> * *I don't recommed to use it unil it is released on PyPI!*
+> * *A production ready release will follow soon.*
+> * *This documentation will be improved over time.*
 
 
 * [Installation](#installation)
 * [Quick Start](#quick-start)
-* [Features](#features)
-    * [Automatc file processing](#automatc-file-processing)
-    * [Expandability](#expandability)
-    * [Flexible Event System with Filter Composition](#flexible-event-system-with-filter-composition)
+* [Automatc file processing](#automatc-file-processing)
+* [Expandability](#expandability)
+* [Taksks](#tasks)
+* [Events](#events)
+* [Flexible Filter Composition System](#flexible-filter-composition-system)
+* [Event Handler Chaining](#event-hanlder-chaining)
 
 
 ## Installation
 
 *Requires Python 3.11+*
 
-### Installation on Windows  
+### Create and activate a virtual Environment
+While this is optional, it's highly recommended to use a virtual environment to avoid conflicts with other Python projects.  
+It's also a save place to store you bot Token.
+
+Open a Terminal in a work directory of your choice.
+
 ```sh
-python -m pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
+python -m venv .venv
+
+# Activate it (Linux/macOS)
+source .venv/bin/activate
+
+# Activate it (Windows)
+.venv\Scripts\activate
+```
+> 💡 Remember to activate the virtual environment every time you work on your bot or on the project itself.
+
+Set your Bot API Token in Environment Variables.
+The token looks something like `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11` but we use `<token>` in this example.
+
+```sh
+# Linux/macOS
+export API_TOKEN=<token>
+
+# Windows
+set API_TOKEN=<token>         
 ```
 
-### Installation on Linux / MacOS   
+### Installation
+
+Since there is no PyPI release ath the moment, you have to install it from source using `pip` + `git`
 ```sh
-python3 -m pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
+pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
 ```
+*Note: on Linux/MacOs you may have to use `pip3`*
+
+### Editable Install (For Development)
+```sh
+git clone https://github.com/username/repo-name.git
+cd repo-name
+pip install -e .
+```
+*Note: on Linux/MacOs you may have to use `pip3`*
+
 
 ## Quick Start
 
@@ -103,11 +142,11 @@ async def on_shutdown(exit_code: int):
 bot.start_polling()
 ```
 
-## Features
+<!-- ## Features
 
-The purpose of this Repository is to build a stable and powerful base for Telegram Bots. But it can also be used directly by advanced users, well knowing the Telegram Bot API. It is completely written in python 3.13, using modern python techniques.
+The purpose of this Repository is to build a stable and powerful base for Telegram Bots. But it can also be used directly by advanced users, well knowing the Telegram Bot API. It is completely written in python 3.13, using modern python techniques. -->
 
-### Automatc file processing
+## Automatc file processing
 
 Simple things like file processing are done automatically by the bot. Eg. `InputFile` and the `media` field of `InputMedia` can just be a `str` representing a Path, a `pathlib.Path` or just `bytes`. The bot will process this automatically if the `check_input_files` or `check_input_media` are set properly.
 
@@ -153,7 +192,7 @@ async def on_document_message(msg: dict[str]):
     file_path = await bot.download(file_obj, Path.cwd() / ".tmp", doc["file_name"], overwrite_existing=True)
 ```
 
-### Expandability
+## Expandability
 
 Since this library comes without the bloat and is made for users very familiar to the Telegram Bot API, this is not a very userfriendly bot.  
 
@@ -161,7 +200,7 @@ It's very easy to make a user friendlier bot, using this bot as base.
 
 Eg.
 ```python
-from swisscore_tba_lite.core.base_bot import BaseBot, api_method
+from swisscore_tba_lite.core.base_bot import BaseBot, api_method_wrapper
 
 # Make a user friendly class representing a Message
 class Message:
@@ -170,7 +209,7 @@ class Message:
 
 # Make a class inheriting from `BaseBot` to add user frendlier methods
 class Bot(BaseBot):
-    @api_method(
+    @api_method_wrapper(
         check_input_files=["photo"], 
         convert_func=lambda m: m if m is True else Message(**m)
     )
@@ -197,6 +236,42 @@ async def startup()
 bot.start_polling()
 ```
 
-### Flexible Event System With Filter Composition
+## Tasks
 
-More about this topic later.
+*Details will be added later*
+
+## Events
+
+*Details will be added later*
+
+## Flexible Filter Composition System
+
+*Details will be added later*
+
+## Event Handler Chaining
+
+It's possible to chain event handlers without manual re-dispatching logic by just using `return bot.event.UNHANDLED` in an event handler.
+
+### Why is this great?
+
+* **Graceful fallbacks:** You can write a series of specific handlers followed by a general catch-all without filter spaghetti.
+* **More expressive filters:** You can "fail" a match manually even if the filters pass, which is great for edge cases (like optional preconditions).
+
+Example Usage:
+```python
+
+from swisscore_tba_lite.filters import sub_keys
+
+@bot.event("message", filters=[sub_keys("document", "mime_type")]]):
+async def handle_pdf(msg):
+    if msg["document"]["mime_type"] != "application/pdf":
+        return bot.event.UNHANDLED
+    
+    ... # Handle pdf document
+
+@bot.event("message", filters=[sub_keys("document", "mime_type")]]):
+async def handle_file(msg):
+    ... # Handle any other kind of document with a mime_type
+```
+
+
