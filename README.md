@@ -9,18 +9,19 @@ Main focus on core functionality without all the bloat. Just *dictionaries*.
 ✅ **No bloat**  
 ✅ **Easy to extend**  
 ✅ **Builin colored Logger** *(requires colorama)*  
+✅ **Written from scratch in modern Python using modern techniques**  
 
 > ⚠️ **Note:** *This project and it's documentation are still work in progress!*  
-> * *I don't recommed to use it unil it is released on PyPI!*
+> * *I don't recommed to use it until it is released on PyPI!*
 > * *A production ready release will follow soon.*
 > * *This documentation will be improved over time.*
 
 
 * [Installation](#installation)
 * [Quick Start](#quick-start)
-* [Automatc file processing](#automatc-file-processing)
+* [Automatic file processing](#automatic-file-processing)
 * [Expandability](#expandability)
-* [Taksks](#tasks)
+* [Tasks](#tasks)
 * [Events](#events)
 * [Flexible Filter Composition System](#flexible-filter-composition-system)
 * [Event Handler Chaining](#event-hanlder-chaining)
@@ -32,7 +33,7 @@ Main focus on core functionality without all the bloat. Just *dictionaries*.
 
 ### Create and activate a virtual Environment
 While this is optional, it's highly recommended to use a virtual environment to avoid conflicts with other Python projects.  
-It's also a save place to store you bot Token.
+It's also a save place to store your Telegram Bot API token.
 
 Open a Terminal in a work directory of your choice.
 
@@ -47,20 +48,20 @@ source .venv/bin/activate
 ```
 > 💡 Remember to activate the virtual environment every time you work on your bot or on the project itself.
 
-Set your Bot API Token in Environment Variables.
-The token looks something like `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11` but we use `<token>` in this example.
+Set your Bot API token in an environment variable.
+The token looks something like `123456:ABC-DEF1234ghIkl_zyx57W2v1u123ew11` but we use `token` in this example.
 
 ```sh
 # Linux/macOS
-export API_TOKEN=<token>
+export API_TOKEN=token
 
 # Windows
-set API_TOKEN=<token>         
+set API_TOKEN=token        
 ```
 
 ### Installation
 
-Since there is no PyPI release at the moment, you have to install it from source using `pip` + `git`
+Since there is no PyPI release at the moment, you have to install it from source using `pip` & `git`.
 ```sh
 pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
 ```
@@ -68,8 +69,8 @@ pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
 
 ### Editable Install (For Development)
 ```sh
-git clone https://github.com/username/repo-name.git
-cd repo-name
+git clone https://github.com/SwissCore92/swisscore-tba-lite.git
+cd swisscore-tba-lite
 pip install -e .
 ```
 *Note: on Linux/MacOs you may have to use `pip3`*
@@ -142,11 +143,7 @@ async def on_shutdown(exit_code: int):
 bot.start_polling()
 ```
 
-<!-- ## Features
-
-The purpose of this Repository is to build a stable and powerful base for Telegram Bots. But it can also be used directly by advanced users, well knowing the Telegram Bot API. It is completely written in python 3.13, using modern python techniques. -->
-
-## Automatc file processing
+## Automatic file processing
 
 Simple things like file processing are done automatically by the bot. Eg. `InputFile` and the `media` field of `InputMedia` can just be a `str` representing a Path, a `pathlib.Path` or just `bytes`. The bot will process this automatically if the `check_input_files` or `check_input_media` are set properly.
 
