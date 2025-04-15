@@ -100,6 +100,7 @@ def commands(*commands: str, caption: bool = False):
                 if obj[t_key][1:e["length"]].split("@")[0] in commands:
                     return True
         return False
+    return f
 
 def chat_ids(*chat_ids: int):
     """
