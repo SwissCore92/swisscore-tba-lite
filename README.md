@@ -8,7 +8,7 @@ Main focus on core functionality without all the bloat. Just *dictionaries*.
 ✅ **Very fast**  
 ✅ **No bloat**  
 ✅ **Easy to extend**  
-✅ **Builin colored Logger** *(requires colorama)*  
+✅ **Builtin colored Logger** *(requires colorama)*  
 ✅ **Written from scratch in modern Python using modern techniques**  
 
 > ⚠️ **Note:** *This project and it's documentation are still work in progress!*  
@@ -38,12 +38,13 @@ It's also a save place to store your Telegram Bot API token.
 Open a Terminal in a work directory of your choice.
 
 ```sh
+# Create venv
 python -m venv .venv
 
-# Activate it (Linux/macOS)
+# Activate venv (Linux/macOS)
 source .venv/bin/activate
 
-# Activate it (Windows)
+# Activate venv (Windows)
 .venv\Scripts\activate
 ```
 > 💡 Remember to activate the virtual environment every time you work on your bot or on the project itself.
@@ -65,7 +66,7 @@ Since there is no PyPI release at the moment, you have to install it from source
 ```sh
 pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
 ```
-*Note: on Linux/MacOs you may have to use `pip3`*
+*Note: On Linux/MacOS you may have to use `pip3`*.
 
 ### Editable Install (For Development)
 ```sh
@@ -73,7 +74,7 @@ git clone https://github.com/SwissCore92/swisscore-tba-lite.git
 cd swisscore-tba-lite
 pip install -e .
 ```
-*Note: on Linux/MacOs you may have to use `pip3`*
+*Note: On Linux/MacOS you may have to use `pip3`*.
 
 
 ## Quick Start
