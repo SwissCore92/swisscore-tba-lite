@@ -2,14 +2,18 @@ import re
 import typing as t
 
 from .helpers import JsonDict, false_on_key_error
+from .composition import any_, all_
 
 
 def any_keys(*keys: str):
     """
     Generates a filter that checks for matching `keys`.  
     
+    Note: passing no *args will raise an AssertionError!
+    
     The filter returns `True` if **any** of `keys` is in `obj.keys()`
     """
+    assert keys
     def f(obj: JsonDict):
         return any(k in obj for k in keys)
     return f
@@ -18,16 +22,20 @@ def all_keys(*keys: str):
     """
     Generates a filter that checks for matching `keys`.  
     
+    Note: passing no *args will raise an AssertionError!
+    
     The filter returns `True` if **all** of `keys` are in `obj.keys()`
     """
+    assert keys
     def f(obj: JsonDict):
         return all(k in obj for k in keys)
     return f
 
-
 def sub_keys(*key_sequence: str):
     """
     Generates a filter that checks if `key_sequence` is recursively found in obj.
+    
+    Note: passing no *args will raise an AssertionError!
 
     Eg. 
     ```python
@@ -48,6 +56,7 @@ def sub_keys(*key_sequence: str):
     So its perfect to check for flags which are always `True` if present. like 'is_premium' in user or 'is_forum' in chat.
 
     """
+    assert key_sequence
     def f(obj: JsonDict):
         o = obj
         for k in key_sequence:
@@ -58,46 +67,39 @@ def sub_keys(*key_sequence: str):
         return True
     return f
 
-
 def regex(*patterns: str, caption: bool = False):
     """
     Generates a filter that checks if any pattern of regular expression `patterns` matches the object text or caption.  
     
-    The filter returns `True` if the regex pattern is found in obj["text"] or obj["caption"] (if `caption=True`).
+    The filter returns `True` if any of the regex patterns is found in obj["text"] or obj["caption"] (if `caption=True`).
     """
+    assert patterns
     pattern = re.compile("|".join(patterns))
     def f(obj: JsonDict):
         text = obj.get("text", "") if not caption else obj.get("caption", "")
         return bool(pattern.search(text))
     return f
 
-
 def text_startswith(*substrings, caption: bool = False):
+    assert substrings
     def f(obj: JsonDict):
         text: str = obj.get("text", "") if not caption else obj.get("caption", "")
         return any(text.startswith(s) for s in substrings)
     return f
 
-
-def commands(*commands: str, prefix: str = "/", caption: bool = False):
+def commands(*commands: str, caption: bool = False):
     """
-    Generates a filter that checks for matching `commands`.  
-    
-    The filter returns `True` if obj["text"] starts with any "\\<prefix\\>\\<command\\>" for \\<command\\> in `commands`  
-    
-    Example:
-    ```python
-    # check for "/test" in obj["text"]
-    f = commands("test", prefix="/")    
-    f({"text": "test"})         # False. obj["text"] does not start with "/test"
-    f({"text": "/test"})        # True.  obj["text"] starts with "/test" 
-    f({"text": "/test 123"})    # True.  obj["text"] starts with "/test"
-    f({"text": "/test123"})     # False. obj["text"] starts with "/test", but "/test" is not a whole word in the string.
-    ```
-    
+    Generates a filter that checks for matching `commands` in the messages (`capition`)`entities`.
     """
-    commands = [rf"{prefix}{c.lstrip(prefix)}\b" for c in commands]
-    return regex(*commands, caption=caption)
+    assert commands
+    commands = [c.lstrip("/") for c in commands]
+    t_key, e_key = ("caption", "caption_entities") if caption else ("text", "entities")
+    def f(obj: JsonDict):
+        for e in obj.get(e_key, []):
+            if e["type"] == "bot_command" and e["offset"] == 0: 
+                if obj[t_key][1:e["length"]].split("@")[0] in commands:
+                    return True
+        return False
 
 def chat_ids(*chat_ids: int):
     """
@@ -105,6 +107,7 @@ def chat_ids(*chat_ids: int):
     
     The filter returns `True` if obj["chat"]["id"] is in `chat_ids`
     """
+    assert chat_ids
     def f(obj: JsonDict):
         return obj.get("chat", {}).get("id") in chat_ids
     return f
@@ -121,6 +124,7 @@ def chat_types(*chat_types: t.Literal["private", "group", "supergroup", "channel
     
     The filter returns `True` if obj["chat"]["type"] is in `chat_types`
     """
+    assert chat_types
     def f(obj: JsonDict):
         chat_type = obj.get("chat", {}).get("type")
         return chat_type in chat_types
@@ -132,6 +136,7 @@ def from_users(*user_ids: int):
     
     The filter returns `True` if obj["from"]["id"] is in `user_ids`
     """
+    assert user_ids
     def f(obj: JsonDict):
         from_id = obj.get("from", {}).get("id")
         return from_id in user_ids
@@ -145,6 +150,7 @@ def callback_data(*data: str):
     
     The filter returns `True` if obj["data"] is in `data`
     """
+    assert data
     def f(obj: JsonDict):
         cb_data = obj.get("data", "")
         return cb_data in data
@@ -158,6 +164,7 @@ def callback_data_startswith(*substrings: str):
     
     The filter returns `True` if obj["data"] startswith any of the provided substrings
     """
+    assert substrings
     def f(obj: JsonDict):
         cb_data: str = obj.get("data", "")
         return any(cb_data.startswith(s) for s in substrings)
