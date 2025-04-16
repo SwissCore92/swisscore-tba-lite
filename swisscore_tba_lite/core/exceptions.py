@@ -2,7 +2,7 @@ import typing as t
 from asyncio import iscoroutinefunction
 from functools import wraps
 
-from aiohttp import ClientResponse as _ClientResponse
+from aiohttp import ClientResponse
 
 from ..utils import sanitize_token
 from .logger import logger
@@ -149,7 +149,7 @@ class GatewayTimeout(TelegramAPIError):
         super().__init__(504, method_name, method_name, status_code, message, retryable=True, retry_after=20)
 
 
-async def raise_for_telegram_error(method_name: str, response: _ClientResponse) -> None:
+async def raise_for_telegram_error(method_name: str, response: ClientResponse) -> None:
 
     if response.status < 400:
         return
