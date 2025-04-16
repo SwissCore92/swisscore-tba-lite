@@ -18,8 +18,10 @@ dev = [
     "pytest"
 ]
 
-[tool.setuptools]
-packages = ["swisscore_tba_lite"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["swisscore_tba_lite*"]
+exclude = ["scripts"]
 
 [build-system]
 requires = ["setuptools", "wheel"]
