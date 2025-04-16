@@ -211,7 +211,7 @@ class EventHandler:
     def __init__(
         self, 
         type: str, 
-        func: t.Callable[[dict], t.Any], 
+        func: t.Callable[[dict[str, t.Any]], None | UnhandledEventType], 
         filters: list[t.Callable[[dict[str, t.Any]], bool]] | None = None
     ) -> None:
         self.type = type
