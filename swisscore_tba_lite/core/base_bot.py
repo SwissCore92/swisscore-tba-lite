@@ -5,7 +5,7 @@ import sys
 import os
 from functools import wraps
 from pathlib import Path
- 
+
 import aiohttp
 import aiofiles
 
@@ -191,6 +191,17 @@ def serialize_params(params: JsonDict) -> JsonDict:
             "Did you forgot to set 'check_input_files' / 'check_input_media'? {e}"
         ) from e
 
+async def run_builtin_event(bot: "BaseBot", event_name: str, *args):
+    try:
+        await bot.event._trigger_event(event_name, *args)
+        await bot._gather_pending_tasks()
+    
+    except exceptions.RestartBotException:
+        logger.error(f"RestartBotExcepiton not allowed in '{event_name}' event handler!")
+    
+    except (exceptions.FilterEvaluationError, exceptions.EventHandlerError) as e:
+        logger.error(f"Error in '{event_name}' event handler. ({e})", exc_info=True)
+
 
 class BaseBot:
     """
@@ -220,6 +231,11 @@ class BaseBot:
         
         if not utils.is_valid_bot_api_token(token):
             raise TypeError(f"'{token}' is not a valid Telegram Bot API Token!")
+        
+        self.token = token
+        """
+        Your Bot API token. 
+        """
         
         if event_manager and not isinstance(event_manager, EventManager):
             raise TypeError("`event_manager` has to be an instance of `EventManager`")
@@ -299,6 +315,7 @@ class BaseBot:
         **Is used internally to manage tasks**
         """
 
+    #region tasks
     
     def _create_task(self, coro, name=None) -> asyncio.Task:
         """
@@ -324,175 +341,8 @@ class BaseBot:
             await asyncio.gather(*self._tasks)
         logger.debug("All pending tasks completed")
     
+    #endregion tasks
     
-    def start_polling(self, drop_pending_updates: bool = False) -> None:
-        """
-        Start the bot in [long polling](https://en.wikipedia.org/wiki/Push_technology#Long_polling) mode.  
-        
-        Uses the [`getUpdates`](https://core.telegram.org/bots/api#getupdates) API method to get [Updates](https://core.telegram.org/bots/api#update).  
-        
-        **Note:**
-        * *`offset`* is calculated automatically
-        * *`limit`* can be set using `bot.update_limit = <limit>` (defaults to `None` which is 100)
-        * *`timeout`* can be set using `bot.polling_timeout = <timeout>` (defaults to 20)
-        * *`allowed_updates`* are automatically set, based on your event handlers
-        
-        Is just a shortcut for
-        ```python
-        asyncio.run(bot._polling_main_loop())
-        ```
-        
-        """
-        logger.debug("Start async event loop")
-        
-        asyncio.run(self._polling_main_loop(drop_pending_updates))
-        
-        logger.debug("Closed async event loop")
-    
-    
-    async def _polling_main_loop(self, drop_pending_updates: bool = False) -> None:
-        """
-        Iterates over incoming updates and triggers the matching event handlers.  
-        
-        To start polling use 
-        ```python
-        bot.start_polling()
-        ```
-        > *or*
-        ```python
-        asyncio.run(bot._polling_main_loop())
-        ```
-        """
-        async for update in self._get_future_updates(drop_pending_updates):
-            try:
-                update_id = update["update_id"]
-                update_type = utils.get_update_type(update)
-                update_object = update[update_type]
-                
-                await self.event._trigger_event(update_type, update_object)
-                
-                if len(self._tasks) >= self.max_concurrent_tasks:
-                    logger.info(
-                        f"Max amount of concurrent tasks exceeded ({self.max_concurrent_tasks}). "
-                        "Gathering all pending tasks before processing further updates..."
-                    )
-                    await self._gather_pending_tasks()
-            
-            except exceptions.RestartBotException as e:
-                logger.debug(f"{repr(e)} raised. Preparing Shutdown.")
-                setattr(self, "restart_flag", True)
-            
-            except exceptions.FilterEvaluationError as e:
-                logger.error(f"Failed to process update of type '{update_type}'. Update was dropped. ({e})", exc_info=True)
-            
-            except exceptions.EventHandlerError as e:
-                logger.error(f"A event handler processing an update of type '{update_type}' crashed. ({e})", exc_info=True)
-
-    
-    async def _get_future_updates(
-        self,
-        drop_pending_updates: bool = False
-    ) -> t.AsyncGenerator[JsonDict, None]:
-        """
-        Generator that asks repeatedly for new updates and yields them one by one.  
-        
-        **Is used internally**
-        """
-        exit_code: int = 0
-        
-        params = {
-            "offset": 0, 
-            "limit": self.update_limit, 
-            "timeout": self.polling_timeout,
-            "allowed_updates": utils.dumps(self.event._get_handled_event_types())
-        }
-        params = {k: v for k, v in params.items() if v is not None}
-        
-        logger.debug("Start client session")
-
-        async with aiohttp.ClientSession() as session:
-            self.session = session
-
-            if drop_pending_updates:
-                if updates := await self.__call__("getUpdates", params={"offset": -1}, auto_prepare=False):
-                    logger.debug("Dropped pending updates.")
-                    params["offset"] = updates[-1]["update_id"] + 1
-            
-            try:
-                await self.event._trigger_event("startup")
-                await self._gather_pending_tasks()
-            
-            except exceptions.RestartBotException:
-                logger.error("RestartBotExcepiton not allowed in 'startup' event handler!")
-                
-            except (exceptions.FilterEvaluationError, exceptions.EventHandlerError) as e:
-                logger.error(f"Error in 'startup' event handler. ({e})", exc_info=True)
-            
-            logger.info(f"Start Bot in long polling mode. Press {utils.kb_interrupt()} to quit.")
-            
-            logger.debug(f"Allowed updates: {params["allowed_updates"]}")
-            
-            while True:
-                try: 
-                    if updates := await self.__call__("getUpdates", params=params, auto_prepare=False, catch_errors=False):
-                        logger.debug(f"Received {len(updates)} new update(s).")
-                        for update in updates:
-                            yield update
-                            params["offset"] = update["update_id"] + 1
-                        
-                        
-                        if getattr(self, "restart_flag", False):
-                            await self.__call__("getUpdates", {"offset": params["offset"], "timeout": 0})
-                            exit_code = exit_codes.RESTART
-                            logger.info(f"RestartBotException raised. Shutting down with {exit_code=}.")
-                            break
-
-                except exceptions.MaxRetriesExeededError as e:
-                    logger.error(f"Failed to get updates. Check your Internet Connection. Retrying in 60 seconds...")
-                    await asyncio.sleep(60)
-                    continue
-                
-                except asyncio.exceptions.CancelledError:
-                    exit_code = exit_codes.TERMITATED_BY_USER
-                    logger.info(f"{utils.kb_interrupt()} pressed. Shutting down with {exit_code=}.")
-                    break
-                
-                except exceptions.TelegramAPIError as e:
-                    if e.critical:
-                        # Only happens when '409: Conflict' or '403: Forbidden' is raised
-                        exit_code = exit_codes.CRITICAL_TELEGRAM_ERROR
-                        logger.critical(f"Shutting down with {exit_code=}.")
-                            
-                    else:
-                        # Should not happen in theory. (The getUpdate request was invalid, logging with exc_info)
-                        logger.critical(f"Failed to get updates due an unexpected Telegram API Error. {repr(e)}", exc_info=True)
-                        exit_code = exit_codes.UNEXPECTED_TELEGRAM_ERROR
-                        
-                    break
-                
-                except Exception as e:
-                    exit_code = exit_codes.UNEXPECTED_ERROR
-                    logger.critical(f"A critical, unexpected error occured. Shutting down with {exit_code=}.", exc_info=True)
-                    break
-            
-            try:
-                await self.event._trigger_event("shutdown", exit_code)
-                await self._gather_pending_tasks()
-            
-            except exceptions.RestartBotException:
-                logger.error("RestartBotExcepiton not allowed in 'shutdown' event handler!")
-            
-            except (exceptions.FilterEvaluationError, exceptions.EventHandlerError) as e:
-                logger.error(f"Error in 'shutdown' event handler. ({e})", exc_info=True)
-
-        self.session = None
-        logger.debug("Closed client session")
-        if getattr(self, "restart_flag", False):
-            python = sys.executable
-            subprocess.run([python] + sys.argv)
-            exit()
-
-
     def download(
         self, 
         file_obj: JsonDict, 
@@ -588,7 +438,6 @@ class BaseBot:
 
         return self._create_task(_download_file())
 
-
     def __call__(
         self, 
         method_name: str, 
@@ -658,7 +507,7 @@ class BaseBot:
                         
                         await exceptions.raise_for_telegram_error(method_name, r)
                         
-                        response: dict[str] = await r.json()
+                        response: JsonDict = await r.json()
 
                         if self.log_successful_requests:
                             logger.debug(f"'{method_name}' -> HTTP {r.status}: OK")
@@ -715,4 +564,163 @@ class BaseBot:
             raise exceptions.MaxRetriesExeededError(f"'{method_name}' Max retries exceeded. Request failed.")
         
         return self._create_task(request(), name=method_name)
+    
+    async def _process_update(self, update: JsonDict) -> None:
+        try:
+            update_id = update["update_id"]
+            update_type = utils.get_update_type(update)
+            update_object = update[update_type]
+            
+            await self.event._trigger_event(update_type, update_object)
+            
+            if len(self._tasks) >= self.max_concurrent_tasks:
+                logger.info(
+                    f"Max amount of concurrent tasks exceeded ({self.max_concurrent_tasks}). "
+                    "Gathering all pending tasks before processing further updates..."
+                )
+                await self._gather_pending_tasks()
+        
+        except exceptions.RestartBotException as e:
+            logger.debug(f"{repr(e)} raised. Preparing Shutdown.")
+            setattr(self, "restart_flag", True)
+        
+        except exceptions.FilterEvaluationError as e:
+            logger.error(f"Failed to process update of type '{update_type}'. Update was dropped. ({e})", exc_info=True)
+        
+        except exceptions.EventHandlerError as e:
+            logger.error(f"A event handler processing an update of type '{update_type}' crashed. ({e})", exc_info=True)
+    
+    #region polling
+    
+    def start_polling(self, drop_pending_updates: bool = False) -> None:
+        """
+        Start the bot in [long polling](https://en.wikipedia.org/wiki/Push_technology#Long_polling) mode.  
+        
+        Uses the [`getUpdates`](https://core.telegram.org/bots/api#getupdates) API method to get [Updates](https://core.telegram.org/bots/api#update).  
+        
+        **Note:**
+        * *`offset`* is calculated automatically
+        * *`limit`* can be set using `bot.update_limit = <limit>` (defaults to `None` which is 100)
+        * *`timeout`* can be set using `bot.polling_timeout = <timeout>` (defaults to 20)
+        * *`allowed_updates`* are automatically set, based on your event handlers
+        
+        Is just a shortcut for
+        ```python
+        asyncio.run(bot._polling_main_loop())
+        ```
+        
+        """
+        logger.debug("Start async event loop")
+        
+        asyncio.run(self._polling_main_loop(drop_pending_updates))
+        
+        logger.debug("Closed async event loop")
+    
+    
+    async def _polling_main_loop(self, drop_pending_updates: bool = False) -> None:
+        """
+        Iterates over incoming updates and triggers the matching event handlers.  
+        
+        To start polling use 
+        ```python
+        bot.start_polling()
+        ```
+        > *or*
+        ```python
+        asyncio.run(bot._polling_main_loop())
+        ```
+        """
+        async for update in self._get_future_updates(drop_pending_updates):
+            await self._process_update(update)
+
+    
+    async def _get_future_updates(
+        self,
+        drop_pending_updates: bool = False
+    ) -> t.AsyncGenerator[JsonDict, None]:
+        """
+        Generator that asks repeatedly for new updates and yields them one by one.  
+        
+        **Is used internally**
+        """
+        exit_code: int = 0
+        
+        params = {
+            "offset": 0, 
+            "limit": self.update_limit, 
+            "timeout": self.polling_timeout,
+            "allowed_updates": utils.dumps(self.event._get_handled_event_types())
+        }
+        params = {k: v for k, v in params.items() if v is not None}
+        
+        logger.debug("Start client session")
+
+        async with aiohttp.ClientSession() as session:
+            self.session = session
+
+            if drop_pending_updates:
+                if updates := await self.__call__("getUpdates", params={"offset": -1}, auto_prepare=False):
+                    logger.debug("Dropped pending updates.")
+                    params["offset"] = updates[-1]["update_id"] + 1
+            
+            await run_builtin_event(self, "startup")
+            
+            logger.info(f"Start Bot in long polling mode. Press {utils.kb_interrupt()} to quit.")
+            
+            logger.debug(f"Allowed updates: {params["allowed_updates"]}")
+            
+            while True:
+                try: 
+                    if updates := await self.__call__("getUpdates", params=params, auto_prepare=False, catch_errors=False):
+                        logger.debug(f"Received {len(updates)} new update(s).")
+                        for update in updates:
+                            yield update
+                            params["offset"] = update["update_id"] + 1
+                        
+                        
+                        if getattr(self, "restart_flag", False):
+                            await self.__call__("getUpdates", {"offset": params["offset"], "timeout": 0})
+                            exit_code = exit_codes.RESTART
+                            logger.info(f"RestartBotException raised. Shutting down with {exit_code=}.")
+                            break
+
+                except exceptions.MaxRetriesExeededError as e:
+                    logger.error(f"Failed to get updates. Check your Internet Connection. Retrying in 60 seconds...")
+                    await asyncio.sleep(60)
+                    continue
+                
+                except asyncio.CancelledError:
+                    exit_code = exit_codes.TERMITATED_BY_USER
+                    logger.info(f"{utils.kb_interrupt()} pressed. Shutting down with {exit_code=}.")
+                    break
+                
+                except exceptions.TelegramAPIError as e:
+                    if e.critical:
+                        # Only happens when '409: Conflict' or '403: Forbidden' is raised
+                        exit_code = exit_codes.CRITICAL_TELEGRAM_ERROR
+                        logger.critical(f"Shutting down with {exit_code=}.")
+                            
+                    else:
+                        # Should not happen in theory. (The getUpdate request was invalid, logging with exc_info)
+                        logger.critical(f"Failed to get updates due an unexpected Telegram API Error. {repr(e)}", exc_info=True)
+                        exit_code = exit_codes.UNEXPECTED_TELEGRAM_ERROR
+                        
+                    break
+                
+                except Exception as e:
+                    exit_code = exit_codes.UNEXPECTED_ERROR
+                    logger.critical(f"A critical, unexpected error occured. Shutting down with {exit_code=}.", exc_info=True)
+                    break
+            
+            await run_builtin_event(self, "shutdown", exit_code)
+
+        self.session = None
+        logger.debug("Closed client session")
+        if getattr(self, "restart_flag", False):
+            python = sys.executable
+            subprocess.run([python] + sys.argv)
+            exit()
+
+    #endregion polling
+    
     
