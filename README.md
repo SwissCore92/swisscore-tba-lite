@@ -1,28 +1,48 @@
 # **SwissCore TBA Lite**
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)  
+  
+## Philosophy
+*swisscore-tba-lite* is built on a simple idea: **a Telegram bot library shouldn't get in your way.**
 
-A very lightweight *asynchronous* [Telegram Bot API](https://core.telegram.org/bots/api) wrapper for **python 3.11+**.  
-Main focus on core functionality without all the bloat. Just *dictionaries*.  
+Most bot frameworks end up bloated with layers of abstractions, rigid class hierarchies, and dozens of overlapping utility functions. You start with something small, and suddenly you're drowning in dataclasses just to send a message.
 
-✅ **Very flexible**  
-✅ **Very fast**  
-✅ **No bloat**  
-✅ **Easy to extend**  
-✅ **Builtin colored Logger** *(requires colorama)*  
-✅ **Written from scratch in modern Python using modern techniques**  
+This library takes a different approach.
 
-> ⚠️ **Note:** *This project and it's documentation are still work in progress!*  
-> * *I don't recommed to use it until it is released on PyPI!*
-> * *A production ready release will follow soon.*
-> * *This documentation will be improved over time.*
+### One `__call__` to rule them all
+Every Telegram API method is just a dictionary away. Want to call sendMessage? You just call the bot like a function:
 
+```python
+bot("sendMessage", {
+    "chat_id": 1234,
+    "text": "Hello, world!"
+})
+```
 
+That’s it. One unified entrypoint. *Await it* or *forget it*. **It's your decision**. But more about this topic in the [Tasks](#tasks) section.
+
+### Always Up-to-Date with *Telegram Bot API*
+One of the biggest frustrations with traditional libraries is lag — you find a new feature in the [*Telegram Bot API docs*](https://core.telegram.org/bots/api), but your library doesn’t support it yet. With *swisscore-tba-lite*, that's a thing of the past.  
+
+The core design guarantees that every method and every parameter supported by the official API is instantly usable — no waiting for a new release, no patching, no forking. If it’s in the *Telegram Bot API docs*, you can use it right now. Just pass the method name and your params and let the magic happen.
+
+### Minimal by default, extensible by design
+At its core, *swisscore-tba-lite* is lean and async-native. You only get the essentials: fast event handling, decorators that feel natural, and a clean internal event loop with graceful shutdown support.
+
+But if you want more? Build it on top. This is your foundation — not your cage.
+
+### Built for reliability and control
+This library is designed with predictability in mind. Startup and shutdown sequences are clean and observable. Handlers are just async functions. And whether you’re running a threaded Flask app or an aiohttp webhook server, it plugs in without drama. 
+
+More about this topic in the [Runners](#runners) section.
+
+## Overview
 * [Installation](#installation)
 * [Quick Start](#quick-start)
 * [Automatic file processing](#automatic-file-processing)
 * [Expandability](#expandability)
 * [Tasks](#tasks)
 * [Events](#events)
+* [Runners](#runners)
 * [Flexible Filter Composition System](#flexible-filter-composition-system)
 * [Event Handler Chaining](#event-hanlder-chaining)
 
@@ -61,6 +81,11 @@ set API_TOKEN=token
 ```
 
 ### Installation
+
+> ⚠️ **Note:** *This project and it's documentation are still work in progress!*  
+> * *I don't recommed to use it until it is released on PyPI!*
+> * *A production ready release will follow soon.*
+> * *This documentation will be improved over time.*
 
 Since there is no PyPI release at the moment, you have to install it from source using `pip` & `git`.
 ```sh
@@ -239,6 +264,10 @@ bot.start_polling()
 *Details will be added later*
 
 ## Events
+
+*Details will be added later*
+
+## Runners
 
 *Details will be added later*
 
