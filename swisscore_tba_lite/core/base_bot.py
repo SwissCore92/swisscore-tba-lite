@@ -97,22 +97,30 @@ def api_method_wrapper(
     
     **Ussage:**
     ```python
+
+    class Message:
+        def __init__(self, message_id, ...):
+            ...
     
     class Bot(BaseBot):
-        @api_method_wrapper()
-        def send_message(self, chat_id, text, ...):
-            \"""No Code needed, the decorator handles the request\"""
+        @api_method_wrapper(convert_func=lambda d: Message(**d))
+        def send_message(self, chat_id: int | str, text: str, ...):
+            \"""
+            Just add the doc sting.  
+            No Code needed, the decorator handles the request
+            \"""
         
-        @api_method_wrapper(check_input_files=["photo"])
-        def send_photo(self, chat_id, photo, ...):
-            \"""No Code needed, the decorator handles the request\"""
+        @api_method_wrapper(check_input_files=["photo"], convert_func=lambda d: Message(**d))
+        def send_photo(self, chat_id: int | str, photo: str | Path | bytes, ...):
+            \"""
+            Just add the doc sting.  
+            No Code needed, the decorator handles the request
+            \"""
         
         ...
     ```
     """
-    
     def wrapper(func):
-        
         method_name = name or utils.snake_to_camel(func.__name__)
 
         def inner(*args, **kwargs):
@@ -133,7 +141,6 @@ def api_method_wrapper(
             )
             
         return inner
-    
     return wrapper
 
 # helper function
@@ -191,6 +198,7 @@ def serialize_params(params: JsonDict) -> JsonDict:
             "Did you forgot to set 'check_input_files' / 'check_input_media'? {e}"
         ) from e
 
+# core function, but no need to expose
 async def run_builtin_event(bot: "BaseBot", event_name: str, *args):
     try:
         await bot.event._trigger_event(event_name, *args)
@@ -313,6 +321,13 @@ class BaseBot:
         Stores currently running tasks to protect them from beeing collected by the garbage collector.  
         
         **Is used internally to manage tasks**
+        """
+
+        self._is_ready: bool = False
+        """
+        Is True when polling (or listening in webhook mode) begins but after 'startup' event
+
+        **Is used internally to check if the bot is fully started**
         """
 
     #region tasks
@@ -592,7 +607,10 @@ class BaseBot:
     
     #region polling
     
-    def start_polling(self, drop_pending_updates: bool = False) -> None:
+    def start_polling(
+        self, 
+        drop_pending_updates: bool = False
+    ) -> None:
         """
         Start the bot in [long polling](https://en.wikipedia.org/wiki/Push_technology#Long_polling) mode.  
         
@@ -603,23 +621,22 @@ class BaseBot:
         * *`limit`* can be set using `bot.update_limit = <limit>` (defaults to `None` which is 100)
         * *`timeout`* can be set using `bot.polling_timeout = <timeout>` (defaults to 20)
         * *`allowed_updates`* are automatically set, based on your event handlers
-        
-        Is just a shortcut for
+
+        Shorthand for:
         ```python
-        asyncio.run(bot._polling_main_loop())
+        asyncio.run(bot._polling_loop())
         ```
         
         """
         logger.debug("Start async event loop")
-        
-        asyncio.run(self._polling_main_loop(drop_pending_updates))
-        
+
+        asyncio.run(self._polling_loop(drop_pending_updates))
+
         logger.debug("Closed async event loop")
-    
-    
-    async def _polling_main_loop(self, drop_pending_updates: bool = False) -> None:
+
+    async def _polling_loop(self, drop_pending_updates: bool = False) -> None:
         """
-        Iterates over incoming updates and triggers the matching event handlers.  
+        Wait for incoming updates and trigger the matching event handlers.  
         
         To start polling use 
         ```python
@@ -627,21 +644,8 @@ class BaseBot:
         ```
         > *or*
         ```python
-        asyncio.run(bot._polling_main_loop())
+        asyncio.run(bot._polling_loop())
         ```
-        """
-        async for update in self._get_future_updates(drop_pending_updates):
-            await self._process_update(update)
-
-    
-    async def _get_future_updates(
-        self,
-        drop_pending_updates: bool = False
-    ) -> t.AsyncGenerator[JsonDict, None]:
-        """
-        Generator that asks repeatedly for new updates and yields them one by one.  
-        
-        **Is used internally**
         """
         exit_code: int = 0
         
@@ -668,13 +672,15 @@ class BaseBot:
             logger.info(f"Start Bot in long polling mode. Press {utils.kb_interrupt()} to quit.")
             
             logger.debug(f"Allowed updates: {params["allowed_updates"]}")
+
+            self._is_ready = True
             
             while True:
                 try: 
                     if updates := await self.__call__("getUpdates", params=params, auto_prepare=False, catch_errors=False):
                         logger.debug(f"Received {len(updates)} new update(s).")
                         for update in updates:
-                            yield update
+                            await self._process_update(update)
                             params["offset"] = update["update_id"] + 1
                         
                         
@@ -683,6 +689,10 @@ class BaseBot:
                             exit_code = exit_codes.RESTART
                             logger.info(f"RestartBotException raised. Shutting down with {exit_code=}.")
                             break
+                        
+                        elif getattr(self, "shutdown_flag", False):
+                            logger.info(f"Shutdown raised. Shutting down with {exit_code=}.")
+
 
                 except exceptions.MaxRetriesExeededError as e:
                     logger.error(f"Failed to get updates. Check your Internet Connection. Retrying in 60 seconds...")
@@ -691,7 +701,7 @@ class BaseBot:
                 
                 except asyncio.CancelledError:
                     exit_code = exit_codes.TERMITATED_BY_USER
-                    logger.info(f"{utils.kb_interrupt()} pressed. Shutting down with {exit_code=}.")
+                    logger.info(f"Shutting down with {exit_code=}.")
                     break
                 
                 except exceptions.TelegramAPIError as e:
