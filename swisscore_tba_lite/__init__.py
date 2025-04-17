@@ -11,3 +11,4 @@ Main focus on core functionality without all the bloat. Just *dictionaries*.
 from .core.base_bot import BaseBot as Bot
 from .core.logger import logger
 from .core.exceptions import RestartBotException
+from .core.runners import ThreadedRunner, AsyncRunner
