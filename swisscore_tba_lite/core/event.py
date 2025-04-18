@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import typing as t
 from inspect import iscoroutinefunction
 from copy import deepcopy
@@ -64,6 +65,7 @@ class EventManager:
     def __init__(self):
         self.__startup_handler: EventHandler = None
         self.__shutdown_handler: EventHandler = None
+        self.__temporary_handlers: dict[str, list[TemporaryEventHandler]] = {}
         self.__update_handlers: dict[str, list[EventHandler]] = dict((k, []) for k in TELEGRAM_EVENT_TYPES)
     
     def _get_handled_event_types(self) -> list[str]:
@@ -88,6 +90,28 @@ class EventManager:
             
             case _:
                 obj: dict = args[0]
+
+                # check temporary handlers first
+                if event_name in self.__temporary_handlers:
+                    hanlded_tmp_event: TemporaryEventHandler | None = None
+                    for tmp_handler in self.__temporary_handlers[event_name]:
+                        if handler := await tmp_handler.matches(obj):
+                            result = await handler(obj) if handler._arg_count == 1 else await handler(obj, tmp_handler.context)
+                            if result is EventManager.UNHANDLED:
+                                # event handler returned that it is unhandled
+                                return
+                            else:
+                                # event handler returned nothing, so it is considered handled
+                                hanlded_tmp_event = tmp_handler
+                            break
+                    if hanlded_tmp_event:
+                        # remove temporay event
+                        self.__temporary_handlers[event_name].remove(hanlded_tmp_event)
+                        logger.debug(f"Removed {(repr(hanlded_tmp_event))}")
+                        if len(self.__temporary_handlers[event_name]) == 0:
+                            self.__temporary_handlers.pop(event_name)
+                        return
+
                 if handlers := self.__update_handlers.get(event_name):
                     for handler in handlers:
                         if await handler.matches(deepcopy(obj)):
@@ -205,6 +229,73 @@ class EventManager:
             return func
         
         return register
+    
+    def wait_for(
+            self, event_name: str, 
+            handlers: list[tuple[t.Callable[[dict[str, t.Any]], None | UnhandledEventType], list[t.Callable[[dict[str, t.Any]], bool]]]], 
+            *,
+            context: t.Any | None = None
+        ) -> None:
+        """
+        create a temporary event listener.
+
+        Example usage:
+        ```python
+        # mimic the @BotFather /add_bot_pic command
+
+        async def cancel_current_action(msg: dict[str], context):
+            bot("sendMessage", {
+                "chat_id": msg["chat"]["id"],
+                "text": f"Ok, {context} was canceled!"
+            })
+        
+        async def set_pic(msg: dict[str]):
+            if msg.get("photo"):
+                ... # do semething with the photo
+
+                bot("sendMessage", {
+                    "chat_id": msg["chat"]["id"],
+                    "text": "Ok, the bot pic was updated."
+                })
+                return
+
+            if msg.get("document"):
+                bot("sendMessage", {
+                    "chat_id": msg["chat"]["id"],
+                    "text": "Send a photo please. Not a file."
+                })
+                return bot.event.UNHANDLED
+            
+            bot("sendMessage", {
+                "chat_id": msg["chat"]["id"],
+                "text": "I told you to send a <b>picture</b>! Not some other nonesense."
+                "parse_mode": "HTML"
+            })
+            return bot.event.UNHANDLED
+
+        @bot.event("message", filters=[chat_types("private"), commands("set_bot_pic")])
+        async def on_set_bot_pic_cmd(msg: dict[str]):
+            bot("sendMessage", {
+                "chat_id": msg["chat"]["id"],
+                "text": "Ok, please send me the new picture for your bot."
+            })
+            is_valid_user = and_(chat_ids(msg["chat"]["id"]), from_users(msg["from"]["id"]))
+            bot.event.wait_for("message", [
+                (cancel_current_action, [is_valid_user, commands("cancel")]),
+                (try_set_pic, [is_valid_user]),
+            ], context="set_bot_pic")
+        ```
+
+        """
+        if event_name not in TELEGRAM_EVENT_TYPES:
+            raise KeyError(f"'{event_name}' is an invalid event_name")
+        
+        if not event_name in self.__temporary_handlers:
+            self.__temporary_handlers[event_name] = []
+        
+        handler = TemporaryEventHandler(event_name, [EventHandler(event_name, x[0], x[1]) for x in handlers], context=context)
+        self.__temporary_handlers[event_name].append(handler)
+        logger.debug(f"Added {(repr(handler))}")
 
 
 class EventHandler:
@@ -217,6 +308,7 @@ class EventHandler:
         self.type = type
         self.func = func
         self.filters = filters
+        self._arg_count = func.__code__.co_argcount
         
         if self.filters:
             for f in filters:
@@ -258,3 +350,25 @@ class EventHandler:
                 f"Error in {repr(self)} filter evaluation. Error: {e}"
             ) from e
 
+class TemporaryEventHandler:
+    def __init__(self, type: str, handlers: list[EventHandler], context: t.Any | None = None):
+        self.type = type
+
+        for h in handlers:
+            if h._arg_count > 2:
+                raise TypeError(f"The temporary {repr(h)} must accept 1 or 2 arguments.")
+
+        self.handlers = handlers
+        self.context = context
+
+    async def matches(self, update_obj: dict[str, t.Any]) -> EventHandler | None:
+        for i, handler in enumerate(self.handlers):
+            if await handler.matches(update_obj):
+                return handler
+    
+    def __str__(self):
+        return f"{self.__class__.__name__}({self.type=})"
+    
+    def __repr__(self):
+        handlers = [f"{h.func.__module__}.{h.__name__}@line={h.func.__code__.co_firstlineno}" for h in self.handlers]
+        return f"{self.__class__.__name__}(type={self.type}, context={self.context}, handlers={handlers})"
