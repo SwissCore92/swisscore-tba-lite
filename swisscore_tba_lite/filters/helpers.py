@@ -5,7 +5,7 @@ JsonDict = dict[str, t.Any]
 
 def false_on_key_error(func):
     """
-    This is a decorator that returns false if a `KeyError` is raised during filter evaluation.  
+    This is a helper decorator that returns false if a `KeyError` is raised during filter evaluation.  
     
     Can be used for both regular and coroutine functions.
     
