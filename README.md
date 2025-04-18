@@ -1,5 +1,19 @@
 # **SwissCore TBA Lite**
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)  
+
+A minimal, async-native Telegram Bot API library — built for developers who want power without the clutter.
+
+## Table of contents
+* [Philosophy](#philosophy)
+* [Installation](#installation)
+* [Quick Start](#quick-start)
+* [Automatic file processing](#automatic-file-processing)
+* [Expandability](#expandability)
+* [Tasks](#tasks)
+* [Events](#events)
+* [Filters](#filters)
+* [Event Handler Chaining](#event-hanlder-chaining)
+* [Runners](#runners)
   
 ## Philosophy
 *swisscore-tba-lite* is built on a simple idea: **a Telegram bot library shouldn't get in your way.**
@@ -18,7 +32,9 @@ bot("sendMessage", {
 })
 ```
 
-That’s it. One unified entrypoint. *Await it* or *forget it*. **It's your decision**. But more about this topic in the [Tasks](#tasks) section.
+That’s it. One unified entrypoint. *Await it* or *forget it*. **It's your decision**. 
+
+More about this topic in the [Tasks](#tasks) section.
 
 ### Always Up-to-Date with *Telegram Bot API*
 One of the biggest frustrations with traditional libraries is lag — you find a new feature in the [*Telegram Bot API docs*](https://core.telegram.org/bots/api), but your library doesn’t support it yet. With *swisscore-tba-lite*, that's a thing of the past.  
@@ -44,26 +60,13 @@ Want to check if a message is from a specific chat type, starts with a certain c
 
 More about this topic in the [Filtes](#filters) section.
 
-### Clear and reasonable logs with privacy in mind
-swisscore_tba_lite comes with a builtin *colored (optional. requires colorama)* logger.
+### Clear, helpful logs with privacy in mind
+*swisscore_tba_lite* includes a built-in logger with optional color support (via *colorama*) to keep your terminal output clean and readable.
 
-Logs are clear and reasonable and with privacy in mind. Sensitive data like *tokens* or *payload contents* are **never** logged.  
-
-
-## Overview
-* [Installation](#installation)
-* [Quick Start](#quick-start)
-* [Automatic file processing](#automatic-file-processing)
-* [Expandability](#expandability)
-* [Tasks](#tasks)
-* [Events](#events)
-* [Filters](#filters)
-* [Event Handler Chaining](#event-hanlder-chaining)
-* [Runners](#runners)
+It gives you full visibility into what's happening under the hood, without exposing sensitive info. API tokens, file contents, local file paths and payloads are never logged. You always stay informed, without compromising user privacy.
 
 ## Installation
-> ⚠️ **Note:** *This project is still work in progress and the core behaviour may change in developement!*  
-> * *I don't recommed to use it until it is released on PyPI!*
+> ⚠️ **Note:** *This library is in early development and not yet production-ready.*  
 > * *A production ready release will follow as soon as possible.*
 > * *The documentation will be improved over time.*
 
@@ -272,9 +275,18 @@ bot.start_polling()
 *Details will be added later*
 
 ## Events
-*Details will be added later*
+The event system in *swisscore-tba-lite* is built to let you express logic naturally — no boilerplate, no acrobatics. You register event handlers using `@bot.event(...)`, with optional filters to fine-tune what should trigger them. 
+
+Filters can be stacked, combined with logic helpers like any_() or and_(), and reused — making your bot code both clean and expressive. 
+
+Handlers run in order, and if one returns bot.event.UNHANDLED, the next matching handler gets a shot — great for small, focused functions without stepping on each other’s toes. For more dynamic flows, like multi-step interactions or temporary commands, `bot.event.wait_for(...)` lets you define one-off handlers with optional filters and even attach a custom context — ideal for implementing things like confirmation prompts or user-specific flows. It’s flexible, predictable, and built for real-world use.
+
+*More Details will be added later*
 
 ## Filters
+*Details will be added later*
+
+## Temporary Events
 *Details will be added later*
 
 ## Event Handler Chaining
