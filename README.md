@@ -30,10 +30,25 @@ At its core, *swisscore-tba-lite* is lean and async-native. You only get the ess
 
 But if you want more? Build it on top. This is your foundation — not your cage.
 
+More about this topic in the [Expandability](#expandability) section.
+
 ### Built for reliability and control
 This library is designed with predictability in mind. Startup and shutdown sequences are clean and observable. Handlers are just async functions. And whether you’re running a threaded Flask app or an aiohttp webhook server, it plugs in without drama. 
 
 More about this topic in the [Runners](#runners) section.
+
+### Filters that feel like writing logic, not wrangling syntax
+In *swisscore-tba-lite*, filtering updates is as natural as thinking in conditions. No black box magic, no custom DSLs, no endless nesting of objects. Just simple, readable functions that behave exactly like you'd expect. 
+
+Want to check if a message is from a specific chat type, starts with a certain command, or is replying to a photo? It's as easy as calling `chat_types("supergroup")`, `commands("start")`, or `sub_keys("reply_to_message", "photo")`. You can even build complex logic using composition helpers like `any_()`, `all_()`, `not_()`, or `none_()` — pure Python, clean and powerful. The filter system is built to feel intuitive, flexible, and extendable. It's designed for developers who think in logic, not in libraries.
+
+More about this topic in the [Filtes](#filters) section.
+
+### Clear and reasonable logs with privacy in mind
+swisscore_tba_lite comes with a builtin *colored (optional. requires colorama)* logger.
+
+Logs are clear and reasonable and with privacy in mind. Sensitive data like *tokens* or *payload contents* are **never** logged.  
+
 
 ## Overview
 * [Installation](#installation)
@@ -42,16 +57,17 @@ More about this topic in the [Runners](#runners) section.
 * [Expandability](#expandability)
 * [Tasks](#tasks)
 * [Events](#events)
-* [Runners](#runners)
-* [Flexible Filter Composition System](#flexible-filter-composition-system)
+* [Filters](#filters)
 * [Event Handler Chaining](#event-hanlder-chaining)
-
+* [Runners](#runners)
 
 ## Installation
+> ⚠️ **Note:** *This project is still work in progress and the core behaviour may change in developement!*  
+> * *I don't recommed to use it until it is released on PyPI!*
+> * *A production ready release will follow as soon as possible.*
+> * *The documentation will be improved over time.*
 
-*Requires Python 3.11+*
-
-### Create and activate a virtual Environment
+<!-- ### Create and activate a virtual Environment
 While this is optional, it's highly recommended to use a virtual environment to avoid conflicts with other Python projects.  
 It's also a save place to store your Telegram Bot API token.
 
@@ -78,16 +94,13 @@ export API_TOKEN=token
 
 # Windows
 set API_TOKEN=token        
-```
+``` -->
 
 ### Installation
-
-> ⚠️ **Note:** *This project and it's documentation are still work in progress!*  
-> * *I don't recommed to use it until it is released on PyPI!*
-> * *A production ready release will follow soon.*
-> * *This documentation will be improved over time.*
+*Requires Python 3.11+*
 
 Since there is no PyPI release at the moment, you have to install it from source using `pip` & `git`.
+
 ```sh
 pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
 ```
@@ -101,9 +114,7 @@ pip install -e .
 ```
 *Note: On Linux/MacOS you may have to use `pip3`*.
 
-
 ## Quick Start
-
 ```python
 import os 
 
@@ -170,7 +181,6 @@ bot.start_polling()
 ```
 
 ## Automatic file processing
-
 Simple things like file processing are done automatically by the bot. Eg. `InputFile` and the `media` field of `InputMedia` can just be a `str` representing a Path, a `pathlib.Path` or just `bytes`. The bot will process this automatically if the `check_input_files` or `check_input_media` are set properly.
 
 Eg.
@@ -216,7 +226,6 @@ async def on_document_message(msg: dict[str]):
 ```
 
 ## Expandability
-
 Since this library comes without the bloat and is made for users very familiar to the Telegram Bot API, this is not a very userfriendly bot.  
 
 It's very easy to make a user friendlier bot, using this bot as base.
@@ -234,9 +243,9 @@ class Message:
 class Bot(BaseBot):
     @api_method_wrapper(
         check_input_files=["photo"], 
-        convert_func=lambda m: m if m is True else Message(**m)
+        convert_func=lambda m: Message(**m)
     )
-    def send_photo(chat_id: int, photo: str | Path | bytes, ...) -> Message | Literal[True]:
+    def send_photo(chat_id: int, photo: str | Path | bytes, ...):
         """
         No code required. the decorator handles the request.
         The method name is automatically converted to camel case.
@@ -260,27 +269,18 @@ bot.start_polling()
 ```
 
 ## Tasks
-
 *Details will be added later*
 
 ## Events
-
 *Details will be added later*
 
-## Runners
-
-*Details will be added later*
-
-## Flexible Filter Composition System
-
+## Filters
 *Details will be added later*
 
 ## Event Handler Chaining
-
 It's possible to chain event handlers without manual re-dispatching logic by just using `return bot.event.UNHANDLED` in an event handler.
 
 ### Why is this great?
-
 * **Graceful fallbacks:** You can write a series of specific handlers followed by a general catch-all without filter spaghetti.
 * **More expressive filters:** You can "fail" a match manually even if the filters pass, which is great for edge cases (like optional preconditions).
 
@@ -300,5 +300,8 @@ async def handle_pdf(msg):
 async def handle_file(msg):
     ... # Handle any other kind of document with a mime_type
 ```
+
+## Runners
+*Details will be added later*
 
 
