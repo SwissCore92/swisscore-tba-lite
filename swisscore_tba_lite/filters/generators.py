@@ -131,7 +131,7 @@ def chat_types(*chat_types: t.Literal["private", "group", "supergroup", "channel
         return chat_type in chat_types
     return f
 
-def from_users(*user_ids: int):
+def from_ids(*user_ids: int):
     """
     Generates a filter that checks for matching `user_ids`.  
     

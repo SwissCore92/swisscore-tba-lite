@@ -10,7 +10,7 @@ from .generators import text_startswith
 from .generators import commands
 from .generators import chat_ids
 from .generators import chat_types
-from .generators import from_users
+from .generators import from_ids
 from .generators import callback_data
 from .generators import callback_data_startswith
 

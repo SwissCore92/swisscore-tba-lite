@@ -1,4 +1,3 @@
-
 from . import generators
 
 is_text = generators.any_keys("text")
