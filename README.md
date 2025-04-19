@@ -322,7 +322,7 @@ The event type is derived from the update content — for example, an update wit
 
 You register event handlers using `@bot.event("<event_type>")`, with optional [filters](#filters) to narrow down when the handler should trigger.
 
-The event's object is passed to your handler as a `dict`.
+The event's object (eg.a `message`) is passed to your handler as a `dict`.
 
 Important:
 * Handlers **must** be async functions.
