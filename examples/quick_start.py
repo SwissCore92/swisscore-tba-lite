@@ -63,4 +63,6 @@ async def on_shutdown(exit_code: int):
             "text": "Bye, I was just shut down!"
         })
 
+# Start the bot in long polling mode
+# This starts an async event loop and blocks the code.
 bot.start_polling()
