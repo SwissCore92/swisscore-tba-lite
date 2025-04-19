@@ -50,7 +50,7 @@ But if you want more? Build it on top. This is your foundation — not your cage
 *See [Expandability](#expandability) for more info.*
 
 ### Built for reliability and control
-This library is designed with predictability in mind. Startup and shutdown sequences are clean and observable. Handlers are just async functions. And whether you’re running a threaded Flask app or an aiohttp webhook server, it plugs in without drama. 
+This library is designed with predictability in mind. Startup and shutdown sequences are clean and observable. Handlers are just async functions. And whether you’re running your bot in sync application like flask or an async application like an aiohttp web app, it plugs in without drama. 
 
 *See [Runners](#runners) for more info.*
 
