@@ -210,7 +210,6 @@ async def run_builtin_event(bot: "BaseBot", event_name: str, *args):
     except (exceptions.FilterEvaluationError, exceptions.EventHandlerError) as e:
         logger.error(f"Error in '{event_name}' event handler. ({e})", exc_info=True)
 
-
 class BaseBot:
     """
     ## The Base Telegram Bot.  
@@ -302,7 +301,7 @@ class BaseBot:
         
         self.default_timeout: int = 30
         """
-        Default timeout to use if not provided.
+        Default timeout to use for requests (if not provided in __call__).
         """
         
         self.max_timeout: int = 60
@@ -515,7 +514,7 @@ class BaseBot:
                 try:
                     async with self.session.post(
                         url, 
-                        params=params, 
+                        json=params, 
                         data=data, 
                         timeout=timeout,
                     ) as r:
@@ -579,7 +578,7 @@ class BaseBot:
             raise exceptions.MaxRetriesExeededError(f"'{method_name}' Max retries exceeded. Request failed.")
         
         return self._create_task(request(), name=method_name)
-    
+
     async def _process_update(self, update: JsonDict) -> None:
         try:
             update_id = update["update_id"]
@@ -661,7 +660,6 @@ class BaseBot:
 
         async with aiohttp.ClientSession() as session:
             self.session = session
-
             if drop_pending_updates:
                 if updates := await self.__call__("getUpdates", params={"offset": -1}, auto_prepare=False):
                     logger.debug("Dropped pending updates.")
@@ -670,7 +668,6 @@ class BaseBot:
             await run_builtin_event(self, "startup")
             
             logger.info(f"Start Bot in long polling mode. Press {utils.kb_interrupt()} to quit.")
-            
             logger.debug(f"Allowed updates: {params["allowed_updates"]}")
 
             self._is_ready = True
@@ -679,10 +676,10 @@ class BaseBot:
                 try: 
                     if updates := await self.__call__("getUpdates", params=params, auto_prepare=False, catch_errors=False):
                         logger.debug(f"Received {len(updates)} new update(s).")
+
                         for update in updates:
                             await self._process_update(update)
                             params["offset"] = update["update_id"] + 1
-                        
                         
                         if getattr(self, "restart_flag", False):
                             await self.__call__("getUpdates", {"offset": params["offset"], "timeout": 0})
@@ -692,7 +689,6 @@ class BaseBot:
                         
                         elif getattr(self, "shutdown_flag", False):
                             logger.info(f"Shutdown raised. Shutting down with {exit_code=}.")
-
 
                 except exceptions.MaxRetriesExeededError as e:
                     logger.error(f"Failed to get updates. Check your Internet Connection. Retrying in 60 seconds...")
