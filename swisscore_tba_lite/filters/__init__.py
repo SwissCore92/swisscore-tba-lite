@@ -13,6 +13,7 @@ from .generators import chat_types
 from .generators import from_ids
 from .generators import callback_data
 from .generators import callback_data_startswith
+from .generators import max_age
 
 from .composition import not_
 from .composition import any_

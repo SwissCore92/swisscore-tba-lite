@@ -1,5 +1,7 @@
 import re
+import time
 import typing as t
+from datetime import timedelta
 
 from .helpers import JsonDict, false_on_key_error
 from .composition import any_, all_
@@ -171,3 +173,17 @@ def callback_data_startswith(*substrings: str):
         return any(cb_data.startswith(s) for s in substrings)
     return f
 
+def max_age(limit: float | int | timedelta):
+    """
+    Generates a filter that checks if the age of hasn't exeeded the provided `limit` (in seconds). 
+
+    *Note: Only use this if the object **has** a `date` field.* **It will *always* return `False` if this field is missing.**
+    
+    The filter returns `True` if `time.time() - obj.get("date", 0) <= limit`
+    """
+    if isinstance(limit, timedelta):
+        limit = limit.seconds
+    
+    def f(obj: JsonDict):
+        return time.time() - obj.get("date", 0) <= limit
+    return f
