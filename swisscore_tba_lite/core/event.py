@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 import typing as t
 from inspect import iscoroutinefunction
 from copy import deepcopy
@@ -34,7 +33,8 @@ TELEGRAM_EVENT_TYPES: frozenset[str] = frozenset({
     "removed_chat_boost",
 })
 
-
+def func_info(f: t.Callable) -> str:
+    return f"{f.__module__}.{f.__name__}@line={f.__code__.co_firstlineno}"
 
 class EventManager:
     UNHANDLED = UnhandledEventType
@@ -214,8 +214,13 @@ class EventManager:
                     if event_name not in TELEGRAM_EVENT_TYPES:
                         raise KeyError(f"'{event_name}' is an invalid event_name")
 
-                    exceptions.raise_for_non_matching_arg_count(func, 1)
-                    
+                    if func.__code__.co_argcount == 2:
+                        # this event handler is likely used as tmp handler too
+                        if not func.__defaults__:
+                            raise TypeError(f"The second argument of {func_info(func)} `{func.__code__.co_varnames[1]}` must have a default value.")
+                    elif func.__code__.co_argcount != 1:
+                        raise TypeError(f"The event handler {func_info(func)} must accept exactly 1 or 2 arguments.")
+
                     handler = EventHandler(event_name, func, filters)
                     self.__update_handlers[event_name].append(handler)
                     
@@ -320,7 +325,7 @@ class EventHandler:
         return self.__name__
     
     def __repr__(self):
-        return f"{self.__class__.__name__}(type='{self.type}', func={self.func.__module__}.{self.__name__}@line={self.func.__code__.co_firstlineno})"
+        return f"{self.__class__.__name__}(type='{self.type}', func={func_info(self.func)})"
     
     async def __call__(self, *args, **kwargs) -> t.Awaitable[t.Any | UnhandledEventType]:
         try:
@@ -356,7 +361,7 @@ class TemporaryEventHandler:
 
         for h in handlers:
             if h._arg_count > 2:
-                raise TypeError(f"The temporary {repr(h)} must accept 1 or 2 arguments.")
+                raise TypeError(f"The temporary event handler {func_info(h.func)} must accept exactly 1 or 2 arguments.")
 
         self.handlers = handlers
         self.context = context
@@ -370,5 +375,5 @@ class TemporaryEventHandler:
         return f"{self.__class__.__name__}({self.type=})"
     
     def __repr__(self):
-        handlers = [f"{h.func.__module__}.{h.__name__}@line={h.func.__code__.co_firstlineno}" for h in self.handlers]
+        handlers = [func_info(h.func) for h in self.handlers]
         return f"{self.__class__.__name__}(type={self.type}, context={self.context}, handlers={handlers})"
