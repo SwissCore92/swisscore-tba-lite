@@ -1,7 +1,7 @@
 # **SwissCore TBA Lite**
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)  
 
-A minimal, async-native Telegram Bot API library — built for developers who want power without the clutter.
+A minimal, async-native **Telegram Bot API** library — built for developers who want power without the clutter.
 
 ## Table of contents
 * [Philosophy](#philosophy)
@@ -35,7 +35,7 @@ bot("sendMessage", {
 
 That’s it. One unified entrypoint. *Await it* or *forget it*. **It's your decision**. 
 
-See [Tasks](#tasks) for more info.
+*See [Tasks](#tasks) for more info.*
 
 ### Always Up-to-Date with *Telegram Bot API*
 One of the biggest frustrations with traditional libraries is lag — you find a new feature in the [*Telegram Bot API docs*](https://core.telegram.org/bots/api), but your library doesn’t support it yet. With *swisscore-tba-lite*, that's a thing of the past.  
@@ -47,19 +47,19 @@ At its core, *swisscore-tba-lite* is lean and async-native. You only get the ess
 
 But if you want more? Build it on top. This is your foundation — not your cage.
 
-See [Expandability](#expandability) for more info.
+*See [Expandability](#expandability) for more info.*
 
 ### Built for reliability and control
 This library is designed with predictability in mind. Startup and shutdown sequences are clean and observable. Handlers are just async functions. And whether you’re running a threaded Flask app or an aiohttp webhook server, it plugs in without drama. 
 
-See [Runners](#runners) for more info.
+*See [Runners](#runners) for more info.*
 
 ### Filters that feel like writing logic, not wrangling syntax
 In *swisscore-tba-lite*, filtering updates is as natural as thinking in conditions. No black box magic, no custom DSLs, no endless nesting of objects. Just simple, readable functions that behave exactly like you'd expect. 
 
 Want to check if a message is from a specific chat type, starts with a certain command, or is replying to a photo? It's as easy as calling `chat_types("supergroup")`, `commands("start")`, or `sub_keys("reply_to_message", "photo")`. You can even build complex logic using composition helpers like `any_()`, `all_()`, `not_()`, or `none_()` — pure Python, clean and powerful. The filter system is built to feel intuitive, flexible, and extendable. It's designed for developers who think in logic, not in libraries.
 
-See [Filtes](#filters) for more info.
+*See [Filtes](#filters) for more info.*
 
 ### Clear, helpful logs with privacy in mind
 *swisscore_tba_lite* includes a built-in logger with optional color support (via *colorama*) to keep your terminal output clean and readable.
@@ -67,40 +67,10 @@ See [Filtes](#filters) for more info.
 It gives you full visibility into what's happening under the hood, without exposing sensitive info. API tokens, file contents, local file paths and payloads are never logged. You always stay informed, without compromising user privacy.
 
 ## Installation
-> ⚠️ **Note:** *This library is in early development and not yet production-ready.*  
+> ⚠️ **Note:** *This library is in heavy development and not yet production-ready.*  
 > * *A production ready release will follow as soon as possible.*
 > * *The documentation will be improved over time.*
 
-<!-- ### Create and activate a virtual Environment
-While this is optional, it's highly recommended to use a virtual environment to avoid conflicts with other Python projects.  
-It's also a save place to store your Telegram Bot API token.
-
-Open a Terminal in a work directory of your choice.
-
-```sh
-# Create venv
-python -m venv .venv
-
-# Activate venv (Linux/macOS)
-source .venv/bin/activate
-
-# Activate venv (Windows)
-.venv\Scripts\activate
-```
-> 💡 Remember to activate the virtual environment every time you work on your bot or on the project itself.
-
-Set your Bot API token in an environment variable.
-The token looks something like `123456:ABC-DEF1234ghIkl_zyx57W2v1u123ew11` but we use `token` in this example.
-
-```sh
-# Linux/macOS
-export API_TOKEN=token
-
-# Windows
-set API_TOKEN=token        
-``` -->
-
-### Installation
 *Requires Python 3.11+*
 
 *It's recommended to use a virtual environment*
@@ -357,8 +327,8 @@ The event's object is passed to your handler as a `dict`.
 Important:
 * Handlers **must** be async functions.
 * Handlers run in the order they were registered.
-* If a handler is called, the event is considered handled and will not propagate to other handlers — unless you return `bot.event.UNHANDLED`. See [Event Handler Chaining](#event-handler-chaining) for more info.
-* Temporary event handlers can be registered at runtime. See [Temporary Events](#temporary-events) for more info.
+* If a handler is called, the event is considered handled and will not propagate to other handlers — unless you return `bot.event.UNHANDLED`. *See [Event Handler Chaining](#event-handler-chaining) for more info.*
+* Temporary event handlers can be registered at runtime. *See [Temporary Events](#temporary-events) for more info.*
 
 <details>
 <summary>Example</summary>
