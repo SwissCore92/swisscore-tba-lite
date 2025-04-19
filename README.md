@@ -473,7 +473,9 @@ It's possible to chain event handlers without manual re-dispatching logic by jus
 * **Graceful fallbacks:** You can write a series of specific handlers followed by a general catch-all without filter spaghetti.
 * **More expressive filters:** You can "fail" a match manually even if the filters pass, which is great for edge cases (like optional preconditions).
 
-Example Usage:
+<details>
+<summary>Example</summary>
+
 ```python
 
 from swisscore_tba_lite.filters import sub_keys
@@ -489,6 +491,8 @@ async def handle_pdf(msg):
 async def handle_file(msg):
     ... # Handle any other kind of document with a mime_type
 ```
+
+</details>
 
 ## Temporary Events
 *Details will be added later*
