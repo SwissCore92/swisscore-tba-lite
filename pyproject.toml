@@ -21,7 +21,7 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["swisscore_tba_lite*"]
-exclude = ["scripts"]
+exclude = ["scripts", "examples"]
 
 [build-system]
 requires = ["setuptools", "wheel"]
