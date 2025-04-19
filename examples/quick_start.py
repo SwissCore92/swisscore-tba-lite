@@ -15,7 +15,6 @@ ADMIN_ID = int(os.environ.get("ADMIN_ID", 1234))
 
 bot = Bot(TOKEN)
 
-
 @bot.event("startup")
 async def on_startup():
     """
@@ -26,7 +25,6 @@ async def on_startup():
         "chat_id": ADMIN_ID, 
         "text": "Hi, I was just started!"
     })
-
 
 @bot.event("message", filters=[chat_types("private"), commands("myid")])
 async def on_cmd_myid(msg: dict[str]):
