@@ -579,7 +579,10 @@ class BaseBot:
         
         return self._create_task(request(), name=method_name)
 
-    async def _process_update(self, update: JsonDict) -> None:
+    async def process_update(self, update: JsonDict) -> None:
+        """
+        Process an Update by triggering the corresponding event handler. 
+        """
         try:
             update_id = update["update_id"]
             update_type = utils.get_update_type(update)
@@ -623,7 +626,7 @@ class BaseBot:
 
         Shorthand for:
         ```python
-        asyncio.run(bot._polling_loop())
+        asyncio.run(bot._polling_loop(...))
         ```
         
         """
@@ -639,11 +642,11 @@ class BaseBot:
         
         To start polling use 
         ```python
-        bot.start_polling()
+        bot.start_polling(...)
         ```
         > *or*
         ```python
-        asyncio.run(bot._polling_loop())
+        asyncio.run(bot._polling_loop(...))
         ```
         """
         exit_code: int = 0
@@ -678,7 +681,7 @@ class BaseBot:
                         logger.debug(f"Received {len(updates)} new update(s).")
 
                         for update in updates:
-                            await self._process_update(update)
+                            await self.process_update(update)
                             params["offset"] = update["update_id"] + 1
                         
                         if getattr(self, "restart_flag", False):
@@ -729,4 +732,68 @@ class BaseBot:
 
     #endregion polling
     
+    def start_idle(self) -> None:
+        """
+        Start the bot in idle mode (for webhooks). 
+        
+        The bot will do nothing but waiting for updates commited to it using `bot.process_update(update)`.    
+
+        Shorthand for:
+        ```python
+        asyncio.run(bot._idle_loop())
+        """
+        logger.debug("Start async event loop")
+
+        asyncio.run(self._idle_loop())
+
+        logger.debug("Closed async event loop")
     
+    async def _idle_loop(self) -> None:
+        """
+        Wait for updates being commited by using `bot.process_update(update)`.  
+        
+        To start idle use 
+        ```python
+        bot.start_idle()
+        ```
+        > *or*
+        ```python
+        asyncio.run(bot._idle_loop())
+        ```
+        """
+        exit_code: int = 0
+        
+        logger.debug("Start client session")
+
+        async with aiohttp.ClientSession() as session:
+            self.session = session
+
+            await run_builtin_event(self, "startup")
+            
+            logger.info(f"Start Bot in idle mode. Press {utils.kb_interrupt()} to quit.")
+
+            self._is_ready = True
+            
+            while True:
+                try: 
+                    # sleep at an inteval of 3600 seconds (1 hour)
+                    await asyncio.sleep(3600)
+                
+                except asyncio.CancelledError:
+                    exit_code = exit_codes.TERMITATED_BY_USER
+                    logger.info(f"Shutting down with {exit_code=}.")
+                    break
+                
+                except Exception as e:
+                    exit_code = exit_codes.UNEXPECTED_ERROR
+                    logger.critical(f"A critical, unexpected error occured. Shutting down with {exit_code=}.", exc_info=True)
+                    break
+            
+            await run_builtin_event(self, "shutdown", exit_code)
+
+        self.session = None
+        logger.debug("Closed client session")
+        if getattr(self, "restart_flag", False):
+            python = sys.executable
+            subprocess.run([python] + sys.argv)
+            exit()
