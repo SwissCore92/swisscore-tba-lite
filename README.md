@@ -102,18 +102,12 @@ set API_TOKEN=token
 ### Installation
 *Requires Python 3.11+*
 
+*It's recommended to use a virtual environment*
+
 Since there is no PyPI release at the moment, you have to install it from source using `pip` & `git`.
 
 ```sh
 pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
-```
-*Note: On Linux/MacOS you may have to use `pip3`*.
-
-### Editable Install (For Development)
-```sh
-git clone https://github.com/SwissCore92/swisscore-tba-lite.git
-cd swisscore-tba-lite
-pip install -e .
 ```
 *Note: On Linux/MacOS you may have to use `pip3`*.
 
@@ -125,21 +119,17 @@ from swisscore_tba_lite import Bot
 from swisscore_tba_lite.filters import commands, chat_types
 
 # Get your Telegram Bot API Token from @BotFather
-# Set it in an environment variable (API_TOKEN) 
-#   or manually replace <YOUR_API_TOKEN> below
+# Set it in an environment variable (API_TOKEN) or manually replace <YOUR_API_TOKEN> below
 TOKEN = os.environ.get("API_TOKEN", "<YOUR_API_TOKEN>")
 
+# Optional:
 # Get your Telegram user ID
-# (if you don't know it,
-#   you can use the `/myid` command below in private chat with your bot)
-# Set it in an environment variable (ADMIN_ID) 
-#   or manually replace 1234 below
+# (You can use the `/myid` command below in private chat with your bot if you don't know it)
+# Set it in an environment variable (ADMIN_ID) or manually replace 1234 below
 ADMIN_ID = int(os.environ.get("ADMIN_ID", 1234))
 
-# Initialize the bot with your token
 bot = Bot(TOKEN)
 
-# Add a startup handler.
 @bot.event("startup")
 async def on_startup():
     """
@@ -151,7 +141,6 @@ async def on_startup():
         "text": "Hi, I was just started!"
     })
 
-# Add a message handler for private messages with the commamd /myid
 @bot.event("message", filters=[chat_types("private"), commands("myid")])
 async def on_cmd_myid(msg: dict[str]):
     """
@@ -165,7 +154,18 @@ async def on_cmd_myid(msg: dict[str]):
         "parse_mode": "MarkdownV2"
     })
 
-# Add a shutdown handler.
+@bot.event("message", filters=[chat_types("private")])
+async def echo_message(msg: dict[str]):
+    """
+    Runs on any other message in a private chat with the bot.  
+    Sends the same message back to the user.
+    """
+    bot("copyMessage", {
+        "from_chat_id": msg["chat"]["id"],
+        "chat_id": msg["chat"]["id"],
+        "message_id": msg["message_id"]
+    })
+
 @bot.event("shutdown")
 async def on_shutdown(exit_code: int):
     """
@@ -292,7 +292,7 @@ Handlers run in order, and if one returns bot.event.UNHANDLED, the next matching
 ## Event Handler Chaining
 It's possible to chain event handlers without manual re-dispatching logic by just using `return bot.event.UNHANDLED` in an event handler.
 
-### Why is this great?
+***Why is this great?***
 * **Graceful fallbacks:** You can write a series of specific handlers followed by a general catch-all without filter spaghetti.
 * **More expressive filters:** You can "fail" a match manually even if the filters pass, which is great for edge cases (like optional preconditions).
 
