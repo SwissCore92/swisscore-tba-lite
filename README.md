@@ -198,7 +198,6 @@ bot("sendMediaGroup", {
 ```
 
 </details>
-<br>
 
 The built-in `download` method allows you to quickly download files from the telegram server. Just don't forget to fetch the file first using the `getFile` API call.
 
@@ -354,7 +353,7 @@ async def on_supergroup_message(msg: dict):
 Each event handler can use an optional list of filters — functions with the signature `(obj: dict) -> bool`.
 All filters must return truthy values for the event to pass.
 
-Filters can be regular or async functions. You can write your own or use the handy helpers in `swisscore_tba_lite.filters`.
+Filters can be regular or async functions. You can write your own, use `lambda`s or use the handy helpers in `swisscore_tba_lite.filters`.
 
 It includes:
 * Filter generators
@@ -389,7 +388,7 @@ async def on_cmd_settings(msg: dict):
 <summary>Defining your own filters (or generators)</summary>
 
 ```python
-from swisscore-tba-lite.filters import (
+from swisscore_tba_lite.filters import (
     chat_types, 
     commands,
     false_on_key_error
@@ -397,30 +396,52 @@ from swisscore-tba-lite.filters import (
 
 # define a filter generator for easy reuse
 async def has_permission(permission: str):
+    """
+    check if both (performer **and** bot) have the required `permission` to perform a specific action. 
+    """
 
-    # define the actual filter 
+    # define the filter 
     @false_on_key_error
     async def f(msg: dict):
-        # get the list of chat administrators
+
+        # get a list of all chat administrators (excluding other bots)
         admins = await bot("getChatAdministrators", {
             "chat_id": msg["chat"]["id"]
         })
-        for member in admins or []:
-            #check for the user
-            if member["user"]["id"] == msg["from"]["id"]:
-                if member["status"] == "creator":
-                    # creator has all permissions
-                    return True
-                if member[permission]:
-                    # this member has the required permission
-                    return True
-                break
-        # this member is not an admin 
-        # or does not have the required permission
-        return False
+
+        # create an admin dict {user_id: ChatMember}
+        admin_dict = {member["user"]["id"]: member for member in admins}
+
+        # check if the user is an admin
+        if not msg["from"]["id"] in admin_dict:
+            # the user is not an admin
+            return False
+
+        # check if the bot is an admin
+        if not bot.user_id in admin_dict:
+            # the bot is not an admin. 
+            # the action can not be performed by the bot anyway
+            return False
+        
+        # extract the admin from admin dict
+        admin = admin_dict[msg["from"]["id"]]
+        
+        # check if the admin has the required permission ("creator" always has all permissions)
+        if not (admin["status"] == "creator" or admin[permission]):
+            # the admin does not have the required permission 
+            return False
+        
+        # check if the bot has the required permission
+        if not admin_dict[bot.user_id][permission]:
+            # the bot does not have the required permission 
+            return False
+        
+        # both (user and bot) are admins with the required permission :)
+        return True
     
     # return the filter
     return f
+
 
 @bot.event("message", filters=[
     chat_types("supergroup"), 
@@ -428,9 +449,20 @@ async def has_permission(permission: str):
     has_permission("can_restrict_members")
 ])
 async def ban_chat_member(msg: dict):
-    # runs only if the member is a chat administrator
-    # and has the `can_restrict_members` permission
+    # runs only if the performer and the bot are both chat administrators
+    # with the `can_restrict_members` permission.
     bot("banChatMember", {...})
+
+
+@bot.event("message", filters=[
+    chat_types("supergroup"), 
+    commands("promote"), 
+    has_permission("can_promote_members")
+])
+async def promote_chat_member(msg: dict):
+    # runs only if the performer and the bot are both chat administrators
+    # with the `can_promote_members` permission. 
+    bot("promoteChatMember", {...})
 
 ```
 
@@ -445,6 +477,8 @@ It's possible to chain event handlers without manual re-dispatching logic by jus
 
 <details>
 <summary>Example</summary>
+
+But where `bot.event.UNHANDLED` really shines is in [Temporary Events](#temporary-events).
 
 ```python
 
