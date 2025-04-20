@@ -18,6 +18,9 @@ from . import exceptions
 T = t.TypeVar("T")
 JsonDict = dict[str, t.Any]
 
+CLOUD_BOT_API_URL = "https://api.telegram.org"
+CLOUD_BOT_FILE_URL = "https://api.telegram.org/file"
+
 # decorator
 def request_task_wrapper(catch_errors: bool):
     """
@@ -222,8 +225,8 @@ class BaseBot:
         self, 
         token: str, 
         *, 
-        base_api_url: str = "https://api.telegram.org",
-        base_file_url: str = "https://api.telegram.org/file",
+        base_api_url: str = CLOUD_BOT_API_URL,
+        base_file_url: str = CLOUD_BOT_FILE_URL,
         event_manager: EventManager | None = None
     ) -> None:
         """
@@ -255,8 +258,10 @@ class BaseBot:
         self.event = event_manager or EventManager()
         """
         The event manager of the bot.
-        
-        Use this decorator to register events
+
+        See [Events](https://github.com/SwissCore92/swisscore-tba-lite?tab=readme-ov-file#events) 
+        and [Temporary Events](https://github.com/SwissCore92/swisscore-tba-lite?tab=readme-ov-file#temporary-events)
+        for more info.
         """
         
         self.api_url = f"{base_api_url}/bot{token}"
