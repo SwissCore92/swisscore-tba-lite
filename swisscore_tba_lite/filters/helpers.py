@@ -9,7 +9,7 @@ def false_on_key_error(func):
     
     Can be used for both regular and coroutine functions.
     
-    Ussage  
+    Usage: 
     ```python
     @false_on_key_error
     def my_filter(obj):
