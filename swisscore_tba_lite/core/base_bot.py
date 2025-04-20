@@ -244,7 +244,7 @@ class BaseBot:
         Your Bot API token. 
         """
 
-        self.user_id = int(self.token.split(":", 1))[0]
+        self.user_id = int(self.token.split(":", 1)[0])
         """
         The user ID of the bot.
         """
