@@ -3,9 +3,7 @@ import os
 from swisscore_tba_lite import Bot
 from swisscore_tba_lite.filters import commands, chat_types, chat_ids, from_ids, all_
 
-TOKEN = os.environ.get("API_TOKEN", "<YOUR_API_TOKEN>")
-
-bot = Bot(TOKEN)
+bot = Bot(os.environ.get("API_TOKEN", "<YOUR_API_TOKEN>"))
 
 ##########################################
 # Mimic @BotFather's /setuserpic command #
