@@ -21,6 +21,12 @@ JsonDict = dict[str, t.Any]
 CLOUD_BOT_API_URL = "https://api.telegram.org"
 CLOUD_BOT_FILE_URL = "https://api.telegram.org/file"
 
+# use lowercase for method names
+USE_CLOUD_URL = frozenset({"logout"})
+"""
+For methods that always must be dispatched to the cloud telegram bot api
+"""
+
 # decorator
 def request_task_wrapper(catch_errors: bool):
     """
@@ -352,7 +358,6 @@ class BaseBot:
         task.add_done_callback(self._tasks.remove)
         return task
     
-    
     async def _gather_pending_tasks(self):
         """
         Wait for the completion of all spawned tasks.  
@@ -367,6 +372,10 @@ class BaseBot:
     
     #endregion tasks
     
+    #region core
+
+    
+
     def download(
         self, 
         file_obj: JsonDict, 
@@ -513,7 +522,10 @@ class BaseBot:
                 # may raise an InvalidParamsError
                 params = serialize_params(params)
 
-            url = f"{self.api_url}/{method_name}"
+            if method_name.lower() in USE_CLOUD_URL:
+                url = f"{CLOUD_BOT_API_URL}/bot{self.token}/{method_name}"
+            else:
+                url = f"{self.api_url}/{method_name}"
             
             retries = 0
 
@@ -617,6 +629,36 @@ class BaseBot:
         except exceptions.EventHandlerError as e:
             logger.error(f"A event handler processing an update of type '{update_type}' crashed. ({e})", exc_info=True)
     
+    async def log_out(self) -> None:
+        """
+        Use this method to switch to your own Telegram Bot API server.
+
+        Note: Calling "logOut" will always automatically use the cloud API server url (https://api.telegram.org/bot<token>/logOut)
+
+        Example usage:
+        ```python
+        
+        bot = Bot(
+            TOKEN, 
+            base_api_url="http://localhost:8081",
+            base_file_url="http://localhost:8081/file"
+        )
+        
+        @bot.event("startup")
+        async def on_startup():
+            await bot.log_out()
+
+        ```
+
+        """
+        try:
+            await self.__call__("logOut", catch_errors=False)
+            logger.info("Bot was succesfully logged out from the cloud Telegram Bot API server")
+        except exceptions.BadRequest:
+            logger.info("Bot was already logged out from the cloud Telegram Bot API server")
+
+    #endregion core
+
     #region polling
     
     def start_polling(
@@ -742,6 +784,8 @@ class BaseBot:
 
     #endregion polling
     
+    #region idle
+
     def start_idle(self) -> None:
         """
         Start the bot in idle mode (for webhooks). 
@@ -807,3 +851,5 @@ class BaseBot:
             python = sys.executable
             subprocess.run([python] + sys.argv)
             exit()
+
+    #endregion idle
