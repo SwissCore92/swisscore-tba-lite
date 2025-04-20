@@ -132,7 +132,7 @@ class EventManager:
         """
         Resgister an event handler of any type.
         
-        **ussage:**
+        **Usage:**
         ```python
         # text messages
         @bot.event("message", [lambda m: m.get("text")])

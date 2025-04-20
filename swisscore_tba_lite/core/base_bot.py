@@ -95,7 +95,7 @@ def api_method_wrapper(
     
     It's purpose is to make it very easy to extend the `BaseBot` class.
     
-    **Ussage:**
+    **Usage:**
     ```python
 
     class Message:
@@ -473,7 +473,7 @@ class BaseBot:
         
         Returns a asyncio.Task which can be awaited to get actual result.  
 
-        **Ussage:**
+        **Usage:**
         ```python
         bot("sendMessage", {"chat_id": chat_id, "text": "Hello world!"})
         me = await bot("getMe") 
