@@ -243,6 +243,11 @@ class BaseBot:
         """
         Your Bot API token. 
         """
+
+        self.user_id = int(self.token.split(":", 1))[0]
+        """
+        The user ID of the bot.
+        """
         
         if event_manager and not isinstance(event_manager, EventManager):
             raise TypeError("`event_manager` has to be an instance of `EventManager`")
