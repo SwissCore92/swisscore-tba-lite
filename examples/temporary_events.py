@@ -40,7 +40,7 @@ async def on_cmd_cancel(msg: dict[str], ctx=None):
             "text": "No active command to cancel. I wasn't doing anything anyway. Zzzzz...😴"
         })
 
-# define a /setuserpic comment event handleer 
+# define a /setuserpic command event handler 
 @bot.event("message", filters=[chat_types("private"), commands("setuserpic")])
 async def on_cmd_set_pic(msg: dict[str]):
 
