@@ -14,7 +14,7 @@ A minimal, async-native **Telegram Bot API** library — built for developers wh
 * [Filters](#filters)
 * [Event Handler Chaining](#event-hanlder-chaining)
 * [Temporary Events](#temporary-events)
-* [Runners](#runners)
+<!-- * [Runners](#runners) -->
   
 ## Philosophy
 *swisscore-tba-lite* is built on a simple idea: **a Telegram bot library shouldn't get in your way.**
@@ -49,10 +49,10 @@ But if you want more? Build it on top. This is your foundation — not your cage
 
 *See [Expandability](#expandability) for more info.*
 
-### Built for reliability and control
+<!-- ### Built for reliability and control
 This library is designed with predictability in mind. Startup and shutdown sequences are clean and observable. Handlers are just async functions. And whether you’re running your bot in sync application like flask or an async application like an aiohttp web app, it plugs in without drama. 
 
-*See [Runners](#runners) for more info.*
+*See [Runners](#runners) for more info.* -->
 
 ### Filters that feel like writing logic, not wrangling syntax
 In *swisscore-tba-lite*, filtering updates is as natural as thinking in conditions. No black box magic, no custom DSLs, no endless nesting of objects. Just simple, readable functions that behave exactly like you'd expect. 
@@ -654,8 +654,4 @@ bot.start_polling()
 ```
 
 </details>
-
-## Runners
-*Details will be added later*
-
 
