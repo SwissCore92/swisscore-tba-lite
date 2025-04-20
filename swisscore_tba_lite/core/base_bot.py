@@ -628,34 +628,6 @@ class BaseBot:
         
         except exceptions.EventHandlerError as e:
             logger.error(f"A event handler processing an update of type '{update_type}' crashed. ({e})", exc_info=True)
-    
-    async def log_out(self) -> None:
-        """
-        Use this method to switch to your own Telegram Bot API server.
-
-        Note: Calling "logOut" will always automatically use the cloud API server url (https://api.telegram.org/bot<token>/logOut)
-
-        Example usage:
-        ```python
-        
-        bot = Bot(
-            TOKEN, 
-            base_api_url="http://localhost:8081",
-            base_file_url="http://localhost:8081/file"
-        )
-        
-        @bot.event("startup")
-        async def on_startup():
-            await bot.log_out()
-
-        ```
-
-        """
-        try:
-            await self.__call__("logOut", catch_errors=False)
-            logger.info("Bot was succesfully logged out from the cloud Telegram Bot API server")
-        except exceptions.BadRequest:
-            logger.info("Bot was already logged out from the cloud Telegram Bot API server")
 
     #endregion core
 
