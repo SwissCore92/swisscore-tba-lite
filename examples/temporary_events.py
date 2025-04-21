@@ -23,7 +23,7 @@ async def on_startup():
     })
 
 # define a /cancel command event handler with an optional context argument
-@bot.event("message", filters=[chat_types("private"), commands("cancel")])
+@bot.event("message", chat_types("private"), commands("cancel"))
 async def on_cmd_cancel(msg: dict[str], ctx=None):
     if ctx:
         # context was passed, so tell the user that the action was cancelled
@@ -41,7 +41,7 @@ async def on_cmd_cancel(msg: dict[str], ctx=None):
         })
 
 # define a /setuserpic command event handler 
-@bot.event("message", filters=[chat_types("private"), commands("setuserpic")])
+@bot.event("message", chat_types("private"), commands("setuserpic"))
 async def on_cmd_set_pic(msg: dict[str]):
 
     # define a filter to make sure to target the correct chat and user 

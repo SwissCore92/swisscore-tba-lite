@@ -26,7 +26,7 @@ async def on_startup():
         "text": "Hi, I was just started!"
     })
 
-@bot.event("message", filters=[chat_types("private"), commands("myid")])
+@bot.event("message", chat_types("private"), commands("myid"))
 async def on_cmd_myid(msg: dict[str]):
     """
     Runs when a user sends '/myid' in a private chat with the bot.  
@@ -39,7 +39,7 @@ async def on_cmd_myid(msg: dict[str]):
         "parse_mode": "MarkdownV2"
     })
 
-@bot.event("message", filters=[chat_types("private")])
+@bot.event("message", chat_types("private"))
 async def echo_message(msg: dict[str]):
     """
     Runs on any other message in a private chat with the bot.  
