@@ -48,14 +48,14 @@ class EventManager:
     
     from swisscore_tba_lite.filters import sub_keys
     
-    @bot.event("message", filters=[sub_keys("document", "mime_type")]]):
+    @bot.event("message", sub_keys("document", "mime_type")):
     async def handle_pdf(msg):
         if msg["document"]["mime_type"] != "application/pdf":
             return bot.event.UNHANDLED
         
         # Handle pdf document
     
-    @bot.event("message", filters=[sub_keys("document", "mime_type")]]):
+    @bot.event("message", sub_keys("document", "mime_type")):
     async def handle_file(msg):
         ...
         # Continue handling the document (which is no pdf file)
@@ -128,19 +128,19 @@ class EventManager:
                 return False
                 
 
-    def __call__(self, event_name: str, filters: list[t.Callable[[dict[str, t.Any]], t.Any]] | None = None):
+    def __call__(self, event_name: str, *filters: t.Callable[[dict[str, t.Any]], t.Any]):
         """
         Resgister an event handler of any type.
         
         **Usage:**
         ```python
         # text messages
-        @bot.event("message", [lambda m: m.get("text")])
+        @bot.event("message", is_text)
         async def on_text_message(msg):
             ...
         
         # photo messages with caption
-        @bot.event("message", [lambda m: m.get("photo"), lambda m: m.get("caption")])
+        @bot.event("message", sub_keys("photo", "caption"))
         async def on_photo_message(msg):
             ...
         
@@ -181,7 +181,7 @@ class EventManager:
         * Both Coroutine and regular functions are supported.
         * A filter **must match** the signature `func(obj: dict)` where `obj` is *always* a `dict`!
         * A filter is satisfied if `bool(your_filter(obj)) == True`
-        * The filters are checked in order. Eg. `filters=[first_filter, second_filter, ..., last_filter]`
+        * The filters are checked in order. 
         * Event handlers are checked in the order you defined them from top to bottom.
         * Event handlers without filters should always be defined at the bottom of all other handlers of the same type (`event_name`).
 
@@ -221,7 +221,7 @@ class EventManager:
                     elif func.__code__.co_argcount != 1:
                         raise TypeError(f"The event handler {func_info(func)} must accept exactly 1 or 2 arguments.")
 
-                    handler = EventHandler(event_name, func, filters)
+                    handler = EventHandler(event_name, func, list(filters))
                     self.__update_handlers[event_name].append(handler)
                     
                     for previous_handler in reversed(self.__update_handlers[event_name]):
@@ -278,7 +278,7 @@ class EventManager:
             })
             return bot.event.UNHANDLED
 
-        @bot.event("message", filters=[chat_types("private"), commands("set_bot_pic")])
+        @bot.event("message", chat_types("private"), commands("set_bot_pic"))
         async def on_set_bot_pic_cmd(msg: dict[str]):
             bot("sendMessage", {
                 "chat_id": msg["chat"]["id"],

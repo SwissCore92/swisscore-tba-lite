@@ -58,22 +58,22 @@ async def has_permission(permission: str):
     return f
 
 
-@bot.event("message", filters=[
+@bot.event("message", 
     chat_types("supergroup"), 
     commands("ban"), 
     has_permission("can_restrict_members")
-])
+)
 async def ban_chat_member(msg: dict):
     # runs only if the performer and the bot are both chat administrators
     # with the `can_restrict_members` permission.
     bot("banChatMember", {...})
 
 
-@bot.event("message", filters=[
+@bot.event("message", 
     chat_types("supergroup"), 
     commands("promote"), 
     has_permission("can_promote_members")
-])
+)
 async def promote_chat_member(msg: dict):
     # runs only if the performer and the bot are both chat administrators
     # with the `can_promote_members` permission. 

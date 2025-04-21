@@ -91,15 +91,24 @@ def text_startswith(*substrings, caption: bool = False):
 
 def commands(*commands: str, caption: bool = False):
     """
-    Generates a filter that checks for matching `commands` in the messages (`capition`)`entities`.
+    Generates a filter that checks for matching `commands` in the messages `entities`.
+
+    Note:
+    * If no command is provided, the filter will **always** return `True` if the the message starts with **any** command
+    * If `caption` is set to `True` the `captions_entities` are checked **instead** of `entities`.
+    * The text **must start** with the command.
     """
-    assert commands
+    # assert commands
     commands = [c.lstrip("/") for c in commands]
     t_key, e_key = ("caption", "caption_entities") if caption else ("text", "entities")
     def f(obj: JsonDict):
         for e in obj.get(e_key, []):
-            if e["type"] == "bot_command" and e["offset"] == 0: 
-                if obj[t_key][1:e["length"]].split("@")[0] in commands:
+            if e["type"] == "bot_command" and e["offset"] == 0:
+                if not commands:
+                    return True
+                
+                command: str = obj[t_key][1:e["length"]]
+                if command.split("@")[0] in commands:
                     return True
         return False
     return f
