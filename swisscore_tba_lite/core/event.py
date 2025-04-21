@@ -284,7 +284,7 @@ class EventManager:
                 "chat_id": msg["chat"]["id"],
                 "text": "Ok, please send me the new picture for your bot."
             })
-            is_valid_user = and_(chat_ids(msg["chat"]["id"]), from_ids(msg["from"]["id"]))
+            is_valid_user = if_all(chat_ids(msg["chat"]["id"]), from_ids(msg["from"]["id"]))
             bot.event.wait_for("message", [
                 (cancel_current_action, [is_valid_user, commands("cancel")]),
                 (try_set_pic, [is_valid_user]),

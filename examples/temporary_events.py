@@ -1,7 +1,7 @@
 import os 
 
 from swisscore_tba_lite import Bot
-from swisscore_tba_lite.filters import commands, chat_types, chat_ids, from_ids, all_
+from swisscore_tba_lite.filters import commands, chat_types, chat_ids, from_ids, if_all
 
 bot = Bot(os.environ.get("API_TOKEN", "<YOUR_API_TOKEN>"))
 
@@ -45,7 +45,7 @@ async def on_cmd_cancel(msg: dict[str], ctx=None):
 async def on_cmd_set_pic(msg: dict[str]):
 
     # define a filter to make sure to target the correct chat and user 
-    is_valid_chat_user = all_(
+    is_valid_chat_user = if_all(
         chat_ids(msg["chat"]["id"]), 
         from_ids(msg["from"]["id"])
     )

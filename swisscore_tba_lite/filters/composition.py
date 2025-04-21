@@ -3,7 +3,7 @@ import typing as t
 from .helpers import JsonDict
 
 
-def not_(filter: t.Callable[[JsonDict], bool]):
+def if_not(filter: t.Callable[[JsonDict], bool]):
     """
     shorthand for 
     ```python
@@ -12,7 +12,7 @@ def not_(filter: t.Callable[[JsonDict], bool]):
     """
     return lambda obj: not filter(obj)
 
-def any_(*filters: t.Callable[[JsonDict], bool]):
+def if_any(*filters: t.Callable[[JsonDict], bool]):
     """
     shorthand for 
     ```python
@@ -21,7 +21,7 @@ def any_(*filters: t.Callable[[JsonDict], bool]):
     """
     return lambda obj: any(f(obj) for f in filters)
 
-def all_(*filters: t.Callable[[JsonDict], bool]):
+def if_all(*filters: t.Callable[[JsonDict], bool]):
     """
     shorthand for 
     ```python
@@ -30,7 +30,7 @@ def all_(*filters: t.Callable[[JsonDict], bool]):
     """
     return lambda obj: all(f(obj) for f in filters)
 
-def none_(*filters: t.Callable[[JsonDict], bool]):
+def if_none(*filters: t.Callable[[JsonDict], bool]):
     """
     shorthand for 
     ```python
@@ -39,7 +39,7 @@ def none_(*filters: t.Callable[[JsonDict], bool]):
     """
     return lambda obj: not any(f(obj) for f in filters)
 
-def xor(*filters: t.Callable[[JsonDict], bool]):
+def if_xor(*filters: t.Callable[[JsonDict], bool]):
     """
     shorthand for 
     ```python

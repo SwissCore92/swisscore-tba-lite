@@ -57,7 +57,7 @@ This library is designed with predictability in mind. Startup and shutdown seque
 ### Filters that feel like writing logic, not wrangling syntax
 In *swisscore-tba-lite*, filtering updates is as natural as thinking in conditions. No black box magic, no custom DSLs, no endless nesting of objects. Just simple, readable functions that behave exactly like you'd expect. 
 
-Want to check if a message is from a specific chat type, starts with a certain command, or is replying to a photo? It's as easy as calling `chat_types("supergroup")`, `commands("start")`, or `sub_keys("reply_to_message", "photo")`. You can even build complex logic using composition helpers like `any_()`, `all_()`, `not_()`, or `none_()` — pure Python, clean and powerful. The filter system is built to feel intuitive, flexible, and extendable. It's designed for developers who think in logic, not in libraries.
+Want to check if a message is from a specific chat type, starts with a certain command, or is replying to a photo? It's as easy as calling `chat_types("supergroup")`, `commands("start")`, or `sub_keys("reply_to_message", "photo")`. You can even build complex logic using composition helpers like `if_any()`, `if_all()`, `in_not()`, or `if_none()` — pure Python, clean and powerful. The filter system is built to feel intuitive, flexible, and extendable. It's designed for developers who think in logic, not in libraries.
 
 *See [Filtes](#filters) for more info.*
 
@@ -358,7 +358,7 @@ Filters can be regular or async functions. You can write your own, use `lambda`s
 It includes:
 * Filter generators
 * Preconfigured filters
-* Composables like `not_()`, `any_()`, `all_()`, and `none_()` — giving you *powerful* but **readable** logic for handler conditions.
+* Composables like `if_not()`, `if_any()`, `if_all()`, and `if_none()` — giving you *powerful* but **readable** logic for handler conditions.
 
 Everything is well-documented and easy to use.
 
@@ -509,7 +509,7 @@ async def handle_file(msg):
 import os 
 
 from swisscore_tba_lite import Bot
-from swisscore_tba_lite.filters import commands, chat_types, chat_ids, from_ids, all_
+from swisscore_tba_lite.filters import commands, chat_types, chat_ids, from_ids, if_all
 
 bot = Bot(os.environ.get("API_TOKEN", "<YOUR_API_TOKEN>"))
 
@@ -553,7 +553,7 @@ async def on_cmd_cancel(msg: dict[str], ctx=None):
 async def on_cmd_set_pic(msg: dict[str]):
 
     # define a filter to make sure to target the correct chat and user 
-    is_valid_chat_user = all_(
+    is_valid_chat_user = if_all(
         chat_ids(msg["chat"]["id"]), 
         from_ids(msg["from"]["id"])
     )

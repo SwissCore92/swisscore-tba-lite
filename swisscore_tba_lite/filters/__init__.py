@@ -15,11 +15,11 @@ from .generators import callback_data
 from .generators import callback_data_startswith
 from .generators import max_age
 
-from .composition import not_
-from .composition import any_
-from .composition import all_
-from .composition import none_
-from .composition import xor
+from .composition import if_not
+from .composition import if_any
+from .composition import if_all
+from .composition import if_none
+from .composition import if_xor
 
 from .pre_configured import is_text
 from .pre_configured import has_caption
