@@ -392,7 +392,7 @@ class BaseBot:
         Example Usage:
         ```python
         # filtering messages with document 
-        @bot.event("message", filters=[is_document, lambda m: m["document"].get("file_name")])
+        @bot.event("message", is_document, lambda m: m["document"].get("file_name"))
         async def on_document_message(msg: dict[str]):
             doc = msg["document"]
             file_obj = await bot("getFile", {"file_id": doc["file_id"]})
