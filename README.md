@@ -14,7 +14,7 @@ A minimal, async-native **Telegram Bot API** library — built for developers wh
 * [Filters](#filters)
 * [Event Handler Chaining](#event-hanlder-chaining)
 * [Temporary Events](#temporary-events)
-<!-- * [Runners](#runners) -->
+* [Runners](#runners)
   
 ## Philosophy
 *swisscore-tba-lite* is built on a simple idea: **a Telegram bot library shouldn't get in your way.**
@@ -655,3 +655,6 @@ bot.start_polling()
 
 </details>
 
+## Runners
+
+*Details will be added later*
