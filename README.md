@@ -112,7 +112,7 @@ async def on_startup():
         "text": "Hi, I was just started!"
     })
 
-@bot.event("message", filters=[chat_types("private"), commands("myid")])
+@bot.event("message", chat_types("private"), commands("myid"))
 async def on_cmd_myid(msg: dict[str]):
     """
     Runs when a user sends '/myid' in a private chat with the bot.  
@@ -125,7 +125,7 @@ async def on_cmd_myid(msg: dict[str]):
         "parse_mode": "MarkdownV2"
     })
 
-@bot.event("message", filters=[chat_types("private")])
+@bot.event("message", chat_types("private"))
 async def echo_message(msg: dict[str]):
     """
     Runs on any other message in a private chat with the bot.  
@@ -206,7 +206,7 @@ The built-in `download` method allows you to quickly download files from the tel
 
 ```python
 # filtering messages with document and a file name
-@bot.event("message", filters=[sub_keys("document", "file_name")])
+@bot.event("message", sub_keys("document", "file_name"))
 async def on_document_message(msg: dict[str]):
     doc = msg["document"]
     file_obj = await bot("getFile", {"file_id": doc["file_id"]})
@@ -335,11 +335,11 @@ Important:
 ```python
 from swisscore-tba-lite.filters import chat_types, is_text, is_photo
 
-@bot.event("message", filters=[chat_types("private"), is_text])
+@bot.event("message", chat_types("private"), is_text)
 async def on_private_message(msg: dict):
     ... #Will run if a text message in a private chat is received
 
-@bot.event("message", filters=[chat_types("supergroup"), is_photo])
+@bot.event("message", chat_types("supergroup"), is_photo)
 async def on_supergroup_message(msg: dict):
     ... #Will run if a photo message in a supergroup chat is received
 
@@ -375,7 +375,7 @@ from swisscore-tba-lite.filters import (
 is_my_chat = chat_ids(<your_user_id>)
 is_me = user_ids(<your_user_id>)
 
-@bot.event("message", filters=[is_my_chat, commands("settings")])
+@bot.event("message", is_my_chat, commands("settings"))
 async def on_cmd_settings(msg: dict):
     # runs only if YOU use the /settings command 
     # in private chat with the bot
@@ -443,22 +443,22 @@ async def has_permission(permission: str):
     return f
 
 
-@bot.event("message", filters=[
+@bot.event("message", 
     chat_types("supergroup"), 
     commands("ban"), 
     has_permission("can_restrict_members")
-])
+)
 async def ban_chat_member(msg: dict):
     # runs only if the performer and the bot are both chat administrators
     # with the `can_restrict_members` permission.
     bot("banChatMember", {...})
 
 
-@bot.event("message", filters=[
+@bot.event("message",
     chat_types("supergroup"), 
     commands("promote"), 
     has_permission("can_promote_members")
-])
+)
 async def promote_chat_member(msg: dict):
     # runs only if the performer and the bot are both chat administrators
     # with the `can_promote_members` permission. 
@@ -484,14 +484,14 @@ But where `bot.event.UNHANDLED` really shines is in [Temporary Events](#temporar
 
 from swisscore_tba_lite.filters import sub_keys
 
-@bot.event("message", filters=[sub_keys("document", "mime_type")])
+@bot.event("message", sub_keys("document", "mime_type"))
 async def handle_pdf(msg):
     if msg["document"]["mime_type"] != "application/pdf":
         return bot.event.UNHANDLED
     
     ... # Handle pdf document
 
-@bot.event("message", filters=[sub_keys("document", "mime_type")])
+@bot.event("message", sub_keys("document", "mime_type"))
 async def handle_file(msg):
     ... # Handle any other kind of document with a mime_type
 ```
@@ -531,7 +531,7 @@ async def on_startup():
     })
 
 # define a /cancel command event handler with an optional context argument
-@bot.event("message", filters=[chat_types("private"), commands("cancel")])
+@bot.event("message", chat_types("private"), commands("cancel"))
 async def on_cmd_cancel(msg: dict[str], ctx=None):
     if ctx:
         # context was passed, so tell the user that the action was cancelled
@@ -549,7 +549,7 @@ async def on_cmd_cancel(msg: dict[str], ctx=None):
         })
 
 # define a /setuserpic command event handler 
-@bot.event("message", filters=[chat_types("private"), commands("setuserpic")])
+@bot.event("message", chat_types("private"), commands("setuserpic"))
 async def on_cmd_set_pic(msg: dict[str]):
 
     # define a filter to make sure to target the correct chat and user 
