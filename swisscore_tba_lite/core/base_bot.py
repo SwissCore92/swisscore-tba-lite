@@ -24,7 +24,7 @@ CLOUD_BOT_FILE_URL = "https://api.telegram.org/file"
 # use lowercase for method names
 USE_CLOUD_URL = frozenset({"logout"})
 """
-For methods that always must be dispatched to the cloud telegram bot api
+methods that always must be dispatched to the cloud telegram bot api server
 """
 
 # decorator
@@ -424,9 +424,9 @@ class BaseBot:
             dest_dir = Path(dest_dir)
         
         if not dest_dir.exists():
-            raise FileNotFoundError(f"{dest_dir=} was not found.")
+            raise FileNotFoundError(f"<dest_dir> was not found.")
         if not dest_dir.is_dir():
-            raise NotADirectoryError(f"{dest_dir=} is not a directory.")
+            raise NotADirectoryError(f"<dest_dir> is not a directory.")
         
         tg_file_path: str = file_obj["file_path"]
         
@@ -437,9 +437,7 @@ class BaseBot:
         
         if dest_file.exists():
             if not overwrite_existing:
-                raise FileExistsError(f"{dest_file=} already exists and overwriting is not allowed.")
-            # No warning needed. the user decided to overwrite
-            # logger.warning(f"'<dest_dir>/{file_name}' will be overwritten!")
+                raise FileExistsError(f"<dest_dir>/{dest_file.name} already exists and overwriting is not allowed.")
         
         bs = bs or 16*utils.KiB
         
