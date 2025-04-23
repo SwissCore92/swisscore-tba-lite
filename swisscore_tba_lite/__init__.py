@@ -1,14 +1,16 @@
 """
-# **SwissCore TBA Lite**
+## **SwissCore TBA Lite**
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)  
 
-A very basic and lightweight asynchronous [Telegram Bot API](https://core.telegram.org/bots/api) wrapper for **python 3.11+**.  
-Main focus on core functionality without all the bloat. Just *dictionaries*.  
+A minimal, async-native **Telegram Bot API** library — built for developers who want power without the clutter.
 
-*Read full [docs on GitHub](https://github.com/SwissCore92/swisscore-tba-lite)*
+*See [docs](https://github.com/SwissCore92/swisscore-tba-lite) on GitHub for more info.*
 """
 
-from .core.base_bot import BaseBot as Bot
+from .core.base_bot import BaseBot
 from .core.logger import logger
 from .core.exceptions import RestartBotException
 from .core.runners import ThreadedRunner
+
+from .bot_api.v9_0 import objects
+from .bot_api.v9_0.bot import Bot

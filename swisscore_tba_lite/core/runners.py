@@ -42,7 +42,7 @@ class ThreadedRunner(AbstractRunner):
     ```python
     
     from flask import Flask
-    from swisscore_tba_lite import Bot, ThreadedRunner
+    from swisscore_tba_lite import BaseBot as Bot, ThreadedRunner
 
     bot = Bot("your_token")
 
@@ -139,7 +139,7 @@ class ThreadedRunner(AbstractRunner):
 #     ```python
 #     from aiohttp import web
 
-#     from swisscore_tba_lite import Bot, AsyncRunner
+#     from swisscore_tba_lite import BaseBot as Bot, AsyncRunner
 
 #     bot = Bot("your_token")
 

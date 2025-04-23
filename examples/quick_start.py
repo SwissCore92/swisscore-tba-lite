@@ -1,6 +1,6 @@
 import os 
 
-from swisscore_tba_lite import Bot
+from swisscore_tba_lite import BaseBot as Bot
 from swisscore_tba_lite.filters import commands, chat_types
 
 # Get your Telegram Bot API Token from @BotFather

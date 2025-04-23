@@ -86,7 +86,7 @@ pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
 ```python
 import os 
 
-from swisscore_tba_lite import Bot
+from swisscore_tba_lite import BaseBot as Bot
 from swisscore_tba_lite.filters import commands, chat_types
 
 # Get your Telegram Bot API Token from @BotFather
@@ -388,6 +388,7 @@ async def on_cmd_settings(msg: dict):
 <summary>Defining your own filters (or generators)</summary>
 
 ```python
+from swisscore_tba_lite import BaseBot as Bot
 from swisscore_tba_lite.filters import (
     chat_types, 
     commands,
@@ -404,12 +405,12 @@ async def has_permission(permission: str):
     @false_on_key_error
     async def f(msg: dict):
 
-        # get a list of all chat administrators (excluding other bots)
+        # get a list of all chat administrators (excluding bots)
         admins = await bot("getChatAdministrators", {
             "chat_id": msg["chat"]["id"]
         })
 
-        # create an admin dict {user_id: ChatMember}
+        # create an admin dict {user_id: ChatMember} (might raise a KeyError)
         admin_dict = {member["user"]["id"]: member for member in admins}
 
         # check if the user is an admin
@@ -417,23 +418,24 @@ async def has_permission(permission: str):
             # the user is not an admin
             return False
 
-        # check if the bot is an admin
-        if not bot.user_id in admin_dict:
-            # the bot is not an admin. 
-            # the action can not be performed by the bot anyway
-            return False
-        
         # extract the admin from admin dict
         admin = admin_dict[msg["from"]["id"]]
         
         # check if the admin has the required permission ("creator" always has all permissions)
-        if not (admin["status"] == "creator" or admin[permission]):
+        if admin["status"] != "creator" or not admin[permission]:
             # the admin does not have the required permission 
             return False
         
-        # check if the bot has the required permission
-        if not admin_dict[bot.user_id][permission]:
-            # the bot does not have the required permission 
+        # get the bot as chat member
+        my_member = await bot("getChatMember", {
+            "chat_id": msg["chat"]["id"],
+            "user_id": bot.user_id
+        })
+
+        # check if the bot is an admin and has the required permission (might raise a KeyError)
+        if my_member["status"] != "administrator" or not my_member[permission]:
+            # the bot is not an admin or is not permitted. 
+            # the action can not be performed by the bot
             return False
         
         # both (user and bot) are admins with the required permission :)
@@ -454,7 +456,7 @@ async def ban_chat_member(msg: dict):
     bot("banChatMember", {...})
 
 
-@bot.event("message",
+@bot.event("message", 
     chat_types("supergroup"), 
     commands("promote"), 
     has_permission("can_promote_members")
@@ -508,7 +510,7 @@ async def handle_file(msg):
 ```python
 import os 
 
-from swisscore_tba_lite import Bot
+from swisscore_tba_lite import BaseBot as Bot
 from swisscore_tba_lite.filters import commands, chat_types, chat_ids, from_ids, if_all
 
 bot = Bot(os.environ.get("API_TOKEN", "<YOUR_API_TOKEN>"))

@@ -374,8 +374,6 @@ class BaseBot:
     
     #region core
 
-    
-
     def download(
         self, 
         file_obj: JsonDict, 
@@ -431,9 +429,9 @@ class BaseBot:
         tg_file_path: str = file_obj["file_path"]
         
         if file_name is None:
-            file_name: str = file_obj.get("file_name", tg_file_path.rsplit("/", 1)[-1])
+            file_name = file_obj.get("file_name", tg_file_path.rsplit("/", 1)[-1])
             
-        dest_file = dest_dir / file_name
+        dest_file = dest_dir / str(file_name)
         
         if dest_file.exists():
             if not overwrite_existing:
@@ -484,18 +482,6 @@ class BaseBot:
         Use this method to make [API](https://core.telegram.org/bots/api) requests.
         
         Returns a asyncio.Task which can be awaited to get actual result.  
-
-        **Usage:**
-        ```python
-        bot("sendMessage", {"chat_id": chat_id, "text": "Hello world!"})
-        me = await bot("getMe") 
-        ```
-        
-        Note: `JsonDict` is just a shorthand for `dict[str, Any]`
-
-        > ⚠️ ***Warning:***  
-        > * *Using this method when the bot isn't yet started will raise a `RuntimeError`! Use the 'startup' event if you need to make requests on startup!*  
-        
         """
 
         if self.session is None:
@@ -519,6 +505,10 @@ class BaseBot:
             if auto_prepare and params:
                 # may raise an InvalidParamsError
                 params = serialize_params(params)
+
+            if not params:
+                # ensure params is not an empty dict
+                params = None
 
             if method_name.lower() in USE_CLOUD_URL:
                 url = f"{CLOUD_BOT_API_URL}/bot{self.token}/{method_name}"
