@@ -12,5 +12,5 @@ from .core.logger import logger
 from .core.exceptions import RestartBotException
 from .core.runners import ThreadedRunner
 
-from .bot_api.v9_0 import objects
-from .bot_api.v9_0.bot import Bot
+from .bot_api import objects
+from .bot_api import Bot
