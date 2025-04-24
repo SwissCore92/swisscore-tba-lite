@@ -201,14 +201,15 @@ class EventManager:
                         raise TypeError(f"The event handler {func_info(func)} must accept exactly 1 or 2 arguments.")
 
                     handler = EventHandler(event_name, func, list(filters))
-                    self.__update_handlers[event_name].append(handler)
-                    
+
                     for previous_handler in reversed(self.__update_handlers[event_name]):
                         if not previous_handler.filters:
                             logger.warning(
                                 f"{repr(handler)} may never be triggered because "
                                 f"{repr(previous_handler)} has no filters and is defined above it."
                             )
+                    
+                    self.__update_handlers[event_name].append(handler)
 
             return func
         
