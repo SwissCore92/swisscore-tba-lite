@@ -4,34 +4,13 @@ from copy import deepcopy
 
 from .logger import logger
 from . import exceptions
+from ..bot_api import literals
 
 class UnhandledEventType: ...
 
-TELEGRAM_EVENT_TYPES: frozenset[str] = frozenset({
-    "message",
-    "edited_message",
-    "channel_post",
-    "edited_channel_post",
-    "business_connection",
-    "business_message",
-    "edited_business_message",
-    "deleted_business_messages",
-    "message_reaction",
-    "message_reaction_count",
-    "inline_query",
-    "chosen_inline_result",
-    "callback_query",
-    "shipping_query",
-    "pre_checkout_query",
-    "purchased_paid_media",
-    "poll",
-    "poll_answer",
-    "my_chat_member",
-    "chat_member",
-    "chat_join_request",
-    "chat_boost",
-    "removed_chat_boost",
-})
+EventName = literals.UpdateType | t.Literal["startup", "shutdown"]
+
+TELEGRAM_EVENT_TYPES: frozenset[str] = frozenset(t.get_args(literals.UpdateType))
 
 def func_info(f: t.Callable) -> str:
     return f"{f.__module__}.{f.__name__}@line={f.__code__.co_firstlineno}"
@@ -65,8 +44,8 @@ class EventManager:
     def __init__(self):
         self.__startup_handler: EventHandler = None
         self.__shutdown_handler: EventHandler = None
-        self.__temporary_handlers: dict[str, list[TemporaryEventHandler]] = {}
-        self.__update_handlers: dict[str, list[EventHandler]] = dict((k, []) for k in TELEGRAM_EVENT_TYPES)
+        self.__temporary_handlers: dict[EventName, list[TemporaryEventHandler]] = {}
+        self.__update_handlers: dict[EventName, list[EventHandler]] = dict((k, []) for k in TELEGRAM_EVENT_TYPES)
     
     def _get_handled_event_types(self) -> list[str]:
         """
@@ -76,7 +55,7 @@ class EventManager:
         """
         return [k for k, v in self.__update_handlers.items() if v]
     
-    async def _trigger_event(self, event_name: str, *args) -> bool:
+    async def _trigger_event(self, event_name: EventName, *args) -> bool:
         match event_name:
             case "startup":
                 if self.__startup_handler is not None:
@@ -128,7 +107,7 @@ class EventManager:
                 return False
                 
 
-    def __call__(self, event_name: str, *filters: t.Callable[[dict[str, t.Any]], t.Any]):
+    def __call__(self, event_name: EventName, *filters: t.Callable[[dict[str, t.Any]], t.Any]):
         """
         Resgister an event handler of any type.
         
@@ -236,7 +215,7 @@ class EventManager:
         return register
     
     def wait_for(
-            self, event_name: str, 
+            self, event_name: EventName, 
             handlers: list[tuple[t.Callable[[dict[str, t.Any]], None | UnhandledEventType], list[t.Callable[[dict[str, t.Any]], bool]]]], 
             *,
             context: t.Any | None = None
@@ -306,7 +285,7 @@ class EventManager:
 class EventHandler:
     def __init__(
         self, 
-        type: str, 
+        type: EventName, 
         func: t.Callable[[dict[str, t.Any]], None | UnhandledEventType], 
         filters: list[t.Callable[[dict[str, t.Any]], bool]] | None = None
     ) -> None:
