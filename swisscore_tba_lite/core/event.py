@@ -218,59 +218,51 @@ class EventManager:
         return register
     
     def wait_for(
-            self, event_name: EventName, 
-            handlers: list[tuple[HandlerFunction, list[FilterFunction]]], 
-            *,
-            context: t.Any | None = None
-        ) -> None:
+        self, 
+        event_name: EventName, 
+        handlers: list[tuple[HandlerFunction, list[FilterFunction]]], 
+        *,
+        context: t.Any | None = None,
+        shared_filters: list[FilterFunction]
+    ) -> None:
         """
         create a temporary event listener.
 
+        Args:
+            event_name: name of the event
+            handlers: the temporary handlers
+            context (optional): an optional context (can be anything)
+            shared_filters (optional): a list of shared filters. **Note:** these are checked first.
+
         Example usage:
         ```python
-        # mimic the @BotFather /add_bot_pic command
-
-        async def cancel_current_action(msg: dict[str], context):
-            bot("sendMessage", {
-                "chat_id": msg["chat"]["id"],
-                "text": f"Ok, {context} was canceled!"
-            })
-        
-        async def set_pic(msg: dict[str]):
-            if msg.get("photo"):
-                ... # do semething with the photo
-
+        # add a test command handler
+        @bot.event("message", chat_types("private"), commands("test"))
+        async def test_cmd(msg: tg.Message):
+            # define a temporary handler
+            async def countdown(m: tg.Message, ctx):
+                if ctx["count"] > 0:
+                    bot("sendMessage", {
+                        "chat_id": m["chat"]["id"],
+                        "text": f"Explode after {ctx["count"]}..."
+                    })
+                    ctx["count"] -= 1
+                    return bot.event.UNHANDLED
+                
                 bot("sendMessage", {
                     "chat_id": msg["chat"]["id"],
-                    "text": "Ok, the bot pic was updated."
+                    "text": "BOOM! 💥"
                 })
-                return
-
-            if msg.get("document"):
-                bot("sendMessage", {
-                    "chat_id": msg["chat"]["id"],
-                    "text": "Send a photo please. Not a file."
-                })
-                return bot.event.UNHANDLED
             
             bot("sendMessage", {
                 "chat_id": msg["chat"]["id"],
-                "text": "I told you to send a <b>picture</b>! Not some other nonesense."
-                "parse_mode": "HTML"
+                "text": "Explode after 3..."
             })
-            return bot.event.UNHANDLED
 
-        @bot.event("message", chat_types("private"), commands("set_bot_pic"))
-        async def on_set_bot_pic_cmd(msg: dict[str]):
-            bot("sendMessage", {
-                "chat_id": msg["chat"]["id"],
-                "text": "Ok, please send me the new picture for your bot."
-            })
-            is_valid_user = if_all(chat_ids(msg["chat"]["id"]), from_ids(msg["from"]["id"]))
+            # register the temporary handler
             bot.event.wait_for("message", [
-                (cancel_current_action, [is_valid_user, commands("cancel")]),
-                (try_set_pic, [is_valid_user]),
-            ], context="set_bot_pic")
+                (countdown, [chat_ids(msg["chat"]["id"])]),
+            ], context={"count": 2})
         ```
 
         """
@@ -280,7 +272,15 @@ class EventManager:
         if not event_name in self.__temporary_handlers:
             self.__temporary_handlers[event_name] = []
         
-        handler = TemporaryEventHandler(event_name, [EventHandler(event_name, x[0], x[1]) for x in handlers], context=context)
+        if not shared_filters:
+            shared_filters = []
+        
+        handler = TemporaryEventHandler(
+            event_name, 
+            [EventHandler(event_name, x[0], [*shared_filters, *[1]]) for x in handlers], 
+            context=context, 
+            shared_filters=shared_filters
+        )
         self.__temporary_handlers[event_name].append(handler)
         logger.debug(f"Added {(repr(handler))}")
 
