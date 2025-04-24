@@ -14,6 +14,7 @@ from .logger import logger
 from .event import EventManager
 from . import exit_codes
 from . import exceptions
+from ..bot_api import literals
 
 T = t.TypeVar("T")
 JsonDict = dict[str, t.Any]
@@ -469,7 +470,7 @@ class BaseBot:
 
     def __call__(
         self, 
-        method_name: str, 
+        method_name: literals.MethodName, 
         params: JsonDict | None = None,
         *, 
         check_input_files: list[str] | None = None, 
