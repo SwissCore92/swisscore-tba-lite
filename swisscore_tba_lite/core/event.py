@@ -9,6 +9,8 @@ from ..bot_api import literals
 class UnhandledEventType: ...
 
 EventName = literals.UpdateType | t.Literal["startup", "shutdown"]
+HandlerFunction = t.Callable[[dict[str, t.Any], t.Any | None], t.Any | UnhandledEventType]
+FilterFunction = t.Callable[[dict[str, t.Any]], bool]
 
 TELEGRAM_EVENT_TYPES: frozenset[str] = frozenset(t.get_args(literals.UpdateType))
 
@@ -217,7 +219,7 @@ class EventManager:
     
     def wait_for(
             self, event_name: EventName, 
-            handlers: list[tuple[t.Callable[[dict[str, t.Any]], None | UnhandledEventType], list[t.Callable[[dict[str, t.Any]], bool]]]], 
+            handlers: list[tuple[HandlerFunction, list[FilterFunction]]], 
             *,
             context: t.Any | None = None
         ) -> None:
