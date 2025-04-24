@@ -322,7 +322,7 @@ class ReplyParameters(t.TypedDict, total=False):
     Describes reply parameters for the message that is being sent.
     """
     message_id: int
-    chat_id: str | int
+    chat_id: int | str
     allow_sending_without_reply: bool
     quote: str
     quote_parse_mode: str
@@ -1752,7 +1752,7 @@ class BotCommandScopeChat(t.TypedDict, total=False):
     Represents the [scope](https://core.telegram.org/bots/api#botcommandscope) of bot commands, covering a specific chat.
     """
     type: t.Literal["chat"]
-    chat_id: str | int
+    chat_id: int | str
 
 class BotCommandScopeChatAdministrators(t.TypedDict, total=False):
     """
@@ -1761,7 +1761,7 @@ class BotCommandScopeChatAdministrators(t.TypedDict, total=False):
     Represents the [scope](https://core.telegram.org/bots/api#botcommandscope) of bot commands, covering all administrators of a specific group or supergroup chat.
     """
     type: t.Literal["chat_administrators"]
-    chat_id: str | int
+    chat_id: int | str
 
 class BotCommandScopeChatMember(t.TypedDict, total=False):
     """
@@ -1770,7 +1770,7 @@ class BotCommandScopeChatMember(t.TypedDict, total=False):
     Represents the [scope](https://core.telegram.org/bots/api#botcommandscope) of bot commands, covering a specific member of a group or supergroup chat.
     """
     type: t.Literal["chat_member"]
-    chat_id: str | int
+    chat_id: int | str
     user_id: int
 
 class BotName(t.TypedDict, total=False):

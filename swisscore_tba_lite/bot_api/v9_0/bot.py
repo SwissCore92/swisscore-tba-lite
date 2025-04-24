@@ -8,7 +8,7 @@ from ...core.base_bot import BaseBot, api_method_wrapper
 
 class Bot(BaseBot):
     """
-    Telegram Bot API methods scraped from 'Bot API 9.0 (April 11, 2025)'
+    Telegram Bot API methods scraped from '**Bot API 9.0** *(April 11, 2025)*'
     """
     @api_method_wrapper()
     def get_updates(
@@ -104,7 +104,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def send_message(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         text: str,
         *,
         business_connection_id: str | None = None,
@@ -128,8 +128,8 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def forward_message(
         self,
-        chat_id: str | int,
-        from_chat_id: str | int,
+        chat_id: int | str,
+        from_chat_id: int | str,
         message_id: int,
         *,
         message_thread_id: int | None = None,
@@ -146,8 +146,8 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def forward_messages(
         self,
-        chat_id: str | int,
-        from_chat_id: str | int,
+        chat_id: int | str,
+        from_chat_id: int | str,
         message_ids: list[int],
         *,
         message_thread_id: int | None = None,
@@ -163,8 +163,8 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def copy_message(
         self,
-        chat_id: str | int,
-        from_chat_id: str | int,
+        chat_id: int | str,
+        from_chat_id: int | str,
         message_id: int,
         *,
         message_thread_id: int | None = None,
@@ -188,8 +188,8 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def copy_messages(
         self,
-        chat_id: str | int,
-        from_chat_id: str | int,
+        chat_id: int | str,
+        from_chat_id: int | str,
         message_ids: list[int],
         *,
         message_thread_id: int | None = None,
@@ -206,8 +206,8 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_files=["photo"])
     def send_photo(
         self,
-        chat_id: str | int,
-        photo: str | Path | bytes,
+        chat_id: int | str,
+        photo: Path | bytes | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -232,8 +232,8 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_files=["audio", "thumbnail"])
     def send_audio(
         self,
-        chat_id: str | int,
-        audio: str | Path | bytes,
+        chat_id: int | str,
+        audio: Path | bytes | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -243,7 +243,7 @@ class Bot(BaseBot):
         duration: int | None = None,
         performer: str | None = None,
         title: str | None = None,
-        thumbnail: str | Path | bytes | None = None,
+        thumbnail: Path | bytes | str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
@@ -262,12 +262,12 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_files=["document", "thumbnail"])
     def send_document(
         self,
-        chat_id: str | int,
-        document: str | Path | bytes,
+        chat_id: int | str,
+        document: Path | bytes | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
-        thumbnail: str | Path | bytes | None = None,
+        thumbnail: Path | bytes | str | None = None,
         caption: str | None = None,
         parse_mode: str | None = None,
         caption_entities: list[tg.MessageEntity] | None = None,
@@ -288,16 +288,16 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_files=["video", "thumbnail", "cover"])
     def send_video(
         self,
-        chat_id: str | int,
-        video: str | Path | bytes,
+        chat_id: int | str,
+        video: Path | bytes | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumbnail: str | Path | bytes | None = None,
-        cover: str | Path | bytes | None = None,
+        thumbnail: Path | bytes | str | None = None,
+        cover: Path | bytes | str | None = None,
         start_timestamp: int | None = None,
         caption: str | None = None,
         parse_mode: str | None = None,
@@ -321,15 +321,15 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_files=["animation", "thumbnail"])
     def send_animation(
         self,
-        chat_id: str | int,
-        animation: str | Path | bytes,
+        chat_id: int | str,
+        animation: Path | bytes | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumbnail: str | Path | bytes | None = None,
+        thumbnail: Path | bytes | str | None = None,
         caption: str | None = None,
         parse_mode: str | None = None,
         caption_entities: list[tg.MessageEntity] | None = None,
@@ -351,8 +351,8 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_files=["voice"])
     def send_voice(
         self,
-        chat_id: str | int,
-        voice: str | Path | bytes,
+        chat_id: int | str,
+        voice: Path | bytes | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -376,14 +376,14 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_files=["video_note", "thumbnail"])
     def send_video_note(
         self,
-        chat_id: str | int,
-        video_note: str | Path | bytes,
+        chat_id: int | str,
+        video_note: Path | bytes | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
         duration: int | None = None,
         length: int | None = None,
-        thumbnail: str | Path | bytes | None = None,
+        thumbnail: Path | bytes | str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
@@ -400,7 +400,7 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_media=["media"])
     def send_paid_media(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         star_count: int,
         media: list[tg.InputPaidMedia],
         *,
@@ -425,7 +425,7 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_media=["media"])
     def send_media_group(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         media: list[tg.InputMediaAudio | tg.InputMediaDocument | tg.InputMediaPhoto | tg.InputMediaVideo],
         *,
         business_connection_id: str | None = None,
@@ -445,7 +445,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def send_location(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         latitude: float,
         longitude: float,
         *,
@@ -471,7 +471,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def send_venue(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         latitude: float,
         longitude: float,
         title: str,
@@ -499,7 +499,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def send_contact(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         phone_number: str,
         first_name: str,
         *,
@@ -523,7 +523,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def send_poll(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         question: str,
         options: list[tg.InputPollOption],
         *,
@@ -557,7 +557,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def send_dice(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -578,7 +578,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def send_chat_action(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         action: str,
         *,
         business_connection_id: str | None = None,
@@ -597,7 +597,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def set_message_reaction(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_id: int,
         *,
         reaction: list[tg.ReactionType] | None = None,
@@ -650,7 +650,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def ban_chat_member(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         user_id: int,
         *,
         until_date: int | None = None,
@@ -665,7 +665,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def unban_chat_member(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         user_id: int,
         *,
         only_if_banned: bool | None = None
@@ -679,7 +679,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def restrict_chat_member(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         user_id: int,
         permissions: tg.ChatPermissions,
         *,
@@ -695,7 +695,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def promote_chat_member(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         user_id: int,
         *,
         is_anonymous: bool | None = None,
@@ -723,7 +723,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def set_chat_administrator_custom_title(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         user_id: int,
         custom_title: str
     ) -> Task[t.Literal[True]]:
@@ -736,7 +736,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def ban_chat_sender_chat(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         sender_chat_id: int
     ) -> Task[t.Literal[True]]:
         """
@@ -748,7 +748,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def unban_chat_sender_chat(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         sender_chat_id: int
     ) -> Task[t.Literal[True]]:
         """
@@ -760,7 +760,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def set_chat_permissions(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         permissions: tg.ChatPermissions,
         *,
         use_independent_chat_permissions: bool | None = None
@@ -772,7 +772,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def export_chat_invite_link(self, chat_id: str | int) -> Task[str]:
+    def export_chat_invite_link(self, chat_id: int | str) -> Task[str]:
         """
         ### [exportChatInviteLink](https://core.telegram.org/bots/api#exportchatinvitelink)  
         
@@ -784,7 +784,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def create_chat_invite_link(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         *,
         name: str | None = None,
         expire_date: int | None = None,
@@ -800,7 +800,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def edit_chat_invite_link(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         invite_link: str,
         *,
         name: str | None = None,
@@ -817,7 +817,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def create_chat_subscription_invite_link(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         subscription_period: int,
         subscription_price: int,
         *,
@@ -832,7 +832,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def edit_chat_subscription_invite_link(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         invite_link: str,
         *,
         name: str | None = None
@@ -846,7 +846,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def revoke_chat_invite_link(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         invite_link: str
     ) -> Task[tg.ChatInviteLink]:
         """
@@ -858,7 +858,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def approve_chat_join_request(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         user_id: int
     ) -> Task[t.Literal[True]]:
         """
@@ -870,7 +870,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def decline_chat_join_request(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         user_id: int
     ) -> Task[t.Literal[True]]:
         """
@@ -882,7 +882,7 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_files=["photo"])
     def set_chat_photo(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         photo: Path | bytes
     ) -> Task[t.Literal[True]]:
         """
@@ -892,7 +892,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def delete_chat_photo(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def delete_chat_photo(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [deleteChatPhoto](https://core.telegram.org/bots/api#deletechatphoto)  
         
@@ -902,7 +902,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def set_chat_title(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         title: str
     ) -> Task[t.Literal[True]]:
         """
@@ -914,7 +914,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def set_chat_description(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         *,
         description: str | None = None
     ) -> Task[t.Literal[True]]:
@@ -927,7 +927,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def pin_chat_message(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_id: int,
         *,
         business_connection_id: str | None = None,
@@ -942,7 +942,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def unpin_chat_message(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         *,
         business_connection_id: str | None = None,
         message_id: int | None = None
@@ -954,7 +954,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def unpin_all_chat_messages(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def unpin_all_chat_messages(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [unpinAllChatMessages](https://core.telegram.org/bots/api#unpinallchatmessages)  
         
@@ -962,7 +962,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def leave_chat(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def leave_chat(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [leaveChat](https://core.telegram.org/bots/api#leavechat)  
         
@@ -970,7 +970,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def get_chat(self, chat_id: str | int) -> Task[tg.ChatFullInfo]:
+    def get_chat(self, chat_id: int | str) -> Task[tg.ChatFullInfo]:
         """
         ### [getChat](https://core.telegram.org/bots/api#getchat)  
         
@@ -978,7 +978,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def get_chat_administrators(self, chat_id: str | int) -> Task[list[tg.ChatMember]]:
+    def get_chat_administrators(self, chat_id: int | str) -> Task[list[tg.ChatMember]]:
         """
         ### [getChatAdministrators](https://core.telegram.org/bots/api#getchatadministrators)  
         
@@ -986,7 +986,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def get_chat_member_count(self, chat_id: str | int) -> Task[int]:
+    def get_chat_member_count(self, chat_id: int | str) -> Task[int]:
         """
         ### [getChatMemberCount](https://core.telegram.org/bots/api#getchatmembercount)  
         
@@ -996,7 +996,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def get_chat_member(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         user_id: int
     ) -> Task[tg.ChatMember]:
         """
@@ -1008,7 +1008,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def set_chat_sticker_set(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         sticker_set_name: str
     ) -> Task[t.Literal[True]]:
         """
@@ -1018,7 +1018,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def delete_chat_sticker_set(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def delete_chat_sticker_set(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [deleteChatStickerSet](https://core.telegram.org/bots/api#deletechatstickerset)  
         
@@ -1036,7 +1036,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def create_forum_topic(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         name: str,
         *,
         icon_color: int | None = None,
@@ -1051,7 +1051,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def edit_forum_topic(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_thread_id: int,
         *,
         name: str | None = None,
@@ -1066,7 +1066,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def close_forum_topic(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_thread_id: int
     ) -> Task[t.Literal[True]]:
         """
@@ -1078,7 +1078,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def reopen_forum_topic(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_thread_id: int
     ) -> Task[t.Literal[True]]:
         """
@@ -1090,7 +1090,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def delete_forum_topic(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_thread_id: int
     ) -> Task[t.Literal[True]]:
         """
@@ -1102,7 +1102,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def unpin_all_forum_topic_messages(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_thread_id: int
     ) -> Task[t.Literal[True]]:
         """
@@ -1114,7 +1114,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def edit_general_forum_topic(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         name: str
     ) -> Task[t.Literal[True]]:
         """
@@ -1124,7 +1124,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def close_general_forum_topic(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def close_general_forum_topic(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [closeGeneralForumTopic](https://core.telegram.org/bots/api#closegeneralforumtopic)  
         
@@ -1132,7 +1132,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def reopen_general_forum_topic(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def reopen_general_forum_topic(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [reopenGeneralForumTopic](https://core.telegram.org/bots/api#reopengeneralforumtopic)  
         
@@ -1140,7 +1140,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def hide_general_forum_topic(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def hide_general_forum_topic(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [hideGeneralForumTopic](https://core.telegram.org/bots/api#hidegeneralforumtopic)  
         
@@ -1148,7 +1148,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def unhide_general_forum_topic(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def unhide_general_forum_topic(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [unhideGeneralForumTopic](https://core.telegram.org/bots/api#unhidegeneralforumtopic)  
         
@@ -1156,7 +1156,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def unpin_all_general_forum_topic_messages(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def unpin_all_general_forum_topic_messages(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [unpinAllGeneralForumTopicMessages](https://core.telegram.org/bots/api#unpinallgeneralforumtopicmessages)  
         
@@ -1184,7 +1184,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def get_user_chat_boosts(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         user_id: int
     ) -> Task[tg.UserChatBoosts]:
         """
@@ -1372,14 +1372,14 @@ class Bot(BaseBot):
         text: str,
         *,
         business_connection_id: str | None = None,
-        chat_id: str | int | None = None,
+        chat_id: int | str | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None,
         parse_mode: str | None = None,
         entities: list[tg.MessageEntity] | None = None,
         link_preview_options: tg.LinkPreviewOptions | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageText](https://core.telegram.org/bots/api#editmessagetext)  
         
@@ -1391,7 +1391,7 @@ class Bot(BaseBot):
         self,
         *,
         business_connection_id: str | None = None,
-        chat_id: str | int | None = None,
+        chat_id: int | str | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None,
         caption: str | None = None,
@@ -1399,7 +1399,7 @@ class Bot(BaseBot):
         caption_entities: list[tg.MessageEntity] | None = None,
         show_caption_above_media: bool | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageCaption](https://core.telegram.org/bots/api#editmessagecaption)  
         
@@ -1412,11 +1412,11 @@ class Bot(BaseBot):
         media: tg.InputMedia,
         *,
         business_connection_id: str | None = None,
-        chat_id: str | int | None = None,
+        chat_id: int | str | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageMedia](https://core.telegram.org/bots/api#editmessagemedia)  
         
@@ -1430,7 +1430,7 @@ class Bot(BaseBot):
         longitude: float,
         *,
         business_connection_id: str | None = None,
-        chat_id: str | int | None = None,
+        chat_id: int | str | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None,
         live_period: int | None = None,
@@ -1438,7 +1438,7 @@ class Bot(BaseBot):
         heading: int | None = None,
         proximity_alert_radius: int | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageLiveLocation](https://core.telegram.org/bots/api#editmessagelivelocation)  
         
@@ -1450,11 +1450,11 @@ class Bot(BaseBot):
         self,
         *,
         business_connection_id: str | None = None,
-        chat_id: str | int | None = None,
+        chat_id: int | str | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [stopMessageLiveLocation](https://core.telegram.org/bots/api#stopmessagelivelocation)  
         
@@ -1466,11 +1466,11 @@ class Bot(BaseBot):
         self,
         *,
         business_connection_id: str | None = None,
-        chat_id: str | int | None = None,
+        chat_id: int | str | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageReplyMarkup](https://core.telegram.org/bots/api#editmessagereplymarkup)  
         
@@ -1480,7 +1480,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def stop_poll(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_id: int,
         *,
         business_connection_id: str | None = None,
@@ -1495,7 +1495,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def delete_message(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_id: int
     ) -> Task[t.Literal[True]]:
         """
@@ -1516,7 +1516,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def delete_messages(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         message_ids: list[int]
     ) -> Task[t.Literal[True]]:
         """
@@ -1539,7 +1539,7 @@ class Bot(BaseBot):
         gift_id: str,
         *,
         user_id: int | None = None,
-        chat_id: str | int | None = None,
+        chat_id: int | str | None = None,
         pay_for_upgrade: bool | None = None,
         text: str | None = None,
         text_parse_mode: str | None = None,
@@ -1584,7 +1584,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def verify_chat(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         *,
         custom_description: str | None = None
     ) -> Task[t.Literal[True]]:
@@ -1603,7 +1603,7 @@ class Bot(BaseBot):
         """
 
     @api_method_wrapper()
-    def remove_chat_verification(self, chat_id: str | int) -> Task[t.Literal[True]]:
+    def remove_chat_verification(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [removeChatVerification](https://core.telegram.org/bots/api#removechatverification)  
         
@@ -1852,8 +1852,8 @@ class Bot(BaseBot):
     @api_method_wrapper(check_input_files=["sticker"])
     def send_sticker(
         self,
-        chat_id: str | int,
-        sticker: str | Path | bytes,
+        chat_id: int | str,
+        sticker: Path | bytes | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -2021,7 +2021,7 @@ class Bot(BaseBot):
         user_id: int,
         format: str,
         *,
-        thumbnail: str | Path | bytes | None = None
+        thumbnail: Path | bytes | str | None = None
     ) -> Task[t.Literal[True]]:
         """
         ### [setStickerSetThumbnail](https://core.telegram.org/bots/api#setstickersetthumbnail)  
@@ -2105,7 +2105,7 @@ class Bot(BaseBot):
     @api_method_wrapper()
     def send_invoice(
         self,
-        chat_id: str | int,
+        chat_id: int | str,
         title: str,
         description: str,
         payload: str,
@@ -2288,7 +2288,7 @@ class Bot(BaseBot):
         chat_id: int | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [setGameScore](https://core.telegram.org/bots/api#setgamescore)  
         
