@@ -1,7 +1,5 @@
 """
 ## **SwissCore TBA Lite**
-![Python](https://img.shields.io/badge/python-3.11%2B-blue)  
-
 A minimal, async-native **Telegram Bot API** library — built for developers who want power without the clutter.
 
 *See [docs](https://github.com/SwissCore92/swisscore-tba-lite) on GitHub for more info.*
