@@ -1,4 +1,7 @@
+import asyncio
 import typing as t
+import time
+from datetime import timedelta
 from inspect import iscoroutinefunction
 from copy import deepcopy
 
@@ -48,8 +51,13 @@ class EventManager:
         self.__shutdown_handler: EventHandler = None
         self.__temporary_handlers: dict[EventName, list[TemporaryEventHandler]] = {}
         self.__update_handlers: dict[EventName, list[EventHandler]] = dict((k, []) for k in TELEGRAM_EVENT_TYPES)
+        self.__locked = False
     
-    def _get_handled_event_types(self) -> list[str]:
+    def _lock(self):
+        """*for internal use*"""
+        self.__locked = True
+
+    def _get_handled_event_types(self) -> list[literals.UpdateType]:
         """
         Get a list of all handled event types.
         
@@ -57,7 +65,15 @@ class EventManager:
         """
         return [k for k, v in self.__update_handlers.items() if v]
     
+    def _remove_temporary_event_handler(self, tmp_event_handler: "TemporaryEventHandler", reason="handled"):
+        """*for internal use only*"""
+        self.__temporary_handlers[tmp_event_handler.type].remove(tmp_event_handler)
+        if len(self.__temporary_handlers[tmp_event_handler.type]) == 0:
+            self.__temporary_handlers.pop(tmp_event_handler.type)
+        logger.debug(f"Removed {(repr(tmp_event_handler))} - Reason: {repr(reason)}")
+
     async def _trigger_event(self, event_name: EventName, *args) -> bool:
+        """*for internal use only*"""
         match event_name:
             case "startup":
                 if self.__startup_handler is not None:
@@ -74,25 +90,28 @@ class EventManager:
 
                 # check temporary handlers first
                 if event_name in self.__temporary_handlers:
-                    hanlded_tmp_event: TemporaryEventHandler | None = None
-                    for tmp_handler in self.__temporary_handlers[event_name]:
-                        if handler := await tmp_handler.matches(obj):
-                            result = await handler(obj) if handler._arg_count == 1 else await handler(obj, tmp_handler.context)
-                            if result is EventManager.UNHANDLED:
-                                # event handler returned that it is unhandled
-                                return
-                            else:
-                                # event handler returned nothing, so it is considered handled
-                                hanlded_tmp_event = tmp_handler
-                            break
-                    if hanlded_tmp_event:
-                        # remove temporay event
-                        self.__temporary_handlers[event_name].remove(hanlded_tmp_event)
-                        logger.debug(f"Removed {(repr(hanlded_tmp_event))}")
-                        if len(self.__temporary_handlers[event_name]) == 0:
-                            self.__temporary_handlers.pop(event_name)
-                        return
+                    for tmp_handler in self.__temporary_handlers[event_name].copy():
+                        
+                        # TODO: check in realtime. not on matching update type
+                        if tmp_handler.is_expired():
+                            # remove expired event handler
+                            self._remove_temporary_event_handler(tmp_handler, "expired")
+                            continue
 
+                        if await tmp_handler.matches(obj):
+                            if handler := await tmp_handler.get_matching_handler(obj):
+                                result = await handler(obj) if handler._arg_count == 1 else await handler(obj, tmp_handler.context)
+                                if result is EventManager.UNHANDLED:
+                                    # event handler returned that it is unhandled
+                                    return True
+                                else:
+                                    # event handler returned nothing, so it is considered handled
+                                    self._remove_temporary_event_handler(tmp_handler, "handled")
+                                    return True
+                            
+                            logger.warning(f"{repr(tmp_handler)} matched. But none of its handlers did.")
+                
+                # check static handlers
                 if handlers := self.__update_handlers.get(event_name):
                     for handler in handlers:
                         if await handler.matches(deepcopy(obj)):
@@ -108,8 +127,7 @@ class EventManager:
                 logger.warning(f"No matching event handler found for update of type '{event_name}'. Update was dropped.")
                 return False
                 
-
-    def __call__(self, event_name: EventName, *filters: t.Callable[[dict[str, t.Any]], t.Any]):
+    def __call__(self, event_name: EventName, *filters: FilterFunction):
         """
         Resgister an event handler of any type.
         
@@ -171,6 +189,9 @@ class EventManager:
             filters (list[Callable], optional): A list of filter functions.  
         """
 
+        if self.__locked:
+            raise RuntimeError("It's not allowed to register static event handlers at runtime.")
+
         def register(func: t.Callable[[dict], t.Any]):
             exceptions.raise_for_not_coro(func)
             
@@ -196,7 +217,7 @@ class EventManager:
                         raise KeyError(f"'{event_name}' is an invalid event_name")
 
                     if func.__code__.co_argcount == 2:
-                        # this event handler is likely used as tmp handler too
+                        # this event handler is likely used as temporary handler too
                         if not func.__defaults__:
                             raise TypeError(f"The second argument of {func_info(func)} `{func.__code__.co_varnames[1]}` must have a default value.")
                     elif func.__code__.co_argcount != 1:
@@ -220,10 +241,10 @@ class EventManager:
     def wait_for(
         self, 
         event_name: EventName, 
+        *filters: FilterFunction,
         handlers: list[tuple[HandlerFunction, list[FilterFunction]]], 
-        *,
         context: t.Any | None = None,
-        shared_filters: list[FilterFunction]
+        timeout: float | timedelta | None = None
     ) -> None:
         """
         create a temporary event listener.
@@ -233,14 +254,15 @@ class EventManager:
             handlers: the temporary handlers
             context (optional): an optional context (can be anything)
             shared_filters (optional): a list of shared filters. **Note:** these are checked first.
+            timeout (optional): a timeout for the temporary handler (in seconds).  
 
         Example usage:
         ```python
         # add a test command handler
         @bot.event("message", chat_types("private"), commands("test"))
-        async def test_cmd(msg: tg.Message):
+        async def test_cmd(msg: dict):
             # define a temporary handler
-            async def countdown(m: tg.Message, ctx):
+            async def countdown(m: dict, ctx: dict):
                 if ctx["count"] > 0:
                     bot("sendMessage", {
                         "chat_id": m["chat"]["id"],
@@ -254,33 +276,35 @@ class EventManager:
                     "text": "BOOM! 💥"
                 })
             
-            bot("sendMessage", {
-                "chat_id": msg["chat"]["id"],
-                "text": "Explode after 3..."
-            })
+            context = {"count": 3}
+            await countdown(msg, context)
 
             # register the temporary handler
             bot.event.wait_for("message", [
                 (countdown, [chat_ids(msg["chat"]["id"])]),
-            ], context={"count": 2})
+            ], context=context)
         ```
 
         """
         if event_name not in TELEGRAM_EVENT_TYPES:
             raise KeyError(f"'{event_name}' is an invalid event_name")
-        
-        if not event_name in self.__temporary_handlers:
-            self.__temporary_handlers[event_name] = []
-        
-        if not shared_filters:
-            shared_filters = []
+
+        expires_at = None
+        if isinstance(timeout, timedelta):
+            timeout = timeout.seconds
+        if isinstance(timeout, (int, float)):
+            expires_at = time.time() + timeout
         
         handler = TemporaryEventHandler(
             event_name, 
-            [EventHandler(event_name, x[0], [*shared_filters, *[1]]) for x in handlers], 
+            [EventHandler(event_name, handler, filters) for handler, filters in handlers], 
             context=context, 
-            shared_filters=shared_filters
+            filters=list(filters),
+            expires_at=expires_at
         )
+
+        if not event_name in self.__temporary_handlers:
+            self.__temporary_handlers[event_name] = []
         self.__temporary_handlers[event_name].append(handler)
         logger.debug(f"Added {(repr(handler))}")
 
@@ -289,8 +313,8 @@ class EventHandler:
     def __init__(
         self, 
         type: EventName, 
-        func: t.Callable[[dict[str, t.Any]], None | UnhandledEventType], 
-        filters: list[t.Callable[[dict[str, t.Any]], bool]] | None = None
+        func: HandlerFunction, 
+        filters: list[FilterFunction] | None = None
     ) -> None:
         self.type = type
         self.func = func
@@ -332,13 +356,20 @@ class EventHandler:
             return True
         
         except Exception as e:
-            logger.error(f"Exception while evaluating {self}: {repr(e)}", exc_info=True)
+            logger.error(f"Exception while evaluating {repr(self)}: {repr(e)}", exc_info=True)
             raise exceptions.FilterEvaluationError(
                 f"Error in {repr(self)} filter evaluation. Error: {e}"
             ) from e
 
 class TemporaryEventHandler:
-    def __init__(self, type: str, handlers: list[EventHandler], context: t.Any | None = None):
+    def __init__(
+        self, 
+        type: str, 
+        handlers: list[EventHandler], 
+        context: t.Any | None = None, 
+        filters: list[FilterFunction] | None = None,
+        expires_at: float | None = None
+    ):
         self.type = type
 
         for h in handlers:
@@ -347,9 +378,30 @@ class TemporaryEventHandler:
 
         self.handlers = handlers
         self.context = context
+        self.filters = filters
+        self.expires_at = expires_at
+    
+    def is_expired(self) -> bool:
+        if self.expires_at == None:
+            return False
+        return time.time() > self.expires_at
+    
+    async def matches(self, update_obj: dict[str, t.Any]) -> bool:
+        if not self.filters:
+            return True
+        try:
+            return all([
+                await f(update_obj) if iscoroutinefunction(f) else f(update_obj) for f in self.filters
+            ])
+        
+        except Exception as e:
+            logger.error(f"Exception while evaluating {repr(self)}: {repr(e)}", exc_info=True)
+            raise exceptions.FilterEvaluationError(
+                f"Error in {repr(self)} filter evaluation. Error: {e}"
+            ) from e
 
-    async def matches(self, update_obj: dict[str, t.Any]) -> EventHandler | None:
-        for i, handler in enumerate(self.handlers):
+    async def get_matching_handler(self, update_obj: dict[str, t.Any]) -> EventHandler | None:
+        for handler in self.handlers:
             if await handler.matches(update_obj):
                 return handler
     
