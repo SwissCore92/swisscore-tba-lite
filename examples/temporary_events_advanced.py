@@ -94,10 +94,13 @@ async def on_cmd_set_pic(msg: dict[str]):
             })
 
             # register the next step of the temporary event to check for a valid bot picture
-            bot.event.wait_for("message", [
-                (on_cmd_cancel, [is_valid_chat_user, commands("cancel")]), 
-                (set_bot_pic, [is_valid_chat_user])
-            ], context={"action": "setuserpic", "bot_name": bot_name})
+            bot.event.wait_for("message", is_valid_chat_user,
+                handlers=[
+                    (on_cmd_cancel, [commands("cancel")]), 
+                    (set_bot_pic, [])
+                ], 
+                context={"action": "setuserpic", "bot_name": bot_name}
+            )
 
             # return nothing, so this step of the temporary event is considered handled (finished)
             # but we already registered the next step above
@@ -127,10 +130,13 @@ async def on_cmd_set_pic(msg: dict[str]):
     })
 
     # register the first step of the temporary event to check for a valid bot name
-    bot.event.wait_for("message", [
-        (on_cmd_cancel, [is_valid_chat_user, commands("cancel")]),
-        (check_selected_bot, [is_valid_chat_user])
-    ], context={"action": "setuserpic", "valid_bots": bots})
+    bot.event.wait_for("message", is_valid_chat_user,
+        handlers=[
+            (on_cmd_cancel, [commands("cancel")]),
+            (check_selected_bot, [])
+        ], 
+        context={"action": "setuserpic", "valid_bots": bots}
+    )
 
 # define a shutdown event handler
 @bot.event("shutdown")

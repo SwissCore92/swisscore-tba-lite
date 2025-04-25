@@ -663,6 +663,8 @@ class BaseBot:
         ```
         """
         exit_code: int = 0
+
+        self.event._lock()
         
         params = {
             "offset": 0, 
@@ -776,6 +778,9 @@ class BaseBot:
         asyncio.run(bot._idle_loop())
         ```
         """
+
+        self.event._lock()
+
         exit_code: int = 0
         
         logger.debug("Start client session")
