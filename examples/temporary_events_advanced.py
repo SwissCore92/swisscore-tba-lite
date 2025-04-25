@@ -9,7 +9,7 @@ bot = Bot(os.environ.get("API_TOKEN", "<YOUR_API_TOKEN>"))
 # Mimic @BotFather's /setuserpic command #
 ##########################################
 
-# define a starup event handler
+# define a startup event handler
 @bot.event("startup")
 async def on_startup():
     # Set the bots commands for private chats
@@ -141,5 +141,5 @@ async def on_startup(_):
         "scope": {"type": "all_private_chats"}
     })
 
-#start the bot in polling mode
+# start the bot in polling mode
 bot.start_polling()
