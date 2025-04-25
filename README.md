@@ -2,7 +2,8 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11+-2CA5E0?style=for-the-badge&logo=python&logoColor=white)
 ![Telegram Bot API](https://img.shields.io/badge/Telegram%20Bot%20API-v9.0-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)
- 
+<!-- ![PyPI](https://img.shields.io/badge/PyPI-1.0.0-2CA5E0?style=for-the-badge&logo=pypi&logoColor=white) -->
+
 
 A minimal, async-native **Telegram Bot API** library — built for developers who want power without the clutter.
 
@@ -480,10 +481,10 @@ It's possible to chain event handlers without manual re-dispatching logic by jus
 * **Graceful fallbacks:** You can write a series of specific handlers followed by a general catch-all without filter spaghetti.
 * **More expressive filters:** You can "fail" a match manually even if the filters pass, which is great for edge cases (like optional preconditions).
 
+See [Temporary Events](#temporary-events) for more usecases of `bot.event.UNHANDLED`.
+
 <details>
 <summary>Example</summary>
-
-But where `bot.event.UNHANDLED` really shines is in [Temporary Events](#temporary-events).
 
 ```python
 
@@ -505,35 +506,74 @@ async def handle_file(msg):
 
 ## Temporary Events
 
-*Details will be added later*
+This library allows you to **register temporary event handlers** at runtime `using bot.event.wait_for(...)`. These handlers are useful for managing dynamic, stateful conversation flows—such as wizards, confirmation dialogs, or guided inputs—where user interaction drives the next steps. 
+ 
+Temporary event handlers are short-lived and are **not persisted across bot restarts**. They are best suited for ephemeral, in-session workflows where you want to "wait" for a specific user input before proceeding.
+
+***How it works***
+* Temporary event handlers are registered dynamically using `bot.event.wait_for(...)`.
+* They are context-aware, meaning you can pass and maintain custom state (via a arbitrary context object) between steps.
+* They operate on a first-matched, first-handled basis and can be layered to form multi-step flows.
+* If a temporary event handler matches, the event vill **will not** propagate to static/default event handlers. No matter if `bot.event.UNHANDLED` was returned.
+* If a temporary event handler returns `bot.event.UNHANDLED`, the temporary event handler will be considered unhandled and will continue listening for future matching events (updates). **Else, it will be removed automatically**.
+
+*Note: Temporary event handlers exist only in memory. They are lost on bot restart.*
 
 <details>
 <summary>Example</summary>
 
 ```python
-import os 
+from swisscore_tba_lite.filters import commands, chat_types, chat_ids
 
-from swisscore_tba_lite import BaseBot as Bot
+# define a test command handler
+@bot.event("message", chat_types("private"), commands("test"))
+async def test_cmd(msg: dict):
+    # define a temporary handler
+    async def countdown(m: dict, ctx: dict):
+        if ctx["count"] > 0:
+            bot("sendMessage", {
+                "chat_id": m["chat"]["id"],
+                "text": f"Explode after {ctx["count"]}..."
+            })
+            ctx["count"] -= 1
+            return bot.event.UNHANDLED
+        
+        bot("sendMessage", {
+            "chat_id": msg["chat"]["id"],
+            "text": "BOOM! 💥"
+        })
+    
+    # define a temporary canel command handler
+    async def cancel_countdown(msg: dict):
+        bot("sendMessage", {
+            "chat_id": msg["chat"]["id"],
+            "text": "Explosion canceled!"
+        })
+    
+    context = {"count": 3}
+    await countdown(msg, context)
+
+    # register the temporary handler
+    bot.event.wait_for("message", chat_ids(msg["chat"]["id"]), 
+        handlers=[
+            (cancel_countdown, [commands("cancel")]),
+            (countdown, []),
+        ], 
+        context=context
+    )
+```
+
+</details>
+
+<details>
+<summary>Advanced Example</summary>
+
+```python
 from swisscore_tba_lite.filters import commands, chat_types, chat_ids, from_ids, if_all
-
-bot = Bot(os.environ.get("API_TOKEN", "<YOUR_API_TOKEN>"))
 
 ##########################################
 # Mimic @BotFather's /setuserpic command #
 ##########################################
-
-# define a starup event handler
-@bot.event("startup")
-async def on_startup():
-    # Set the bots commands for private chats
-    # Note: you may have to close and reopen the chat with your bot to see these changes
-    bot("setMyCommands", {
-        "commands": [
-            {"command": "setuserpic", "description": "change bot profile photo"},
-            {"command": "cancel", "description": "cancel the current operation"}
-        ],
-        "scope": {"type": "all_private_chats"}
-    })
 
 # define a /cancel command event handler with an optional context argument
 @bot.event("message", chat_types("private"), commands("cancel"))
@@ -556,7 +596,6 @@ async def on_cmd_cancel(msg: dict[str], ctx=None):
 # define a /setuserpic command event handler 
 @bot.event("message", chat_types("private"), commands("setuserpic"))
 async def on_cmd_set_pic(msg: dict[str]):
-
     # define a filter to make sure to target the correct chat and user 
     is_valid_chat_user = if_all(
         chat_ids(msg["chat"]["id"]), 
@@ -607,10 +646,13 @@ async def on_cmd_set_pic(msg: dict[str]):
             })
 
             # register the next step of the temporary event to check for a valid bot picture
-            bot.event.wait_for("message", [
-                (on_cmd_cancel, [is_valid_chat_user, commands("cancel")]), 
-                (set_bot_pic, [is_valid_chat_user])
-            ], context={"action": "setuserpic", "bot_name": bot_name})
+            bot.event.wait_for("message", is_valid_chat_user,
+                handlers=[
+                    (on_cmd_cancel, [commands("cancel")]), 
+                    (set_bot_pic, [])
+                ], 
+                context={"action": "setuserpic", "bot_name": bot_name}
+            )
 
             # return nothing, so this step of the temporary event is considered handled (finished)
             # but we already registered the next step above
@@ -640,22 +682,13 @@ async def on_cmd_set_pic(msg: dict[str]):
     })
 
     # register the first step of the temporary event to check for a valid bot name
-    bot.event.wait_for("message", [
-        (on_cmd_cancel, [is_valid_chat_user, commands("cancel")]),
-        (check_selected_bot, [is_valid_chat_user])
-    ], context={"action": "setuserpic", "valid_bots": bots})
-
-# define a shutdown event handler
-@bot.event("shutdown")
-async def on_startup(_):
-    # remove the bots commands for private chats
-    # Note: you may have to close and reopen the chat with your bot to see these changes
-    bot("deleteMyCommands", {
-        "scope": {"type": "all_private_chats"}
-    })
-
-#start the bot in polling mode
-bot.start_polling()
+    bot.event.wait_for("message", is_valid_chat_user,
+        handlers=[
+            (on_cmd_cancel, [commands("cancel")]),
+            (check_selected_bot, [])
+        ], 
+        context={"action": "setuserpic", "valid_bots": bots}
+    )
 ```
 
 </details>
