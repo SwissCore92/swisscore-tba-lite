@@ -603,7 +603,7 @@ async def on_cmd_set_pic(msg: dict[str]):
     )
 
     # define an temporary event handler to check if the user has sent a valid photo 
-    # accept the contect as second argument which contains the chosen bot's name
+    # accept the context as second argument which contains the chosen bot's name
     async def set_bot_pic(msg: dict, ctx: dict):
         if msg.get("photo"):
             # the user has sent a valid photo
@@ -633,7 +633,7 @@ async def on_cmd_set_pic(msg: dict[str]):
         return bot.event.UNHANDLED
     
     # define an temporary event handler to check if the user provided a valid bot name
-    # accept the contect as second argument which contains a list of valid bot names
+    # accept the context as second argument which contains a list of valid bot names
     async def check_selected_bot(msg: dict, ctx: dict):
 
         bot_name = msg.get("text", "").strip()
