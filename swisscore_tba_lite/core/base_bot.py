@@ -14,7 +14,9 @@ from .logger import logger
 from .event import EventManager
 from . import exit_codes
 from . import exceptions
+from .file_downloader import FileDownloader
 from ..bot_api import literals
+from ..bot_api import objects
 
 T = t.TypeVar("T")
 JsonDict = dict[str, t.Any]
@@ -375,98 +377,141 @@ class BaseBot:
     
     #region core
 
-    def download(
-        self, 
-        file_obj: JsonDict, 
-        dest_dir: str | Path | None = None, 
-        file_name: str | None = None,
-        *,
-        overwrite_existing: bool = False, 
-        bs: int | None = None,
-    ) -> asyncio.Task[Path]:
-        """Download a file from telegram server.
+    def download(self, file: objects.File) -> FileDownloader:
+        """Download a file from telegram server.  
         
-        **Note: The file must be fetched from telegram first using the `getFile` method**
+        **Note:** The file must be *fetched from telegram first* using the [`getFile`](https://core.telegram.org/bots/api#getfile) method.
         
-        Example Usage:
+        Example ussage:
         ```python
-        # filtering messages with document 
-        @bot.event("message", is_document, lambda m: m["document"].get("file_name"))
+
+        # Download as file
+
+        @bot.event("message", is_document)
         async def on_document_message(msg: dict[str]):
             doc = msg["document"]
-            file_obj = await bot("getFile", {"file_id": doc["file_id"]})
-            file_path = await bot.download(file_obj, Path.cwd() / ".tmp", doc["file_name"], overwrite_existing=True)
+            if file_name := doc.get("file_name"):
+                file_obj = await bot("getFile", {"file_id": doc["file_id"]})
+                async with bot.download(file_obj) as download:
+                    await download.as_file(file_name)
+
+        # Download as base64:
+
+        @bot.event("message", is_photo)
+        async def on_photo_message(msg: dict[str]):
+            photo = sorted(msg["photo"], key=lambda p: p["height"])[-1]
+            file_obj = await bot("getFile", {"file_id": photo["file_id"]})
+            async with bot.download(file_obj) as download:
+                b64 = await download.as_base64("utf-8")
         ```
 
         Args:
-            file_obj (JsonDict): The file object received by using `getFile` api method.
-            dest_dir (str | Path | None, optional): The destination directory. Defaults to Current working directory `Path.cwd()` (Usually the location of your script).
-            file_name (str | None, optional): The destination file name (**with suffix** eg. *'document.txt' **not** 'document'*). Defaults to `file_obj['file_name'] if present else the name in file_obj['file_path']`.
-            overwrite_existing (bool, optional): If set to `True` and the file already exists, the file is overwritten. Else a `FileExistsError` is raised. Defaults to `False`.
-            bs (int, optional): The chunk size for the download in bytes. If `bs <= 0`, the file is downloaded as a whole. Defaults to 16KiB (16384)
-        Raises:
-            KeyError: if `file_path` not found in `file_obj`
-            NotADirectoryError: if dest_dir is not a directory
-            FileNotFoundError: if dest_dir is not found
-            FileExistsError: if destination file already exists and `overwrite_existing` is `False`
-            TelegramError: if the download fails for some reason
+            file_obj (File): The [`File`](https://core.telegram.org/bots/api#file) object to download. Use [`getFile`](https://core.telegram.org/bots/api#getfile) to fetch it.
 
         Returns:
-            Task[Path]: A scheduled task that downloads the file.
+            FileDownloader: _description_
         """
-        if not "file_path" in file_obj:
-            raise KeyError("'file_path' is not present in file_obj. Did you get the file correctly using 'getFile'?")
+        if not isinstance(file, dict):
+            raise TypeError(f"File obj expected (dict). Got {type(file)}.")
         
-        if dest_dir is None:
-            dest_dir = Path.cwd()
-        elif isinstance(dest_dir, str):
-            dest_dir = Path(dest_dir)
+        if "file_path" not in file:
+            raise KeyError(f"Invalid File object. Field `file_path` does not exist.")
+
+        return FileDownloader(f"{self.file_url}/{file["file_path"]}", self.session)
+
+
+    # def download(
+    #     self, 
+    #     file_obj: JsonDict, 
+    #     dest_dir: str | Path | None = None, 
+    #     file_name: str | None = None,
+    #     *,
+    #     overwrite_existing: bool = False, 
+    #     bs: int | None = None,
+    # ) -> asyncio.Task[Path]:
+    #     """Download a file from telegram server.
         
-        if not dest_dir.exists():
-            raise FileNotFoundError(f"<dest_dir> was not found.")
-        if not dest_dir.is_dir():
-            raise NotADirectoryError(f"<dest_dir> is not a directory.")
+    #     **Note: The file must be fetched from telegram first using the `getFile` method**
         
-        tg_file_path: str = file_obj["file_path"]
+    #     Example Usage:
+    #     ```python
+    #     # filtering messages with document 
+    #     @bot.event("message", is_document, lambda m: m["document"].get("file_name"))
+    #     async def on_document_message(msg: dict[str]):
+    #         doc = msg["document"]
+    #         file_obj = await bot("getFile", {"file_id": doc["file_id"]})
+    #         file_path = await bot.download(file_obj, Path.cwd() / ".tmp", doc["file_name"], overwrite_existing=True)
+    #     ```
+
+    #     Args:
+    #         file_obj (JsonDict): The file object received by using `getFile` api method.
+    #         dest_dir (str | Path | None, optional): The destination directory. Defaults to Current working directory `Path.cwd()` (Usually the location of your script).
+    #         file_name (str | None, optional): The destination file name (**with suffix** eg. *'document.txt' **not** 'document'*). Defaults to `file_obj['file_name'] if present else the name in file_obj['file_path']`.
+    #         overwrite_existing (bool, optional): If set to `True` and the file already exists, the file is overwritten. Else a `FileExistsError` is raised. Defaults to `False`.
+    #         bs (int, optional): The chunk size for the download in bytes. If `bs <= 0`, the file is downloaded as a whole. Defaults to 16KiB (16384)
+    #     Raises:
+    #         KeyError: if `file_path` not found in `file_obj`
+    #         NotADirectoryError: if dest_dir is not a directory
+    #         FileNotFoundError: if dest_dir is not found
+    #         FileExistsError: if destination file already exists and `overwrite_existing` is `False`
+    #         TelegramError: if the download fails for some reason
+
+    #     Returns:
+    #         Task[Path]: A scheduled task that downloads the file.
+    #     """
+    #     if not "file_path" in file_obj:
+    #         raise KeyError("'file_path' is not present in file_obj. Did you get the file correctly using 'getFile'?")
         
-        if file_name is None:
-            file_name = file_obj.get("file_name", tg_file_path.rsplit("/", 1)[-1])
+    #     if dest_dir is None:
+    #         dest_dir = Path.cwd()
+    #     elif isinstance(dest_dir, str):
+    #         dest_dir = Path(dest_dir)
+        
+    #     if not dest_dir.exists():
+    #         raise FileNotFoundError(f"<dest_dir> was not found.")
+    #     if not dest_dir.is_dir():
+    #         raise NotADirectoryError(f"<dest_dir> is not a directory.")
+        
+    #     tg_file_path: str = file_obj["file_path"]
+        
+    #     if file_name is None:
+    #         file_name = file_obj.get("file_name", tg_file_path.rsplit("/", 1)[-1])
             
-        dest_file = dest_dir / str(file_name)
+    #     dest_file = dest_dir / str(file_name)
         
-        if dest_file.exists():
-            if not overwrite_existing:
-                raise FileExistsError(f"<dest_dir>/{dest_file.name} already exists and overwriting is not allowed.")
+    #     if dest_file.exists():
+    #         if not overwrite_existing:
+    #             raise FileExistsError(f"<dest_dir>/{dest_file.name} already exists and overwriting is not allowed.")
         
-        bs = bs or 16*utils.KiB
+    #     bs = bs or 16*utils.KiB
         
-        file_size = file_obj.get("file_size", 0)
+    #     file_size = file_obj.get("file_size", 0)
 
-        async def _download_file():
-            async with aiofiles.open(dest_file, "wb") as f:
+    #     async def _download_file():
+    #         async with aiofiles.open(dest_file, "wb") as f:
                 
-                async with self.session.get(f"{self.file_url}/{tg_file_path}") as r:
+    #             async with self.session.get(f"{self.file_url}/{tg_file_path}") as r:
                     
-                    logger.debug(f"Start downloading '<dest_dir>/{file_name}' "
-                        f"(Predicted Size: {utils.readable_file_size(file_size)})"
-                    )
+    #                 logger.debug(f"Start downloading '<dest_dir>/{file_name}' "
+    #                     f"(Predicted Size: {utils.readable_file_size(file_size)})"
+    #                 )
                     
-                    await exceptions.raise_for_telegram_error("DownloadFile", r)
+    #                 await exceptions.raise_for_telegram_error("DownloadFile", r)
                     
-                    if bs <= 0:
-                        await f.write(await r.content.read())
+    #                 if bs <= 0:
+    #                     await f.write(await r.content.read())
                     
-                    else:
-                        async for chunk in r.content.iter_chunked(bs):
-                            await f.write(chunk)
+    #                 else:
+    #                     async for chunk in r.content.iter_chunked(bs):
+    #                         await f.write(chunk)
                 
-                logger.debug(f"Successfully downloaded '<dest_dir>/{file_name}' "
-                    f"(Size: {utils.readable_file_size(os.stat(dest_file).st_size)})"
-                )
+    #             logger.debug(f"Successfully downloaded '<dest_dir>/{file_name}' "
+    #                 f"(Size: {utils.readable_file_size(os.stat(dest_file).st_size)})"
+    #             )
         
-            return dest_file
+    #         return dest_file
 
-        return self._create_task(_download_file())
+    #     return self._create_task(_download_file())
 
     def __call__(
         self, 
@@ -779,7 +824,7 @@ class BaseBot:
         ```
         """
 
-        self.event._lock()
+        
 
         exit_code: int = 0
         
