@@ -140,7 +140,7 @@ async def on_cmd_set_pic(msg: dict[str]):
 
 # define a shutdown event handler
 @bot.event("shutdown")
-async def on_startup(_):
+async def on_shutdown(_):
     # remove the bots commands for private chats
     # Note: you may have to close and reopen the chat with your bot to see these changes
     bot("deleteMyCommands", {
