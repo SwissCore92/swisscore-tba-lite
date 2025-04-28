@@ -52,6 +52,13 @@ def is_valid_bot_api_token(token: str) -> bool:
     pattern = r"^\d{10}:[A-Za-z0-9_-]+$"
     return bool(re.match(pattern, token))
 
+def markdown_escape(text: str) -> str:
+    CHARS = ["_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!", "\\"]
+    return "".join(
+        f"\\{character}" if character in CHARS else character
+        for character in text
+    )
+
 def get_update_type(update_obj: dict[str, t.Any]) -> str:
     return [k for k in update_obj.keys() if not k == "update_id"][0]
 
@@ -113,7 +120,7 @@ async def process_input_files(params: dict, check_input_files: list[str]) -> dic
             if val.exists():
                 input_files[key] = await read_file(val)
             else:
-                raise FileNotFoundError(f"'{val} not found!'")
+                raise FileNotFoundError(f"{val} not found!")
             
         elif isinstance(val, bytes):
             input_files[key] = val
