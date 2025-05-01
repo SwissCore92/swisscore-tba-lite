@@ -79,7 +79,7 @@ class RestartBotException(Exception):
 
 class TelegramAPIError(Exception):
     """Base exception for all Telegram API errors."""
-    def __init__(self, method_name, status_code, message="Unknown Error", retryable=False, retry_after=None, critical=False):
+    def __init__(self, method_name: str, status_code: int, message: str="Unknown Error", retryable: bool=False, retry_after: int=None, critical: bool=False):
         self.method_name = method_name
         self.status_code = status_code
         self.message = message
@@ -174,17 +174,15 @@ async def raise_for_telegram_error(method_name: str, response: ClientResponse) -
         504: GatewayTimeout,
     }
     
-    exc: Exception | None = None
+    # exc: Exception | None = None
 
     if response.status == 429:
-        exc = TooManyRequests(method_name, response.status, description, response_json.get("retry_after", 5))
+        raise TooManyRequests(method_name, response.status, description, response_json.get("parameters", {}).get("retry_after", 5))
     
     if response.status == 404:
-        exc = NotFound(method_name, response.status, description + f" URL: '{sanitize_token(response.url)}'")
+        raise NotFound(method_name, response.status, description + f" URL: '{sanitize_token(response.url)}'")
     
     else:
         exception = error_map.get(response.status, TelegramAPIError)
-        exc = exception(method_name, response.status, description)
-    
-    raise exc
+        raise exception(method_name, response.status, description)
 
