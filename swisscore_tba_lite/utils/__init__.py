@@ -21,11 +21,11 @@ def readable_file_size(b: int) -> str:
     if b < KiB:
         return f"{b}Bytes"
     if b < MiB:
-        return f"{b/KiB:.2f}KiB"
+        return f"{b/KiB:.02f}KiB"
     if b < GiB:
-        return f"{b/MiB:.2f}MiB"
+        return f"{b/MiB:.02f}MiB"
     
-    return f"{b/GiB:2f}MiB"
+    return f"{b/GiB:.02f}GiB"
 
 def is_mac_os():
     return platform.system() == "Darwin"
