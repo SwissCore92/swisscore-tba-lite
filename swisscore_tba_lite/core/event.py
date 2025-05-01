@@ -24,26 +24,6 @@ class EventManager:
     UNHANDLED = UnhandledEventType
     """
     Return this in an event handler to mark the event as unhandled and continue processing the update.  
-    
-    This allows you to make small, single purpose handlers without filter spaghetti.
-    
-    Usage:
-    ```python
-    
-    from swisscore_tba_lite.filters import sub_keys
-    
-    @bot.event("message", sub_keys("document", "mime_type")):
-    async def handle_pdf(msg):
-        if msg["document"]["mime_type"] != "application/pdf":
-            return bot.event.UNHANDLED
-        
-        # Handle pdf document
-    
-    @bot.event("message", sub_keys("document", "mime_type")):
-    async def handle_file(msg):
-        ...
-        # Continue handling the document (which is no pdf file)
-    ```
     """
     
     def __init__(self):
@@ -54,7 +34,7 @@ class EventManager:
         self.__locked = False
     
     def _lock(self):
-        """*for internal use*"""
+        """*for internal use only*"""
         self.__locked = True
 
     def _get_handled_event_types(self) -> list[literals.UpdateType]:
@@ -288,6 +268,11 @@ class EventManager:
         """
         if event_name not in TELEGRAM_EVENT_TYPES:
             raise KeyError(f"'{event_name}' is an invalid event_name")
+        
+        if event_name not in self._get_handled_event_types():
+            # TODO: update allowed_updates instead
+            logger.warning(f"'{event_name}' is not in 'allowed_updates'")
+            return
 
         expires_at = None
         if isinstance(timeout, timedelta):
