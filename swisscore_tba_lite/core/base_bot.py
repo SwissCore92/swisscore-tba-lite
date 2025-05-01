@@ -31,7 +31,7 @@ methods that always must be dispatched to the cloud telegram bot api server
 """
 
 # decorator
-def request_task_wrapper(catch_errors: bool):
+def request_task_wrapper(catch_errors: bool, rate_control: asyncio.Semaphore):
     """
     *decorator* for the request task coroutine.
     
@@ -41,7 +41,8 @@ def request_task_wrapper(catch_errors: bool):
         @wraps(func)
         async def inner(*args, **kwargs):
             try:
-                return await func(*args, **kwargs)
+                async with rate_control:
+                    return await func(*args, **kwargs)
             
             # TODO: Maybe use custom exception for uninitialized session  
             except RuntimeError as e:
@@ -63,7 +64,7 @@ def request_task_wrapper(catch_errors: bool):
             except (exceptions.TelegramAPIError) as e:
                 if e.critical:
                     logger.critical(e)
-                     
+                    
                     if isinstance(e, exceptions.Conflict):
                         logger.warning(
                             "If this conflict wasn't caused by you, it means that somebody else may have access to your API_TOKEN. "
@@ -348,6 +349,8 @@ class BaseBot:
         **Is used internally to check if the bot is fully started**
         """
 
+        self.__rate_control = asyncio.Semaphore(30)
+
     #region tasks
     
     def _create_task(self, coro, name=None) -> asyncio.Task:
@@ -378,39 +381,6 @@ class BaseBot:
     #region core
 
     def download(self, file: objects.File) -> FileDownloader:
-        """Download a file from telegram server.  
-        
-        **Note:** The file must be *fetched from telegram first* using the [`getFile`](https://core.telegram.org/bots/api#getfile) method.
-        
-        Example ussage:
-        ```python
-
-        # Download as file
-
-        @bot.event("message", is_document)
-        async def on_document_message(msg: dict[str]):
-            doc = msg["document"]
-            if file_name := doc.get("file_name"):
-                file_obj = await bot("getFile", {"file_id": doc["file_id"]})
-                async with bot.download(file_obj) as download:
-                    await download.as_file(file_name)
-
-        # Download as base64:
-
-        @bot.event("message", is_photo)
-        async def on_photo_message(msg: dict[str]):
-            photo = sorted(msg["photo"], key=lambda p: p["height"])[-1]
-            file_obj = await bot("getFile", {"file_id": photo["file_id"]})
-            async with bot.download(file_obj) as download:
-                b64 = await download.as_base64("utf-8")
-        ```
-
-        Args:
-            file_obj (File): The [`File`](https://core.telegram.org/bots/api#file) object to download. Use [`getFile`](https://core.telegram.org/bots/api#getfile) to fetch it.
-
-        Returns:
-            FileDownloader: _description_
-        """
         if not isinstance(file, dict):
             raise TypeError(f"File obj expected (dict). Got {type(file)}.")
         
@@ -418,100 +388,6 @@ class BaseBot:
             raise KeyError(f"Invalid File object. Field `file_path` does not exist.")
 
         return FileDownloader(f"{self.file_url}/{file["file_path"]}", self.session)
-
-
-    # def download(
-    #     self, 
-    #     file_obj: JsonDict, 
-    #     dest_dir: str | Path | None = None, 
-    #     file_name: str | None = None,
-    #     *,
-    #     overwrite_existing: bool = False, 
-    #     bs: int | None = None,
-    # ) -> asyncio.Task[Path]:
-    #     """Download a file from telegram server.
-        
-    #     **Note: The file must be fetched from telegram first using the `getFile` method**
-        
-    #     Example Usage:
-    #     ```python
-    #     # filtering messages with document 
-    #     @bot.event("message", is_document, lambda m: m["document"].get("file_name"))
-    #     async def on_document_message(msg: dict[str]):
-    #         doc = msg["document"]
-    #         file_obj = await bot("getFile", {"file_id": doc["file_id"]})
-    #         file_path = await bot.download(file_obj, Path.cwd() / ".tmp", doc["file_name"], overwrite_existing=True)
-    #     ```
-
-    #     Args:
-    #         file_obj (JsonDict): The file object received by using `getFile` api method.
-    #         dest_dir (str | Path | None, optional): The destination directory. Defaults to Current working directory `Path.cwd()` (Usually the location of your script).
-    #         file_name (str | None, optional): The destination file name (**with suffix** eg. *'document.txt' **not** 'document'*). Defaults to `file_obj['file_name'] if present else the name in file_obj['file_path']`.
-    #         overwrite_existing (bool, optional): If set to `True` and the file already exists, the file is overwritten. Else a `FileExistsError` is raised. Defaults to `False`.
-    #         bs (int, optional): The chunk size for the download in bytes. If `bs <= 0`, the file is downloaded as a whole. Defaults to 16KiB (16384)
-    #     Raises:
-    #         KeyError: if `file_path` not found in `file_obj`
-    #         NotADirectoryError: if dest_dir is not a directory
-    #         FileNotFoundError: if dest_dir is not found
-    #         FileExistsError: if destination file already exists and `overwrite_existing` is `False`
-    #         TelegramError: if the download fails for some reason
-
-    #     Returns:
-    #         Task[Path]: A scheduled task that downloads the file.
-    #     """
-    #     if not "file_path" in file_obj:
-    #         raise KeyError("'file_path' is not present in file_obj. Did you get the file correctly using 'getFile'?")
-        
-    #     if dest_dir is None:
-    #         dest_dir = Path.cwd()
-    #     elif isinstance(dest_dir, str):
-    #         dest_dir = Path(dest_dir)
-        
-    #     if not dest_dir.exists():
-    #         raise FileNotFoundError(f"<dest_dir> was not found.")
-    #     if not dest_dir.is_dir():
-    #         raise NotADirectoryError(f"<dest_dir> is not a directory.")
-        
-    #     tg_file_path: str = file_obj["file_path"]
-        
-    #     if file_name is None:
-    #         file_name = file_obj.get("file_name", tg_file_path.rsplit("/", 1)[-1])
-            
-    #     dest_file = dest_dir / str(file_name)
-        
-    #     if dest_file.exists():
-    #         if not overwrite_existing:
-    #             raise FileExistsError(f"<dest_dir>/{dest_file.name} already exists and overwriting is not allowed.")
-        
-    #     bs = bs or 16*utils.KiB
-        
-    #     file_size = file_obj.get("file_size", 0)
-
-    #     async def _download_file():
-    #         async with aiofiles.open(dest_file, "wb") as f:
-                
-    #             async with self.session.get(f"{self.file_url}/{tg_file_path}") as r:
-                    
-    #                 logger.debug(f"Start downloading '<dest_dir>/{file_name}' "
-    #                     f"(Predicted Size: {utils.readable_file_size(file_size)})"
-    #                 )
-                    
-    #                 await exceptions.raise_for_telegram_error("DownloadFile", r)
-                    
-    #                 if bs <= 0:
-    #                     await f.write(await r.content.read())
-                    
-    #                 else:
-    #                     async for chunk in r.content.iter_chunked(bs):
-    #                         await f.write(chunk)
-                
-    #             logger.debug(f"Successfully downloaded '<dest_dir>/{file_name}' "
-    #                 f"(Size: {utils.readable_file_size(os.stat(dest_file).st_size)})"
-    #             )
-        
-    #         return dest_file
-
-    #     return self._create_task(_download_file())
 
     def __call__(
         self, 
@@ -538,7 +414,7 @@ class BaseBot:
         auto_prepare: bool = kwargs.get("auto_prepare", True)
         catch_errors: bool = kwargs.get("catch_errors", True)
 
-        @request_task_wrapper(catch_errors=catch_errors)
+        @request_task_wrapper(catch_errors=catch_errors, rate_control=self.__rate_control)
         async def request():
             nonlocal params
             nonlocal timeout
@@ -603,17 +479,21 @@ class BaseBot:
                 
                 except exceptions.TelegramAPIError as e:
                     if e.retryable and e.retry_after:
-                        logger.warning(f"'{method_name}' -> {e} - Retrying after {e.retry_after} seconds...")
+                        logger.warning(f"{e} - Retrying after {e.retry_after} seconds... "
+                            f"({self.max_retries - retries} / {self.max_retries} retries left.)"
+                        )
                         await asyncio.sleep(e.retry_after)
                         retries += 1
                         continue
                     
-                    e.message = f"'{method_name}' -> {e.message}"
+                    # e.message = f"'{method_name}' -> {e.message}"
                     raise
                 
                 except (asyncio.TimeoutError, aiohttp.ServerConnectionError) as e:
                     wait_time = 2**retries
-                    logger.warning(f"'{method_name}' timed out. - Retrying after {wait_time} seconds...")
+                    logger.warning(f"'{method_name}' timed out. - Retrying after {wait_time} seconds... "
+                        f"({self.max_retries - retries} / {self.max_retries} retries left.)"
+                    )
                     await asyncio.sleep(wait_time)
                     timeout += 10
                     retries += 1
@@ -621,7 +501,9 @@ class BaseBot:
                 
                 except aiohttp.ClientOSError as e:
                     wait_time = 2**retries
-                    logger.warning(f"'{method_name}' Network issue detected. Check your internet connection. Retrying in {wait_time} seconds...")
+                    logger.warning(f"'{method_name}' Network issue detected. Check your internet connection. Retrying in {wait_time} seconds... "
+                        f"({self.max_retries - retries} / {self.max_retries} retries left.)"
+                    )
                     await asyncio.sleep(wait_time)
                     timeout += 10
                     retries += 1
