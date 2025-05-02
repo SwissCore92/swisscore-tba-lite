@@ -23,15 +23,19 @@ def func_info(f: t.Callable) -> str:
 class EventManager:
     UNHANDLED = UnhandledEventType
     """
-    Return this in an event handler to mark the event as unhandled and continue processing the update.  
+    Return this in an static event handler to mark the static event as unhandled and continue processing the update.  
+
+    Return this in an temporary event handler to mark the temporary event as unhandled and continue processing on next matching update.  
     """
     
-    def __init__(self):
+    def __init__(self, max_concurrent_handlers: int = 16):
         self.__startup_handler: EventHandler = None
         self.__shutdown_handler: EventHandler = None
         self.__temporary_handlers: dict[EventName, list[TemporaryEventHandler]] = {}
-        self.__update_handlers: dict[EventName, list[EventHandler]] = dict((k, []) for k in TELEGRAM_EVENT_TYPES)
+        self.__update_handlers: dict[EventName, list[EventHandler]] = {}
+        self.__handler_control = asyncio.Semaphore(max_concurrent_handlers)
         self.__locked = False
+        self.__tasks: list[asyncio.Task] = []
     
     def _lock(self):
         """*for internal use only*"""
@@ -43,7 +47,7 @@ class EventManager:
         
         Is used for `allowed_updates`
         """
-        return [k for k, v in self.__update_handlers.items() if v]
+        return [k for k in self.__update_handlers]
     
     def _remove_temporary_event_handler(self, tmp_event_handler: "TemporaryEventHandler", reason="handled"):
         """*for internal use only*"""
@@ -52,60 +56,66 @@ class EventManager:
             self.__temporary_handlers.pop(tmp_event_handler.type)
         logger.debug(f"Removed {(repr(tmp_event_handler))} - Reason: {repr(reason)}")
 
-    async def _trigger_event(self, event_name: EventName, *args) -> bool:
+    async def __process_update(self, event_name, obj, update_id) -> None:
+        async with self.__handler_control:
+            # check temporary handlers first
+            if event_name in self.__temporary_handlers:
+                for tmp_handler in self.__temporary_handlers[event_name].copy():
+                    
+                    # TODO: check in realtime. not on matching update type
+                    if tmp_handler.is_expired():
+                        # remove expired event handler
+                        self._remove_temporary_event_handler(tmp_handler, "expired")
+                        continue
+
+                    if await tmp_handler.matches(obj):
+                        if handler := await tmp_handler.get_matching_handler(obj):
+                            result = await handler(obj) if handler._arg_count == 1 else await handler(obj, tmp_handler.context)
+                            if result is EventManager.UNHANDLED:
+                                # event handler returned that it is unhandled
+                                return True
+                            else:
+                                # event handler returned nothing, so it is considered handled
+                                self._remove_temporary_event_handler(tmp_handler, "handled")
+                                return True
+                        
+                        logger.warning(f"{repr(tmp_handler)} matched. But none of its handlers did.")
+            
+            # check static handlers
+            if handlers := self.__update_handlers.get(event_name):
+                for handler in handlers:
+                    if await handler.matches(deepcopy(obj)):
+                        if await handler(deepcopy(obj)) is EventManager.UNHANDLED:
+                            logger.debug(f"{repr(handler)} returned EventManager.UNHANDLED! "
+                                "The event is considered unhandled. "
+                                "Continue checking for matching handlers."
+                            )
+                            continue
+                            
+                        return True
+
+            logger.warning(f"No matching event handler found for update of type '{event_name}'. Update was dropped.")
+            return False
+
+    async def _trigger_event(self, event_name: EventName, *args) -> None:
         """*for internal use only*"""
         match event_name:
             case "startup":
                 if self.__startup_handler is not None:
                     await self.__startup_handler()
-                    return True
             
             case "shutdown":
                 if self.__shutdown_handler is not None:
                     await self.__shutdown_handler(args[0])
-                    return True
             
             case _:
                 obj: dict = args[0]
+                update_id: int = args[1]
 
-                # check temporary handlers first
-                if event_name in self.__temporary_handlers:
-                    for tmp_handler in self.__temporary_handlers[event_name].copy():
-                        
-                        # TODO: check in realtime. not on matching update type
-                        if tmp_handler.is_expired():
-                            # remove expired event handler
-                            self._remove_temporary_event_handler(tmp_handler, "expired")
-                            continue
+                task = asyncio.create_task(self.__process_update(event_name, obj, update_id), name=f"handle_update_{update_id}")
+                self.__tasks.append(task)
+                task.add_done_callback(self.__tasks.remove)
 
-                        if await tmp_handler.matches(obj):
-                            if handler := await tmp_handler.get_matching_handler(obj):
-                                result = await handler(obj) if handler._arg_count == 1 else await handler(obj, tmp_handler.context)
-                                if result is EventManager.UNHANDLED:
-                                    # event handler returned that it is unhandled
-                                    return True
-                                else:
-                                    # event handler returned nothing, so it is considered handled
-                                    self._remove_temporary_event_handler(tmp_handler, "handled")
-                                    return True
-                            
-                            logger.warning(f"{repr(tmp_handler)} matched. But none of its handlers did.")
-                
-                # check static handlers
-                if handlers := self.__update_handlers.get(event_name):
-                    for handler in handlers:
-                        if await handler.matches(deepcopy(obj)):
-                            if await handler(deepcopy(obj)) is EventManager.UNHANDLED:
-                                logger.debug(f"{repr(handler)} returned EventManager.UNHANDLED! "
-                                    "The event is considered unhandled. "
-                                    "Continue checking for matching handlers."
-                                )
-                                continue
-                                
-                            return True
-
-                logger.warning(f"No matching event handler found for update of type '{event_name}'. Update was dropped.")
-                return False
                 
     def __call__(self, event_name: EventName, *filters: FilterFunction):
         """
@@ -129,40 +139,13 @@ class EventManager:
             ...
         ```
         
-        `event_name` must be one of:  
-        * "startup" (*Triggered on startup right after the client session is started but before updates are received*)
-        * "shutdown" (*Triggered on shutdown right after receiving updates but before the client session is closed*)
-        * "message" (*Triggered when a update of type "message" is received*)
-        * "edited_message" (*Triggered when a update of type "edited_message" is received*)
-        * "channel_post" (*Triggered when a update of type "channel_post" is received*)
-        * "edited_channel_post" (*Triggered when a update of type "edited_channel_post" is received*)
-        * "business_connection" (*Triggered when a update of type "business_connection" is received*)
-        * "business_message" (*Triggered when a update of type "business_message" is received*)
-        * "edited_business_message" (*Triggered when a update of type "edited_business_message" is received*)
-        * "deleted_business_messages" (*Triggered when a update of type "deleted_business_messages" is received*)
-        * "message_reaction" (*Triggered when a update of type "message_reaction" is received*)
-        * "message_reaction_count" (*Triggered when a update of type "message_reaction_count" is received*)
-        * "inline_query" (*Triggered when a update of type "inline_query" is received*)
-        * "chosen_inline_result" (*Triggered when a update of type "chosen_inline_result" is received*)
-        * "callback_query" (*Triggered when a update of type "callback_query" is received*)
-        * "shipping_query" (*Triggered when a update of type "shipping_query" is received*)
-        * "pre_checkout_query" (*Triggered when a update of type "pre_checkout_query" is received*)
-        * "purchased_paid_media" (*Triggered when a update of type "purchased_paid_media" is received*)
-        * "poll" (*Triggered when a update of type "poll" is received*)
-        * "poll_answer" (*Triggered when a update of type "poll_answer" is received*)
-        * "my_chat_member" (*Triggered when a update of type "my_chat_member" is received*)
-        * "chat_member" (*Triggered when a update of type "chat_member" is received*)
-        * "chat_join_request" (*Triggered when a update of type "chat_join_request" is received*)
-        * "chat_boost" (*Triggered when a update of type "chat_boost" is received*)
-        * "removed_chat_boost" (*Triggered when a update of type "removed_chat_boost" is received*)
-        
         **Note:**
         * Both Coroutine and regular functions are supported.
         * A filter **must match** the signature `func(obj: dict)` where `obj` is *always* a `dict`!
         * A filter is satisfied if `bool(your_filter(obj)) == True`
         * The filters are checked in order. 
         * Event handlers are checked in the order you defined them from top to bottom.
-        * Event handlers without filters should always be defined at the bottom of all other handlers of the same type (`event_name`).
+        * Event handlers without filters should always be defined **at the bottom** of all other handlers of **the same type** (`event_name`).
 
         Args:
             event_name (str): The name of the event.  
@@ -197,15 +180,19 @@ class EventManager:
                         raise KeyError(f"'{event_name}' is an invalid event_name")
 
                     if func.__code__.co_argcount == 2:
-                        # this event handler is likely used as temporary handler too
+                        # this event handler is likely used as temporary handler
                         if not func.__defaults__:
                             raise TypeError(f"The second argument of {func_info(func)} `{func.__code__.co_varnames[1]}` must have a default value.")
                     elif func.__code__.co_argcount != 1:
                         raise TypeError(f"The event handler {func_info(func)} must accept exactly 1 or 2 arguments.")
+                    
+                    if not event_name in self.__update_handlers:
+                        self.__update_handlers[event_name] = []
 
                     handler = EventHandler(event_name, func, list(filters))
 
                     for previous_handler in reversed(self.__update_handlers[event_name]):
+                        # TODO: Check if UNHANDLED is returned
                         if not previous_handler.filters:
                             logger.warning(
                                 f"{repr(handler)} may never be triggered because "

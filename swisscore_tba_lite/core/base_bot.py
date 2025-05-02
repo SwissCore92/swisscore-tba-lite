@@ -478,7 +478,7 @@ class BaseBot:
             update_type = utils.get_update_type(update)
             update_object = update[update_type]
             
-            await self.event._trigger_event(update_type, update_object)
+            await self.event._trigger_event(update_type, update_object, update_id)
             
             if len(self._tasks) >= self.max_concurrent_tasks:
                 logger.info(
