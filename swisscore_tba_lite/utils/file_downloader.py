@@ -22,10 +22,15 @@ class FileDownloader:
         self._callback: t.Callable[[bytes | str | Path], None] | None = None
     
     def then(self, callback: t.Callable[[bytes | str | Path], None]) -> "FileDownloader":
+        """Add a callback to be called after download. The download result will be passed as only argument.
+
+        `callback` can be a regular or an async function.
+        """
         self._callback = callback
         return self
     
-    async def as_file(self, file_path: Path | str, overwrite: bool = False) -> asyncio.Task[Path]:
+    def as_file(self, file_path: Path | str, overwrite: bool = False) -> asyncio.Task[Path]:
+        """Download as file"""
         async def _as_file():
             nonlocal file_path
 
@@ -53,6 +58,7 @@ class FileDownloader:
 
 
     def as_text(self, encoding: str = "utf-8") -> asyncio.Task[str]:
+        """Download as plain text"""
         async def _as_text():
             result = (await self.as_bytes()).decode(encoding)
 
@@ -71,8 +77,9 @@ class FileDownloader:
     def as_base64(self) -> asyncio.Task[bytes]: ...
     @t.overload
     def as_base64(self, encoding: str = ...) -> asyncio.Task[str]: ...
-
+    
     def as_base64(self, encoding: str | None = None) -> asyncio.Task[str | bytes]:
+        """Download as base64"""
         async def _as_base64():
             parts: list[bytes] = []
             async for chunk in self.iter_bytes():
@@ -95,15 +102,24 @@ class FileDownloader:
     
 
     def as_bytes(self) -> asyncio.Task[bytes]:
+        """Download as raw bytes"""
         async def _as_bytes() -> bytes:
             content = b""
             async for chunk in self.iter_bytes():
                 content += chunk
+            
+            if self._callback:
+                if asyncio.iscoroutinefunction(self._callback):
+                    await self._callback(content)
+                else:
+                    self._callback(content)
+
             return content
         
         return create_task(_as_bytes(), f"{self.__class__.__name__}.as_bytes")
     
     async def iter_bytes(self, bs: int | None = None) -> t.AsyncGenerator[bytes]:
+        """Iterate raw bytes"""
         async with self.client.stream("GET", self.file_url) as r:
             async for chunk in r.aiter_raw(bs):
                 yield chunk
