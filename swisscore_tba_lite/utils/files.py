@@ -7,14 +7,19 @@ from pathlib import Path
 
 import aiofiles
 
-from ..bot_api import objects as tg
 from ..core.exceptions import FileProcessingError
 
-class InputFile(t.TypedDict, total=False):
-    filename: str
-    content: bytes
-
 HttpXFile = tuple[str, bytes, str]
+JsonDict = dict[str, t.Any]
+
+class InputFile(t.TypedDict):
+    """
+    ### [InputFile](https://core.telegram.org/bots/api#inputfile)  
+    
+    This [object](https://core.telegram.org/bots/api#available-types) represents the contents of a file to be uploaded. 
+    """
+    filename: str
+    content: str | bytes | Path
 
 def is_local_file(path: str | Path) -> bool:
     """Check if a string represents a valid local file path."""
@@ -68,6 +73,10 @@ async def prepare_input_files(check_files: list[str] | None, params: dict[str, t
 
         filename: str | None = None
 
+        if isinstance(val, dict) and all(key in val for key in ["content", "filename"]):
+            filename = val["filename"]
+            val = val["content"]
+
         if isinstance(val, str):
             if is_local_file(val):
                 val = Path(val)
@@ -78,12 +87,10 @@ async def prepare_input_files(check_files: list[str] | None, params: dict[str, t
             if not val.exists():
                 raise FileNotFoundError(f"{val} was not found.")
             
-            filename = val.name
+            if not filename:
+                filename = val.name
+
             val = await read_file(val)
-        
-        if isinstance(val, dict) and "content" in val and "filename" in val:
-            filename = val["filename"]
-            val = val["content"]
 
         if not isinstance(val, bytes):
             raise TypeError(f"{key!r} was of the wrong type. expected one of (str, Path, bytes, InputFile) but got {type(val)}")
@@ -124,6 +131,12 @@ async def prepare_input_media(check_media: list[str] | None, params: dict[str, t
 
             file_ref = media["media"]
 
+            filename: str | None = None
+
+            if isinstance(file_ref, dict) and all(key in file_ref for key in ["content", "filename"]):
+                filename = file_ref["filename"]
+                file_ref = file_ref["content"]
+
             if isinstance(file_ref, str):
                 if is_local_file(file_ref):
                     file_ref = Path(file_ref)
@@ -135,21 +148,16 @@ async def prepare_input_media(check_media: list[str] | None, params: dict[str, t
             if isinstance(file_ref, Path):
                 if not file_ref.exists():
                     raise FileNotFoundError(f"{file_ref} was not found.")
-                filename = file_ref.name
+                
+                if not filename:
+                    filename = file_ref.name
+
                 file_ref = await read_file(file_ref)
 
                 files[file_id] = (filename, file_ref, mimetypes.guess_type(filename)[0] or "application/octet-stream")
                 media["media"] = f"attach://{file_id}"
             
-            elif isinstance(file_ref, (bytes, dict)):
-                filename: str |None = None
-                if isinstance(file_ref, dict):
-                    if "content" in file_ref and "filename" in file_ref:
-                        filename = file_ref["filename"]
-                        file_ref = file_ref["content"]
-                    else:
-                        raise TypeError("invalid InputFile")
-                
+            elif isinstance(file_ref, bytes):
                 if not filename:
                     filename = token_urlsafe()
 

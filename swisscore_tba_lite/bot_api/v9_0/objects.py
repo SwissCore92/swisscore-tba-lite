@@ -5,6 +5,9 @@ Telegram types scraped from 'Bot API 9.0 (April 11, 2025)'
 import typing as t
 from pathlib import Path
 
+from . import literals
+from ...utils.files import InputFile
+
 
 class Update(t.TypedDict, total=False):
     """
@@ -1474,7 +1477,7 @@ class ReactionTypeEmoji(t.TypedDict, total=False):
     The reaction is based on an emoji.
     """
     type: t.Literal["emoji"]
-    emoji: str
+    emoji: literals.ReactionEmoji
 
 class ReactionTypeCustomEmoji(t.TypedDict, total=False):
     """
@@ -1952,7 +1955,7 @@ class InputMediaPhoto(t.TypedDict, total=False):
     Represents a photo to be sent.
     """
     type: t.Literal["photo"]
-    media: str | Path | bytes
+    media: str | Path | bytes | InputFile
     caption: str
     parse_mode: str
     caption_entities: list["MessageEntity"]
@@ -1966,9 +1969,9 @@ class InputMediaVideo(t.TypedDict, total=False):
     Represents a video to be sent.
     """
     type: t.Literal["video"]
-    media: str | Path | bytes
-    thumbnail: str | Path | bytes
-    cover: str | Path | bytes
+    media: str | Path | bytes | InputFile
+    thumbnail: str | Path | bytes | InputFile
+    cover: str | Path | bytes | InputFile
     start_timestamp: int
     caption: str
     parse_mode: str
@@ -1987,8 +1990,8 @@ class InputMediaAnimation(t.TypedDict, total=False):
     Represents an animation file (GIF or H.264/MPEG\\-4 AVC video without sound) to be sent.
     """
     type: t.Literal["animation"]
-    media: str | Path | bytes
-    thumbnail: str | Path | bytes
+    media: str | Path | bytes | InputFile
+    thumbnail: str | Path | bytes | InputFile
     caption: str
     parse_mode: str
     caption_entities: list["MessageEntity"]
@@ -2005,8 +2008,8 @@ class InputMediaAudio(t.TypedDict, total=False):
     Represents an audio file to be treated as music to be sent.
     """
     type: t.Literal["audio"]
-    media: str | Path | bytes
-    thumbnail: str | Path | bytes
+    media: str | Path | bytes | InputFile
+    thumbnail: str | Path | bytes | InputFile
     caption: str
     parse_mode: str
     caption_entities: list["MessageEntity"]
@@ -2021,20 +2024,12 @@ class InputMediaDocument(t.TypedDict, total=False):
     Represents a general file to be sent.
     """
     type: t.Literal["document"]
-    media: str | Path | bytes
-    thumbnail: str | Path | bytes
+    media: str | Path | bytes | InputFile
+    thumbnail: str | Path | bytes | InputFile
     caption: str
     parse_mode: str
     caption_entities: list["MessageEntity"]
     disable_content_type_detection: bool
-
-class InputFile(t.TypedDict, total=False):
-    """
-    ### [InputFile](https://core.telegram.org/bots/api#inputfile)  
-    
-    This object represents the contents of a file to be uploaded. Must be posted using multipart/form\\-data in the usual way that files are uploaded via the browser.
-    """
-    
 
 class InputPaidMediaPhoto(t.TypedDict, total=False):
     """
@@ -2043,7 +2038,7 @@ class InputPaidMediaPhoto(t.TypedDict, total=False):
     The paid media to send is a photo.
     """
     type: t.Literal["photo"]
-    media: str | Path | bytes
+    media: str | Path | bytes | InputFile
 
 class InputPaidMediaVideo(t.TypedDict, total=False):
     """
@@ -2052,9 +2047,9 @@ class InputPaidMediaVideo(t.TypedDict, total=False):
     The paid media to send is a video.
     """
     type: t.Literal["video"]
-    media: str | Path | bytes
-    thumbnail: str | Path | bytes
-    cover: str | Path | bytes
+    media: str | Path | bytes | InputFile
+    thumbnail: str | Path | bytes | InputFile
+    cover: str | Path | bytes | InputFile
     start_timestamp: int
     width: int
     height: int
@@ -2068,7 +2063,7 @@ class InputProfilePhotoStatic(t.TypedDict, total=False):
     A static profile photo in the .JPG format.
     """
     type: t.Literal["static"]
-    photo: str | Path | bytes
+    photo: str | Path | bytes | InputFile
 
 class InputProfilePhotoAnimated(t.TypedDict, total=False):
     """
@@ -2077,7 +2072,7 @@ class InputProfilePhotoAnimated(t.TypedDict, total=False):
     An animated profile photo in the MPEG4 format.
     """
     type: t.Literal["animated"]
-    animation: str | Path | bytes
+    animation: str | Path | bytes | InputFile
     main_frame_timestamp: float
 
 class InputStoryContentPhoto(t.TypedDict, total=False):
@@ -2087,7 +2082,7 @@ class InputStoryContentPhoto(t.TypedDict, total=False):
     Describes a photo to post as a story.
     """
     type: t.Literal["photo"]
-    photo: str | Path | bytes
+    photo: str | Path | bytes | InputFile
 
 class InputStoryContentVideo(t.TypedDict, total=False):
     """
@@ -2096,7 +2091,7 @@ class InputStoryContentVideo(t.TypedDict, total=False):
     Describes a video to post as a story.
     """
     type: t.Literal["video"]
-    video: str | Path | bytes
+    video: str | Path | bytes | InputFile
     duration: float
     cover_frame_timestamp: float
     is_animation: bool
@@ -2152,7 +2147,7 @@ class InputSticker(t.TypedDict, total=False):
     
     This object describes a sticker to be added to a sticker set.
     """
-    sticker: str | Path | bytes
+    sticker: str | Path | bytes | InputFile
     format: str
     emoji_list: list[str]
     mask_position: "MaskPosition"

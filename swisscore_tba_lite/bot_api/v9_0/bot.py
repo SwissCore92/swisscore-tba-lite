@@ -5,6 +5,7 @@ from pathlib import Path
 
 from . import objects as tg, literals
 from ...core.base_bot import BaseBot, api_method_wrapper
+from ...utils.files import InputFile
 
 class Bot(BaseBot):
     """
@@ -34,7 +35,7 @@ class Bot(BaseBot):
         self,
         url: str,
         *,
-        certificate: Path | bytes | None = None,
+        certificate: Path | bytes | tg.InputFile | None = None,
         ip_address: str | None = None,
         max_connections: int | None = None,
         allowed_updates: list[literals.UpdateType] | None = None,
@@ -117,7 +118,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendMessage](https://core.telegram.org/bots/api#sendmessage)  
@@ -177,7 +178,7 @@ class Bot(BaseBot):
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.MessageId]:
         """
         ### [copyMessage](https://core.telegram.org/bots/api#copymessage)  
@@ -207,7 +208,7 @@ class Bot(BaseBot):
     def send_photo(
         self,
         chat_id: int | str,
-        photo: str | Path | bytes,
+        photo: str | Path | bytes | tg.InputFile,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -221,7 +222,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendPhoto](https://core.telegram.org/bots/api#sendphoto)  
@@ -233,7 +234,7 @@ class Bot(BaseBot):
     def send_audio(
         self,
         chat_id: int | str,
-        audio: str | Path | bytes,
+        audio: str | Path | bytes | tg.InputFile,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -243,13 +244,13 @@ class Bot(BaseBot):
         duration: int | None = None,
         performer: str | None = None,
         title: str | None = None,
-        thumbnail: str | Path | bytes | None = None,
+        thumbnail: str | Path | bytes | tg.InputFile | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendAudio](https://core.telegram.org/bots/api#sendaudio)  
@@ -263,11 +264,11 @@ class Bot(BaseBot):
     def send_document(
         self,
         chat_id: int | str,
-        document: str | Path | bytes,
+        document: str | Path | bytes | tg.InputFile,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
-        thumbnail: str | Path | bytes | None = None,
+        thumbnail: str | Path | bytes | tg.InputFile | None = None,
         caption: str | None = None,
         parse_mode: str | None = None,
         caption_entities: list[tg.MessageEntity] | None = None,
@@ -277,7 +278,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendDocument](https://core.telegram.org/bots/api#senddocument)  
@@ -289,15 +290,15 @@ class Bot(BaseBot):
     def send_video(
         self,
         chat_id: int | str,
-        video: str | Path | bytes,
+        video: str | Path | bytes | tg.InputFile,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumbnail: str | Path | bytes | None = None,
-        cover: str | Path | bytes | None = None,
+        thumbnail: str | Path | bytes | tg.InputFile | None = None,
+        cover: str | Path | bytes | tg.InputFile | None = None,
         start_timestamp: int | None = None,
         caption: str | None = None,
         parse_mode: str | None = None,
@@ -310,7 +311,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVideo](https://core.telegram.org/bots/api#sendvideo)  
@@ -322,14 +323,14 @@ class Bot(BaseBot):
     def send_animation(
         self,
         chat_id: int | str,
-        animation: str | Path | bytes,
+        animation: str | Path | bytes | tg.InputFile,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumbnail: str | Path | bytes | None = None,
+        thumbnail: str | Path | bytes | tg.InputFile | None = None,
         caption: str | None = None,
         parse_mode: str | None = None,
         caption_entities: list[tg.MessageEntity] | None = None,
@@ -340,7 +341,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendAnimation](https://core.telegram.org/bots/api#sendanimation)  
@@ -352,7 +353,7 @@ class Bot(BaseBot):
     def send_voice(
         self,
         chat_id: int | str,
-        voice: str | Path | bytes,
+        voice: str | Path | bytes | tg.InputFile,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -365,7 +366,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVoice](https://core.telegram.org/bots/api#sendvoice)  
@@ -377,19 +378,19 @@ class Bot(BaseBot):
     def send_video_note(
         self,
         chat_id: int | str,
-        video_note: str | Path | bytes,
+        video_note: str | Path | bytes | tg.InputFile,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
         duration: int | None = None,
         length: int | None = None,
-        thumbnail: str | Path | bytes | None = None,
+        thumbnail: str | Path | bytes | tg.InputFile | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVideoNote](https://core.telegram.org/bots/api#sendvideonote)  
@@ -414,7 +415,7 @@ class Bot(BaseBot):
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendPaidMedia](https://core.telegram.org/bots/api#sendpaidmedia)  
@@ -460,7 +461,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendLocation](https://core.telegram.org/bots/api#sendlocation)  
@@ -488,7 +489,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVenue](https://core.telegram.org/bots/api#sendvenue)  
@@ -512,7 +513,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendContact](https://core.telegram.org/bots/api#sendcontact)  
@@ -546,7 +547,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendPoll](https://core.telegram.org/bots/api#sendpoll)  
@@ -567,7 +568,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendDice](https://core.telegram.org/bots/api#senddice)  
@@ -883,7 +884,7 @@ class Bot(BaseBot):
     def set_chat_photo(
         self,
         chat_id: int | str,
-        photo: Path | bytes
+        photo: Path | bytes | tg.InputFile
     ) -> Task[t.Literal[True]]:
         """
         ### [setChatPhoto](https://core.telegram.org/bots/api#setchatphoto)  
@@ -1379,7 +1380,7 @@ class Bot(BaseBot):
         entities: list[tg.MessageEntity] | None = None,
         link_preview_options: tg.LinkPreviewOptions | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageText](https://core.telegram.org/bots/api#editmessagetext)  
         
@@ -1399,7 +1400,7 @@ class Bot(BaseBot):
         caption_entities: list[tg.MessageEntity] | None = None,
         show_caption_above_media: bool | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageCaption](https://core.telegram.org/bots/api#editmessagecaption)  
         
@@ -1416,7 +1417,7 @@ class Bot(BaseBot):
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageMedia](https://core.telegram.org/bots/api#editmessagemedia)  
         
@@ -1438,7 +1439,7 @@ class Bot(BaseBot):
         heading: int | None = None,
         proximity_alert_radius: int | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageLiveLocation](https://core.telegram.org/bots/api#editmessagelivelocation)  
         
@@ -1454,7 +1455,7 @@ class Bot(BaseBot):
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [stopMessageLiveLocation](https://core.telegram.org/bots/api#stopmessagelivelocation)  
         
@@ -1470,7 +1471,7 @@ class Bot(BaseBot):
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageReplyMarkup](https://core.telegram.org/bots/api#editmessagereplymarkup)  
         
@@ -1853,7 +1854,7 @@ class Bot(BaseBot):
     def send_sticker(
         self,
         chat_id: int | str,
-        sticker: str | Path | bytes,
+        sticker: str | Path | bytes | tg.InputFile,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -1863,7 +1864,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | None = None
+        reply_markup: tg.ReplyKeyboardMarkup | tg.ForceReply | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendSticker](https://core.telegram.org/bots/api#sendsticker)  
@@ -1891,7 +1892,7 @@ class Bot(BaseBot):
     def upload_sticker_file(
         self,
         user_id: int,
-        sticker: Path | bytes,
+        sticker: Path | bytes | tg.InputFile,
         sticker_format: literals.StickerFormat
     ) -> Task[tg.File]:
         """
@@ -2021,7 +2022,7 @@ class Bot(BaseBot):
         user_id: int,
         format: literals.StickerFormat,
         *,
-        thumbnail: str | Path | bytes | None = None
+        thumbnail: str | Path | bytes | tg.InputFile | None = None
     ) -> Task[t.Literal[True]]:
         """
         ### [setStickerSetThumbnail](https://core.telegram.org/bots/api#setstickersetthumbnail)  
@@ -2288,7 +2289,7 @@ class Bot(BaseBot):
         chat_id: int | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [setGameScore](https://core.telegram.org/bots/api#setgamescore)  
         
