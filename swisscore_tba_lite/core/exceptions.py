@@ -2,7 +2,7 @@ import typing as t
 from asyncio import iscoroutinefunction
 from functools import wraps
 
-from aiohttp import ClientResponse
+from httpx import Response
 
 from ..utils import sanitize_token
 from .logger import logger
@@ -146,20 +146,20 @@ class BadGateway(TelegramAPIError):
 class GatewayTimeout(TelegramAPIError):
     """504 - Telegram's servers are taking too long to respond."""
     def __init__(self, method_name, status_code=504, message="Gateway Timeout"):
-        super().__init__(504, method_name, method_name, status_code, message, retryable=True, retry_after=20)
+        super().__init__(method_name, status_code, message, retryable=True, retry_after=20)
 
 
-async def raise_for_telegram_error(method_name: str, response: ClientResponse) -> None:
+def raise_for_telegram_error(method_name: str, response: Response) -> None:
 
-    if response.status < 400:
+    if response.status_code < 400:
         return
     
-    if response.status < 500:
-        response_json: dict[str] = await response.json()
+    if response.status_code < 500:
+        response_json: dict[str] = response.json()
         description = response_json.get("description", "No description available.")
     else:
         response_json = {}
-        description = await response.text()
+        description = response.text
 
     error_map = {
         400: BadRequest,
@@ -173,16 +173,14 @@ async def raise_for_telegram_error(method_name: str, response: ClientResponse) -
         502: BadGateway,
         504: GatewayTimeout,
     }
-    
-    # exc: Exception | None = None
 
-    if response.status == 429:
-        raise TooManyRequests(method_name, response.status, description, response_json.get("parameters", {}).get("retry_after", 5))
+    if response.status_code == 429:
+        raise TooManyRequests(method_name, response.status_code, description, response_json.get("parameters", {}).get("retry_after", 5))
     
-    if response.status == 404:
-        raise NotFound(method_name, response.status, description + f" URL: '{sanitize_token(response.url)}'")
+    if response.status_code == 404:
+        raise NotFound(method_name, response.status_code, description + f" URL: '{sanitize_token(response.url)}'")
     
     else:
-        exception = error_map.get(response.status, TelegramAPIError)
-        raise exception(method_name, response.status, description)
+        exception = error_map.get(response.status_code, TelegramAPIError)
+        raise exception(method_name, response.status_code, description)
 

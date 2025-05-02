@@ -7,7 +7,6 @@ from pathlib import Path
 from secrets import token_urlsafe
 
 import aiofiles
-from aiohttp import FormData
 
 T = t.TypeVar("T")
 
@@ -52,13 +51,6 @@ def is_valid_bot_api_token(token: str) -> bool:
     pattern = r"^\d{10}:[A-Za-z0-9_-]+$"
     return bool(re.match(pattern, token))
 
-def markdown_escape(text: str) -> str:
-    CHARS = ["_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!", "\\"]
-    return "".join(
-        f"\\{character}" if character in CHARS else character
-        for character in text
-    )
-
 def get_update_type(update_obj: dict[str, t.Any]) -> str:
     return [k for k in update_obj.keys() if not k == "update_id"][0]
 
@@ -74,109 +66,3 @@ def replace_word(text: str, word: str, new_word: str, count: int = 0) -> str:
 def startswith_word(text: str, word: str) -> bool:
     """Check if a str starts with a specific word or substring (with boundary)"""
     return bool(re.match(rf"^{word}(?:\s|$)", text))
-
-def is_local_file(path: str | Path) -> bool:
-    """Check if a string represents a valid local file path."""
-    path = path if isinstance(path, Path) else Path(path)
-    return path.exists() and path.is_file()
-
-def get_file_size(file: str | Path | bytes) -> int:
-    """Get size of a file in bytes"""
-    if isinstance(file, bytes):
-        return len(file)
-    return os.stat(file).st_size
-
-async def read_json_file(path: str | Path) -> dict | t.Any:
-    """asynchonously read json file"""
-    path = path if isinstance(path, Path) else Path(path)
-    async with aiofiles.open(path, "r") as f:
-        return json.loads(await f.read())
-
-async def write_json_file(path: str | Path, data, *, indent: int | str | None = None, separators: tuple[str, str] = None) -> None:
-    """asynchonously write json file"""
-    path = path if isinstance(path, Path) else Path(path)
-    async with aiofiles.open(path, "w") as f:
-        await f.write(json.dumps(data, indent=indent, separators=separators))
-
-async def read_file(path: Path) -> bytes | t.AsyncGenerator[bytes, None]:
-    """Read file as bytes asynchronously."""
-    async with aiofiles.open(path, "rb") as f:
-        return await f.read()
-
-async def process_input_files(params: dict, check_input_files: list[str]) -> dict:
-    """Extract and process input files from parameters."""
-    input_files = {}
-    
-    for key in check_input_files:
-        if key not in params:
-            continue
-        
-        val = params[key]
-        
-        if isinstance(val, str) and is_local_file(val):
-            input_files[key] = await read_file(Path(val))
-            
-        elif isinstance(val, Path):
-            if val.exists():
-                input_files[key] = await read_file(val)
-            else:
-                raise FileNotFoundError(f"{val} not found!")
-            
-        elif isinstance(val, bytes):
-            input_files[key] = val
-    
-    return input_files
-
-async def process_input_media(params: dict, check_input_media: list[str]) -> t.Tuple[dict, t.Optional[str]]:
-    """Extract input media and attach necessary files."""
-    input_files = {}
-    input_media = None
-
-    for key in check_input_media:
-        if key not in params:
-            continue
-        
-        media_items = params[key]
-        if not isinstance(media_items, (list, dict)):
-            continue
-        
-        is_single = False
-        if isinstance(media_items, dict):
-            is_single = True
-            media_items = [media_items]
-
-        for media in media_items:
-            if isinstance(media, dict) and "media" in media:
-                file_ref = media["media"]
-                if isinstance(file_ref, str) and is_local_file(file_ref):
-                    file_ref = Path(file_ref)
-                    
-                if isinstance(file_ref, Path):
-                    id = token_urlsafe(4)
-                    if file_ref.exists():
-                        input_files[f"{file_ref.stem}_{id}{file_ref.suffix}"] = await read_file(file_ref)
-                        media["media"] = f"attach://{file_ref.stem}_{id}{file_ref.suffix}"
-                    else:
-                        raise FileNotFoundError(f"'{file_ref} not found!'")
-                    
-                elif isinstance(file_ref, bytes):
-                    id = token_urlsafe()
-                    input_files[id] = file_ref
-                    media["media"] = f"attach://{id}"
-        
-        input_media = json.dumps(media_items[0] if is_single else media_items)
-
-    return input_files, input_media
-
-async def create_form_data(params: dict, input_files: dict) -> FormData:
-    """Create multipart form data for file uploads."""
-    form_data = FormData()
-    
-    for key, file_data in input_files.items():
-        form_data.add_field(key, file_data)
-    
-    for key, value in params.items():
-        if key not in input_files:
-            form_data.add_field(key, dumps(value) if isinstance(value, (dict, list, tuple)) else str(value))
-    
-    return form_data

@@ -3,7 +3,7 @@ import typing as t
 from pathlib import Path
 from base64 import b64encode
 
-import aiohttp
+import httpx
 import aiofiles
 
 tasks: list[asyncio.Task] = []
@@ -15,9 +15,9 @@ def create_task(coro, name: str | None = None):
     return task
 
 class FileDownloader:
-    def __init__(self, file_url: str, session: aiohttp.ClientSession) -> None:
+    def __init__(self, file_url: str, client: httpx.AsyncClient) -> None:
         self.file_url = file_url
-        self.session = session
+        self.client = client
 
         self._callback: t.Callable[[bytes | str | Path], None] | None = None
     
@@ -103,9 +103,8 @@ class FileDownloader:
         
         return create_task(_as_bytes(), f"{self.__class__.__name__}.as_bytes")
     
-    async def iter_bytes(self, bs: int = 16384) -> t.AsyncGenerator[bytes]:
-        async with self.session.get(self.file_url) as r:
-            r.raise_for_status()
-            async for chunk in r.content.iter_chunked(bs):
+    async def iter_bytes(self, bs: int | None = None) -> t.AsyncGenerator[bytes]:
+        async with self.client.stream("GET", self.file_url) as r:
+            async for chunk in r.aiter_raw(bs):
                 yield chunk
 

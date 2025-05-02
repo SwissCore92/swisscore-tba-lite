@@ -2,14 +2,12 @@ import asyncio
 import typing as t
 import subprocess
 import sys
-import os
 from functools import wraps
-from pathlib import Path
 
-import aiohttp
-import aiofiles
+import httpx
 
 from .. import utils
+from ..utils.files import prepare_files
 from .logger import logger
 from .event import EventManager
 from . import exit_codes
@@ -44,7 +42,7 @@ def request_task_wrapper(catch_errors: bool, rate_control: asyncio.Semaphore):
                 async with rate_control:
                     return await func(*args, **kwargs)
             
-            # TODO: Maybe use custom exception for uninitialized session  
+            # TODO: Maybe use custom exception for uninitialized client  
             except RuntimeError as e:
                 logger.critical(e, exc_info=True)
                 # Always raise this exception
@@ -157,46 +155,6 @@ def api_method_wrapper(
     return wrapper
 
 # helper function
-async def prepare_files(
-    params: JsonDict, 
-    check_input_files: list[str] | None = None, 
-    check_input_media: list[str] | None = None,
-) -> tuple[JsonDict | None, aiohttp.FormData | None]:
-    form_data: aiohttp.FormData | None = None
-    
-    check_input_files = check_input_files or []
-    check_input_media = check_input_media or []
-    
-    if check_input_files or check_input_media:
-        try:
-            input_files = await utils.process_input_files(params, check_input_files)
-            media_files, input_media = await utils.process_input_media(params, check_input_media)
-            input_files.update(media_files) 
-
-            if input_files:
-                form_data = await utils.create_form_data(params, input_files)
-        
-        except FileNotFoundError as e:
-            raise exceptions.FileProcessingError(
-                f"Provided file was not found."
-            ) from e
-        
-        except IOError as e:
-            raise exceptions.FileProcessingError(
-                f"Error occured while reading file."
-            ) from e
-        
-        except Exception as e:
-            raise exceptions.FileProcessingError(
-                f"A unexcepted error occured while preparing files."
-            ) from e
-
-    if form_data is not None:
-        return None, form_data
-    
-    return params, None
-
-# helper function
 def serialize_params(params: JsonDict) -> JsonDict:
     try:
         params = {
@@ -288,9 +246,9 @@ class BaseBot:
         **Is internally used to download files.**
         """
         
-        self.session: aiohttp.ClientSession | None = None
+        self.client: httpx.AsyncClient | None = None
         """
-        The client session is initialized when the bot is started.  
+        The async client is initialized when the bot is started.  
         
         You can savely use this to make your own requests.
         """
@@ -385,9 +343,9 @@ class BaseBot:
             raise TypeError(f"File obj expected (dict). Got {type(file)}.")
         
         if "file_path" not in file:
-            raise KeyError(f"Invalid File object. Field `file_path` does not exist.")
+            raise KeyError(f"Invalid File object. Field `file_path` not found.")
 
-        return FileDownloader(f"{self.file_url}/{file["file_path"]}", self.session)
+        return FileDownloader(f"{self.file_url}/{file["file_path"]}", self.client)
 
     def __call__(
         self, 
@@ -397,7 +355,6 @@ class BaseBot:
         check_input_files: list[str] | None = None, 
         check_input_media: list[str] | None = None,
         convert_func: t.Callable[[t.Any], T] | None = None,
-        timeout: int | None = None,
         **kwargs
     ) -> asyncio.Task[T]:
         """
@@ -406,11 +363,11 @@ class BaseBot:
         Returns a asyncio.Task which can be awaited to get actual result.  
         """
 
-        if self.session is None:
-            # TODO: Maybe use custom exception for uninitialized session  
-            raise RuntimeError("Client session is not initialized.")
+        if self.client is None:
+            # TODO: Maybe use custom exception for uninitialized client  
+            raise RuntimeError("Async client is not initialized.")
         
-        timeout = timeout or self.default_timeout
+        timeout: int | None = kwargs.get("timeout", None)
         auto_prepare: bool = kwargs.get("auto_prepare", True)
         catch_errors: bool = kwargs.get("catch_errors", True)
 
@@ -419,10 +376,10 @@ class BaseBot:
             nonlocal params
             nonlocal timeout
 
-            data: aiohttp.FormData | None = None
+            files: dict[str, tuple[str, bytes, str]] | None = None
             if params and (check_input_files or check_input_media):
                 # may raise a FileProcessingError
-                params, data = await prepare_files(params, check_input_files, check_input_media)
+                params, files = await prepare_files(params, check_input_files, check_input_media)
                     
             if auto_prepare and params:
                 # may raise an InvalidParamsError
@@ -441,35 +398,31 @@ class BaseBot:
 
             while retries < self.max_retries:
                 
-                timeout = min(timeout, self.max_timeout)
+                if timeout is not None:
+                    timeout = min(timeout, self.max_timeout)
             
                 try:
-                    async with self.session.post(
-                        url, 
-                        json=params, 
-                        data=data, 
-                        timeout=timeout,
-                    ) as r:
-                        
-                        await exceptions.raise_for_telegram_error(method_name, r)
-                        
-                        response: JsonDict = await r.json()
+                    r = await self.client.post(url, data=params, files=files, timeout=timeout or httpx.USE_CLIENT_DEFAULT)
 
-                        if self.log_successful_requests:
-                            logger.debug(f"'{method_name}' -> HTTP {r.status}: OK")
+                    exceptions.raise_for_telegram_error(method_name, r)
+                    
+                    response: JsonDict = r.json()
+
+                    if self.log_successful_requests:
+                        logger.debug(f"'{method_name}' -> HTTP {r.status_code}: OK")
+                    
+                    result = response["result"]
+                    
+                    if callable(convert_func):
+                        try:
+                            result = convert_func(result)
                         
-                        result = response["result"]
-                        
-                        if callable(convert_func):
-                            try:
-                                result = convert_func(result)
-                            
-                            except Exception as e:
-                                raise exceptions.ResultConversionError(
-                                    f"Error in '{convert_func.__name__}'. Conversion of result failed: {e}"
-                                ) from e
-                        else:
-                            return result 
+                        except Exception as e:
+                            raise exceptions.ResultConversionError(
+                                f"Error in '{convert_func.__name__}'. Conversion of result failed: {e}"
+                            ) from e
+                    else:
+                        return result 
                 
                 except exceptions.FileProcessingError as e:
                     raise
@@ -486,10 +439,9 @@ class BaseBot:
                         retries += 1
                         continue
                     
-                    # e.message = f"'{method_name}' -> {e.message}"
                     raise
                 
-                except (asyncio.TimeoutError, aiohttp.ServerConnectionError) as e:
+                except (asyncio.TimeoutError, httpx.TimeoutException) as e:
                     wait_time = 2**retries
                     logger.warning(f"'{method_name}' timed out. - Retrying after {wait_time} seconds... "
                         f"({self.max_retries - retries} / {self.max_retries} retries left.)"
@@ -499,7 +451,7 @@ class BaseBot:
                     retries += 1
                     continue
                 
-                except aiohttp.ClientOSError as e:
+                except httpx.ConnectError as e:
                     wait_time = 2**retries
                     logger.warning(f"'{method_name}' Network issue detected. Check your internet connection. Retrying in {wait_time} seconds... "
                         f"({self.max_retries - retries} / {self.max_retries} retries left.)"
@@ -601,10 +553,10 @@ class BaseBot:
         }
         params = {k: v for k, v in params.items() if v is not None}
         
-        logger.debug("Start client session")
+        logger.debug("Start async client")
 
-        async with aiohttp.ClientSession() as session:
-            self.session = session
+        async with httpx.AsyncClient(timeout=self.default_timeout) as client:
+            self.client = client
             if drop_pending_updates:
                 if updates := await self.__call__("getUpdates", params={"offset": -1}, auto_prepare=False):
                     logger.debug("Dropped pending updates.")
@@ -665,11 +617,10 @@ class BaseBot:
             
             await run_builtin_event(self, "shutdown", exit_code)
 
-        self.session = None
-        logger.debug("Closed client session")
+        self.client = None
+        logger.debug("Closed async client")
         if getattr(self, "restart_flag", False):
-            python = sys.executable
-            subprocess.run([python] + sys.argv)
+            subprocess.run([sys.executable, *sys.argv])
             exit()
 
     #endregion polling
@@ -710,10 +661,10 @@ class BaseBot:
 
         exit_code: int = 0
         
-        logger.debug("Start client session")
+        logger.debug("Start async client")
 
-        async with aiohttp.ClientSession() as session:
-            self.session = session
+        async with httpx.AsyncClient(timeout=self.default_timeout) as client:
+            self.client = client
 
             await run_builtin_event(self, "startup")
             
@@ -738,11 +689,10 @@ class BaseBot:
             
             await run_builtin_event(self, "shutdown", exit_code)
 
-        self.session = None
-        logger.debug("Closed client session")
+        self.client = None
+        logger.debug("Closed async client")
         if getattr(self, "restart_flag", False):
-            python = sys.executable
-            subprocess.run([python] + sys.argv)
+            subprocess.run([sys.executable, *sys.argv])
             exit()
 
     #endregion idle

@@ -7,7 +7,7 @@ authors = [
 ]
 license = { text = "UNLICENSE" }
 dependencies = [
-    "aiohttp",
+    "httpx",
     "aiofiles"
 ]
 readme = "README.md"
