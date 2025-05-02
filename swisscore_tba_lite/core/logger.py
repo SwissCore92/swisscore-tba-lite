@@ -62,6 +62,4 @@ class Logger(logging.Logger):
         """set logger level (only affects console handler)."""
         self.console_handler.setLevel(level)
 
-logging.setLoggerClass(Logger)
-
 logger = Logger("swisscore_tba_lite", Logger.DEBUG)
