@@ -55,7 +55,7 @@ async def prepare_files(params: dict[str, t.Any], check_files, check_media) -> t
 
 async def prepare_input_files(check_files: list[str] | None, params: dict[str, t.Any]) -> tuple[dict[str, t.Any], dict[str, HttpXFile]]:
     if not check_files: 
-        return params, None
+        return params, {}
     
     files: dict[str, HttpXFile] = {}
     
@@ -100,7 +100,7 @@ async def prepare_input_files(check_files: list[str] | None, params: dict[str, t
 
 async def prepare_input_media(check_media: list[str] | None, params: dict[str, t.Any]) -> tuple[dict[str, t.Any], dict[str, HttpXFile]]:
     if not check_media:
-        return params, None
+        return params, {}
     
     files: dict[str, HttpXFile] = {}
 
