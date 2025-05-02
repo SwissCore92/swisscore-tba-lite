@@ -3,10 +3,6 @@ import re
 import json
 import typing as t
 import platform
-from pathlib import Path
-from secrets import token_urlsafe
-
-import aiofiles
 
 T = t.TypeVar("T")
 
@@ -26,11 +22,8 @@ def readable_file_size(b: int) -> str:
     
     return f"{b/GiB:.02f}GiB"
 
-def is_mac_os():
-    return platform.system() == "Darwin"
-
 def kb_interrupt() -> t.Literal["CTRL+C", "CMD+C"]:
-    return "CMD+C" if is_mac_os() else "CTRL+C"
+    return "CMD+C" if platform.system() == "Darwin" else "CTRL+C"
 
 def clamp(val: int, min_val: int, max_val: int) -> int:
     return min(max(val, min_val), max_val)
@@ -45,17 +38,14 @@ def snake_to_camel(name: str, capitalized=False) -> str:
     return f"{camel[0].lower()}{camel[1:]}"
 
 def sanitize_token(text: str) -> str:
-    return re.sub(r"\d{10}:[A-Za-z0-9_-]{28,}\b", "<token>", str(text))
+    return re.sub(r"\d{6,}:[A-Za-z0-9_-]{28,}\b", "<token>", str(text))
 
 def is_valid_bot_api_token(token: str) -> bool:
-    pattern = r"^\d{10}:[A-Za-z0-9_-]+$"
+    pattern = r"^\d{6,}:[A-Za-z0-9_-]+$"
     return bool(re.match(pattern, token))
 
 def get_update_type(update_obj: dict[str, t.Any]) -> str:
     return [k for k in update_obj.keys() if not k == "update_id"][0]
-
-def to_list(l: T | list[T]) -> list[T]:
-    return l if isinstance(l, list) else [l]
 
 def dumps(obj) -> str:
     return json.dumps(obj, indent=None, separators=(",", ":"))
