@@ -12,7 +12,7 @@ from .logger import logger
 from .event import EventManager
 from . import exit_codes
 from . import exceptions
-from .file_downloader import FileDownloader
+from ..utils.file_downloader import FileDownloader
 from ..bot_api import literals
 from ..bot_api import objects
 
