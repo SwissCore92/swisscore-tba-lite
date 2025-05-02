@@ -2,7 +2,8 @@ import sys
 import logging
 from pathlib import Path
 
-LOG_FILE = Path("swissore_tba_lite.log")
+MAIN_FILE = Path(sys.argv[0]).stem 
+LOG_FILE = Path(f"{MAIN_FILE}.log")
 
 try:
     if "--no-colors" in sys.argv:
@@ -36,6 +37,12 @@ class Logger(logging.Logger):
     WARNING = logging.WARNING
     ERROR = logging.INFO
     CRITICAL = logging.CRITICAL
+
+    def get_log_file(self, flush=False) -> Path:
+        if flush:
+            self.flush_file()
+        return LOG_FILE
+        
     
     def __init__(self, name: str, level=logging.DEBUG):
         super().__init__(name, level)
