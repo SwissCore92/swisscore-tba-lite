@@ -43,11 +43,14 @@ class EventManager:
 
     def _get_handled_event_types(self) -> list[literals.UpdateType]:
         """
-        Get a list of all handled event types.
+        Get a list of all currently handled event types.
         
         Is used for `allowed_updates`
         """
-        return [k for k in self.__update_handlers]
+        return list(set([
+            *self.__update_handlers.keys(), 
+            *self.__temporary_handlers.keys()
+        ]))
     
     def _remove_temporary_event_handler(self, tmp_event_handler: "TemporaryEventHandler", reason="handled"):
         """*for internal use only*"""

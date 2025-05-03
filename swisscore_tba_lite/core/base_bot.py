@@ -545,22 +545,16 @@ class BaseBot:
 
         self.event._lock()
         
-        params = {
-            "offset": 0, 
-            "limit": self.update_limit, 
-            "timeout": self.polling_timeout,
-            "allowed_updates": utils.dumps(self.event._get_handled_event_types())
-        }
-        params = {k: v for k, v in params.items() if v is not None}
-        
         logger.debug("Start async client")
+
+        offset = 0
 
         async with httpx.AsyncClient(timeout=self.default_timeout) as client:
             self.client = client
             if drop_pending_updates:
                 if updates := await self.__call__("getUpdates", params={"offset": -1}, auto_prepare=False):
                     logger.debug("Dropped pending updates.")
-                    params["offset"] = updates[-1]["update_id"] + 1
+                    offset = updates[-1]["update_id"] + 1
             
             await run_builtin_event(self, "startup")
             
@@ -571,7 +565,13 @@ class BaseBot:
             
             while True:
                 try: 
-                    if updates := await self.__call__("getUpdates", params=params, auto_prepare=False, catch_errors=False):
+                    params = {
+                        "offset": offset, 
+                        "allowed_updates": self.event._get_handled_event_types(), 
+                        "timeout": self.polling_timeout,
+                        "limit": self.update_limit
+                    }
+                    if updates := await self.__call__("getUpdates", params=params, catch_errors=False):
                         logger.debug(f"Received {len(updates)} new update(s).")
 
                         for update in updates:
