@@ -12,51 +12,43 @@ A minimal, async-native **Telegram Bot API** library — built for developers wh
 * [Installation](#installation)
 * [Quick Start](#quick-start)
 * [Automatic file processing](#automatic-file-processing)
-* [Expandability](#expandability)
 * [Tasks](#tasks)
 * [Events](#events)
 * [Filters](#filters)
 * [Event Handler Chaining](#event-hanlder-chaining)
 * [Temporary Events](#temporary-events)
-* [Runners](#runners)
   
 ## Philosophy
-*swisscore-tba-lite* is built on a simple idea: **a Telegram bot library shouldn't get in your way.**
+swisscore-tba-lite is built on a simple principle: a Telegram bot library shouldn't get in your way.
 
-Most bot frameworks end up bloated with layers of abstractions, rigid class hierarchies, and dozens of overlapping utility functions. You start with something small, and suddenly you're drowning in dataclasses just to send a message.
+Most frameworks become bloated with excessive abstractions, rigid class hierarchies, and a tangle of utility functions. But do you really need all that just to move some payloads around?
 
-This library takes a different approach.
+This library takes a different path.
+
+Instead of complex abstractions, it uses plain Python `dicts`. Telegram objects are defined as `TypedDict`s—giving you full type checking and autocompletion in your editor, without incurring the overhead of runtime object creation.
+
+Telegram methods are exposed as class methods, with required parameters as positional arguments and optional ones as keyword-only. This keeps your calls explicit, readable, and editor-friendly.
+
+This design ensures:
+
+* Type safety and autocompletion thanks to TypedDicts and explicit signatures
+* Clean separation of required and optional parameters
+* Minimal overhead, since no runtime object wrapping is involved
 
 ### One `__call__` to rule them all
-Every Telegram API method is just a dictionary away. Want to call sendMessage? You just call the bot like a function:
+Every API method is pipelined to `bot.__call__` and returns a [Task](#tasks).
 
+```python
+bot.send_message(1234, "Hello, world!")
+```
+is equivalent to
 ```python
 bot("sendMessage", {
     "chat_id": 1234,
     "text": "Hello, world!"
 })
 ```
-
-That’s it. One unified entrypoint. *Await it* or *forget it*. **It's your decision**. 
-
-*See [Tasks](#tasks) for more info.*
-
-### Always Up-to-Date with *Telegram Bot API*
-One of the biggest frustrations with traditional libraries is lag — you find a new feature in the [*Telegram Bot API docs*](https://core.telegram.org/bots/api), but your library doesn’t support it yet. With *swisscore-tba-lite*, that's a thing of the past.  
-
-The core design guarantees that every method and every parameter supported by the official API is instantly usable — no waiting for a new release, no patching, no forking. If it’s in the *Telegram Bot API docs*, you can use it right now. Just pass the method name and your params and let the magic happen.
-
-### Minimal by default, extensible by design
-At its core, *swisscore-tba-lite* is lean and async-native. You only get the essentials: fast event handling, decorators that feel natural, and a clean internal event loop with graceful shutdown support.
-
-But if you want more? Build it on top. This is your foundation — not your cage.
-
-*See [Expandability](#expandability) for more info.*
-
-<!-- ### Built for reliability and control
-This library is designed with predictability in mind. Startup and shutdown sequences are clean and observable. Handlers are just async functions. And whether you’re running your bot in sync application like flask or an async application like an aiohttp web app, it plugs in without drama. 
-
-*See [Runners](#runners) for more info.* -->
+This lets you use new Telegram Bot API methods immediately, even if the library hasn’t added the method yet. If it’s in the official Telegram docs, you can call it directly.
 
 ### Filters that feel like writing logic, not wrangling syntax
 In *swisscore-tba-lite*, filtering updates is as natural as thinking in conditions. No black box magic, no custom DSLs, no endless nesting of objects. Just simple, readable functions that behave exactly like you'd expect. 
@@ -68,7 +60,7 @@ Want to check if a message is from a specific chat type, starts with a certain c
 ### Clear, helpful logs with privacy in mind
 *swisscore_tba_lite* includes a built-in logger with optional color support (via *colorama*) to keep your terminal output clean and readable.
 
-It gives you full visibility into what's happening under the hood, without exposing sensitive info. API tokens, file contents, local file paths and payloads are never logged. You always stay informed, without compromising user privacy.
+It gives you full visibility into what's happening under the hood, without exposing sensitive info. API tokens or payloads are never logged.
 
 ## Installation
 > ⚠️ **Note:** *This library is in heavy development and not yet production-ready.*  
@@ -76,8 +68,6 @@ It gives you full visibility into what's happening under the hood, without expos
 > * *The documentation will be improved over time.*
 
 *Requires Python 3.11+*
-
-*It's recommended to use a virtual environment*
 
 Since there is no PyPI release at the moment, you have to install it from source using `pip` & `git`.
 
@@ -90,7 +80,7 @@ pip install git+https://github.com/SwissCore92/swisscore-tba-lite.git
 ```python
 import os 
 
-from swisscore_tba_lite import BaseBot as Bot
+from swisscore_tba_lite import Bot
 from swisscore_tba_lite.filters import commands, chat_types
 
 # Get your Telegram Bot API Token from @BotFather
@@ -111,10 +101,7 @@ async def on_startup():
     Runs on bot startup.  
     Sends a message to the admin indicating the bot has started.
     """
-    bot("sendMessage", {
-        "chat_id": ADMIN_ID, 
-        "text": "Hi, I was just started!"
-    })
+    bot.send_message(ADMIN_ID, "Hi, I was just started!")
 
 @bot.event("message", chat_types("private"), commands("myid"))
 async def on_cmd_myid(msg: dict[str]):
@@ -123,11 +110,7 @@ async def on_cmd_myid(msg: dict[str]):
     Sends the user's ID back to them.
     """
     user_id = msg["from"]["id"]
-    bot("sendMessage", {
-        "chat_id": user_id, 
-        "text": f"Your user ID is `{user_id}`",
-        "parse_mode": "MarkdownV2"
-    })
+    bot.send_message(user_id, f"Your user ID is `{user_id}`", parse_mode="Markdown")
 
 @bot.event("message", chat_types("private"))
 async def echo_message(msg: dict[str]):
@@ -135,11 +118,7 @@ async def echo_message(msg: dict[str]):
     Runs on any other message in a private chat with the bot.  
     Sends the same message back to the user.
     """
-    bot("copyMessage", {
-        "from_chat_id": msg["chat"]["id"],
-        "chat_id": msg["chat"]["id"],
-        "message_id": msg["message_id"]
-    })
+    bot.copy_message(msg["chat"]["id"], msg["chat"]["id"], msg["message_id"])
 
 @bot.event("shutdown")
 async def on_shutdown(exit_code: int):
@@ -148,10 +127,7 @@ async def on_shutdown(exit_code: int):
     Sends a message to the admin indicating the bot has stopped.
     """
     if exit_code == 0:
-        bot("sendMessage", {
-            "chat_id": ADMIN_ID, 
-            "text": "Bye, I was just shut down!"
-        })
+        bot.send_message(ADMIN_ID, "Bye, I was just shut down!")
 
 # Start the bot in long polling mode
 # This starts an async event loop and blocks the code.
@@ -163,9 +139,12 @@ Simple things like file handling are taken care of automatically.
 For example, fields like `InputFile` or the media field in `InputMedia` and `InputPaidMedia` can be:
 * a `str` (path to the file),
 * a `pathlib.Path`, or
-* raw `bytes`.
+* raw `bytes`.  
 
-The bot will handle everything under the hood — as long as `check_input_files` or `check_input_media` are properly enabled.
+You can also use a `dict` with the signature ``{"content": <str, path, bytes>, "filename": <str>}``
+This is useful if you:
+* send files as bytes but want to preserve the filename
+* want to send the file with a different name
 
 Of course you can still just pass a valid telegram file_id or file url to send files.
 
@@ -173,94 +152,55 @@ Of course you can still just pass a valid telegram file_id or file url to send f
 <summary>Sending Files</summary>
 
 ```python
-from pathlib import Path
+# send as str Path
+photo = "path/to/your/photo1.png"
+bot.send_photo(msg["chat"]["id"], photo)
 
-m = await bot("sendPhoto", {
-    "chat_id": chat_id,
-    "photo": "path/to/photo.png",
-    "caption": "My beautiful picture"
-}, check_input_files=["photo"])
+# send as pathlib Path
+photo = Path(photo)
+bot.send_photo(msg["chat"]["id"], photo)
 
-bot("editMessageMedia", {
-    "chat_id": chat_id,
-    "message_id": m["message_id"],
-    "media": {
-        "type": "photo", 
-        "media": "path/to/another_photo.png"
-    }
-}, check_input_media=["media"])
+# send as bytes
+with photo.open("rb") as f:
+    photo = f.read()
+bot.send_photo(msg["chat"]["id"], photo)
 
-bot("sendMediaGroup", {
-    "chat_id" chat_id,
-    "media": [
-        {"type": "photo", "media": "path/to/photo1.png"},
-        {"type": "photo", "media": photo2_bytes},
-        {"type": "photo", "media": Path("path/to/photo3.png")},
-        {"type": "photo", "media": "path/to/photo4.png"},
-    ]
-}, check_input_media=["media"])
+# send as inputfile (dict) {"content": <str, path, bytes>, "filename": <str>}
+# this is useful when sending files as bytes but want to preserve the filename
+#   or if you want to send the file with a different name
+bot.send_photo(msg["chat"]["id"], {"content": photo, "filename": "my_photo.png"})
 ```
 
 </details>
 
 The built-in `download` method allows you to quickly download files from the telegram server. Just don't forget to fetch the file first using the `getFile` API call.
 
+**There are some different ways to download a the file** see example below.
+
 <details>
 <summary>Downloading Files</summary>
 
 ```python
-# filtering messages with document and a file name
-@bot.event("message", sub_keys("document", "file_name"))
-async def on_document_message(msg: dict[str]):
+@bot.event("message", chat_ids(ADMIN_ID), is_document)
+async def test(msg: tg.Message):
     doc = msg["document"]
-    file_obj = await bot("getFile", {"file_id": doc["file_id"]})
-    file_path = await bot.download(file_obj, Path.cwd() / ".tmp", doc["file_name"], overwrite_existing=True)
-```
 
-</details>
+    file = await bot.get_file(doc["file_id"])
 
-## Expandability
-This library is intentionally minimal and made for developers already familiar with the Telegram Bot API — so it's not designed to be overly user-friendly out of the box.
+    # download as file 
+    #   if the path is a directory the file name will be taken as it is on the server
+    #   else the provided filename will be used.
+    #   you can optionaly allow/dissallow overwriting if the file name already exists
+    path = await bot.download(file).as_file("path/to/save/file", overwrite=False)
 
-But that's a feature, not a bug: it gives you full control.
-Creating your own abstractions and user-friendly wrappers on top of this core is simple and clean.
+    # download as bytes
+    file_content = await bot.download(file).as_bytes()
 
-<details>
-<summary>Example</summary>
- 
-```python
-from swisscore_tba_lite.core.base_bot import BaseBot, api_method_wrapper
-
-# Custom class to wrap Telegram messages
-class Message:
-    def __init__(self, message_id: int, ...):
-        ...
-
-# Extend the BaseBot with your own high-level methods
-class Bot(BaseBot):
-    @api_method_wrapper(
-        check_input_files=["photo"], 
-        convert_func=lambda m: Message(**m)
-    )
-    def send_photo(chat_id: int, photo: str | Path | bytes, ...) -> asyncio.Task[Message]:
-        """
-        No implementation needed — the decorator handles everything.
-
-        - Method name is auto-converted to camelCase.
-        - If `photo` is a path, Path object, or bytes, 
-          it will be uploaded automatically.
-        - File IDs and URLs are still supported as plain strings.
-        - `convert_func` wraps the result into a Message instance,
-          but you can use any conversion logic you prefer.
-        """
-
-bot = Bot("<YOUR_TOKEN>")
-
-@bot.event("startup")
-async def startup()
-    msg = await bot.send_photo(...)
-
-bot.start_polling()
+    # download as base64 (bytes or str)
+    #   as base64 bytes
+    b64_bytes = await bot.download(file).as_base64()
+    #   as base64 string
+    b64_str = await bot.download(file).as_base64("utf-8")
 ```
 
 </details>
@@ -279,41 +219,30 @@ By using tasks:
 
 This allows your bot to stay snappy and responsive, even during heavy workloads.
 
-> **Note:** The maximum number of cuncurrent tasks can be set by `bot.max_concurrent_tasks = <limit>`.  
-> If the limit is exceeded, the bot will automatically gather all pending tasks before it continues processing updates.  
-> Default is *50*.
+> **Note:** The maximum number of cuncurrent request tasks can be set by `bot = Bot(..., max_concurrent_requests=<limit>)`.  
 
 <details>
 <summary>Example</summary>
 
 ```python
 # `t` is a Task
-t = bot("sendMessage", {
-    "chat_id": 1234, 
-    "text": "hello world!"
-})
+t = bot.send_message(1234, "hello world!")
 
 # await the task to get the result
 result = await t
 
 # or in short
-result = await bot("sendMessage", {
-    "chat_id": 1234, 
-    "text": "hello world!"
-})
+result = await bot.send_message(1234, "hello world!")
 
 # or just fire and forget
-bot("deleteMessage", {
-    "chat_id": result["chat"]["id"], 
-    "message_id": result["message_id"]
-})
+bot.send_message(1234, result["message_id"])
 
 # Run multiple tasks in parallel (faster than awaiting individually)
 # Note: they might complete in any order
 results = await asyncio.gather(
-    bot("sendMessage", {"chat_id": 1234, "text": "hello world!"}),
-    bot("sendMessage", {"chat_id": 4321, "text": "hello world!"}),
-    bot("sendMessage", {"chat_id": 3412, "text": "hello world!"})
+    await bot.send_message(1234, "hello world!"),
+    await bot.send_message(4321, "hello world!"),
+    await bot.send_message(3421, "hello world!")
 )
 ```
 
@@ -329,7 +258,7 @@ The event's object (eg.a `message`) is passed to your handler as a `dict`.
 
 Important:
 * Handlers **must** be async functions.
-* Handlers run in the order they were registered.
+* Handlers checked in the order they were registered.
 * If a handler is called, the event is considered handled and will not propagate to other handlers — unless you return `bot.event.UNHANDLED`. *See [Event Handler Chaining](#event-handler-chaining) for more info.*
 * Temporary event handlers can be registered at runtime. *See [Temporary Events](#temporary-events) for more info.*
 
@@ -388,91 +317,8 @@ async def on_cmd_settings(msg: dict):
 
 </details>
 
-<details>
-<summary>Defining your own filters (or generators)</summary>
 
-```python
-from swisscore_tba_lite import BaseBot as Bot
-from swisscore_tba_lite.filters import (
-    chat_types, 
-    commands,
-    false_on_key_error
-)
-
-# define a filter generator for easy reuse
-async def has_permission(permission: str):
-    """
-    check if both (performer **and** bot) have the required `permission` to perform a specific action. 
-    """
-
-    # define the filter 
-    @false_on_key_error
-    async def f(msg: dict):
-
-        # get a list of all chat administrators (excluding bots)
-        admins = await bot("getChatAdministrators", {
-            "chat_id": msg["chat"]["id"]
-        })
-
-        # create an admin dict {user_id: ChatMember} (might raise a KeyError)
-        admin_dict = {member["user"]["id"]: member for member in admins}
-
-        # check if the user is an admin
-        if not msg["from"]["id"] in admin_dict:
-            # the user is not an admin
-            return False
-
-        # extract the admin from admin dict
-        admin = admin_dict[msg["from"]["id"]]
-        
-        # check if the admin has the required permission ("creator" always has all permissions)
-        if admin["status"] != "creator" or not admin[permission]:
-            # the admin does not have the required permission 
-            return False
-        
-        # get the bot as chat member
-        my_member = await bot("getChatMember", {
-            "chat_id": msg["chat"]["id"],
-            "user_id": bot.user_id
-        })
-
-        # check if the bot is an admin and has the required permission (might raise a KeyError)
-        if my_member["status"] != "administrator" or not my_member[permission]:
-            # the bot is not an admin or is not permitted. 
-            # the action can not be performed by the bot
-            return False
-        
-        # both (user and bot) are admins with the required permission :)
-        return True
-    
-    # return the filter
-    return f
-
-
-@bot.event("message", 
-    chat_types("supergroup"), 
-    commands("ban"), 
-    has_permission("can_restrict_members")
-)
-async def ban_chat_member(msg: dict):
-    # runs only if the performer and the bot are both chat administrators
-    # with the `can_restrict_members` permission.
-    bot("banChatMember", {...})
-
-
-@bot.event("message", 
-    chat_types("supergroup"), 
-    commands("promote"), 
-    has_permission("can_promote_members")
-)
-async def promote_chat_member(msg: dict):
-    # runs only if the performer and the bot are both chat administrators
-    # with the `can_promote_members` permission. 
-    bot("promoteChatMember", {...})
-
-```
-
-</details>  
+You can also define your own filters.
 
 ## Event Handler Chaining
 It's possible to chain event handlers without manual re-dispatching logic by just using `return bot.event.UNHANDLED` in an event handler.
@@ -480,6 +326,30 @@ It's possible to chain event handlers without manual re-dispatching logic by jus
 ***Why is this great?***
 * **Graceful fallbacks:** You can write a series of specific handlers followed by a general catch-all without filter spaghetti.
 * **More expressive filters:** You can "fail" a match manually even if the filters pass, which is great for edge cases (like optional preconditions).
+
+You can also turn an event handler into a filter.
+
+```python
+ADMIN_ID = int(os.environ.get("ADMIN_ID", 1234))
+
+unauthorized_chat = if_not(chat_ids(ADMIN_ID))
+
+@bot.event("message", unauthorized_chat)
+async def on_unouthorized_chat(_):
+    ... # ignore 
+
+... # this message event handler section will only be reached by the admin
+
+@bot.event("message", ...)
+async def on_msg(msg): ...
+
+@bot.event("message", ...)
+async def on_msg(msg): ...
+
+@bot.event("message", ...)
+async def on_msg(msg): ...
+
+```
 
 See [Temporary Events](#temporary-events) for more usecases of `bot.event.UNHANDLED`.
 
@@ -567,6 +437,8 @@ async def test_cmd(msg: dict):
 
 <details>
 <summary>Advanced Example</summary>
+
+> ⚠️ ***deprecated!*** *will be updated soon*
 
 ```python
 from swisscore_tba_lite.filters import commands, chat_types, chat_ids, from_ids, if_all
@@ -693,6 +565,5 @@ async def on_cmd_set_pic(msg: dict[str]):
 
 </details>
 
-## Runners
 
-*Details will be added later*
+**That's all i got for now**, more will follow.
