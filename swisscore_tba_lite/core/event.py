@@ -60,45 +60,59 @@ class EventManager:
         logger.debug(f"Removed {(repr(tmp_event_handler))} - Reason: {repr(reason)}")
 
     async def __process_update(self, event_name, obj, update_id) -> None:
-        async with self.__handler_control:
-            # check temporary handlers first
-            if event_name in self.__temporary_handlers:
-                for tmp_handler in self.__temporary_handlers[event_name].copy():
-                    
-                    # TODO: check in realtime. not on matching update type
-                    if tmp_handler.is_expired():
-                        # remove expired event handler
-                        self._remove_temporary_event_handler(tmp_handler, "expired")
-                        continue
-
-                    if await tmp_handler.matches(obj):
-                        if handler := await tmp_handler.get_matching_handler(obj):
-                            result = await handler(obj) if handler._arg_count == 1 else await handler(obj, tmp_handler.context)
-                            if result is EventManager.UNHANDLED:
-                                # event handler returned that it is unhandled
-                                return True
-                            else:
-                                # event handler returned nothing, so it is considered handled
-                                self._remove_temporary_event_handler(tmp_handler, "handled")
-                                return True
+        try:
+            async with self.__handler_control:
+                # check temporary handlers first
+                if event_name in self.__temporary_handlers:
+                    for tmp_handler in self.__temporary_handlers[event_name].copy():
                         
-                        logger.warning(f"{repr(tmp_handler)} matched. But none of its handlers did.")
-            
-            # check static handlers
-            if handlers := self.__update_handlers.get(event_name):
-                for handler in handlers:
-                    if await handler.matches(deepcopy(obj)):
-                        if await handler(deepcopy(obj)) is EventManager.UNHANDLED:
-                            logger.debug(f"{repr(handler)} returned EventManager.UNHANDLED! "
-                                "The event is considered unhandled. "
-                                "Continue checking for matching handlers."
-                            )
+                        # TODO: check in realtime. not on matching update type
+                        if tmp_handler.is_expired():
+                            # remove expired event handler
+                            self._remove_temporary_event_handler(tmp_handler, "expired")
                             continue
-                            
-                        return True
 
-            logger.warning(f"No matching event handler found for update of type '{event_name}'. Update was dropped.")
-            return False
+                        if await tmp_handler.matches(obj):
+                            if handler := await tmp_handler.get_matching_handler(obj):
+                                result = await handler(obj) if handler._arg_count == 1 else await handler(obj, tmp_handler.context)
+                                if result is EventManager.UNHANDLED:
+                                    # event handler returned that it is unhandled
+                                    return True
+                                else:
+                                    # event handler returned nothing, so it is considered handled
+                                    self._remove_temporary_event_handler(tmp_handler, "handled")
+                                    return True
+                            
+                            logger.warning(f"{repr(tmp_handler)} matched. But none of its handlers did.")
+                
+                # check static handlers
+                if handlers := self.__update_handlers.get(event_name):
+                    for handler in handlers:
+                        if await handler.matches(deepcopy(obj)):
+                            if await handler(deepcopy(obj)) is EventManager.UNHANDLED:
+                                logger.debug(f"{repr(handler)} returned EventManager.UNHANDLED! "
+                                    "The event is considered unhandled. "
+                                    "Continue checking for matching handlers."
+                                )
+                                continue
+                                
+                            return True
+
+                logger.warning(f"No matching event handler found for update (ID={update_id}) of type '{event_name}'. Update was dropped.")
+                return False
+        
+        except asyncio.CancelledError:
+            pass
+        
+        except exceptions.RestartBotException as e:
+            logger.debug("Restart flag set.")
+            setattr(self, "restart_flag", True)
+            
+        except exceptions.FilterEvaluationError as e:
+            logger.error(f"Failed to evaluate filters for update (ID={update_id}) of type '{event_name}'. Update was dropped. ({repr(e)})")
+        
+        except exceptions.EventHandlerError as e:
+            logger.error(f"Failed to process update (ID={update_id}) of type '{event_name}'. Update was dropped. ({repr(e)})")
 
     async def _trigger_event(self, event_name: EventName, *args) -> None:
         """*for internal use only*"""
@@ -114,6 +128,8 @@ class EventManager:
             case _:
                 obj: dict = args[0]
                 update_id: int = args[1]
+
+                # await self.__process_update(event_name, obj, update_id)
 
                 task = asyncio.create_task(self.__process_update(event_name, obj, update_id), name=f"handle_update_{update_id}")
                 self.__tasks.append(task)
