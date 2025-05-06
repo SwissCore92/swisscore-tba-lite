@@ -36,6 +36,10 @@ class FileDownloader:
 
             file_path = Path(file_path)
 
+            if not file_path.is_file():
+                filename = self.file_url.rsplit("/", 1)[-1].split("?", 1)[0]
+                file_path /= filename
+
             if not file_path.parent.exists():
                 raise FileNotFoundError(f"{file_path.parent} was not found.")
 
