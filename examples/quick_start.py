@@ -1,6 +1,7 @@
 import os 
 
-from swisscore_tba_lite import BaseBot as Bot
+from swisscore_tba_lite import Bot
+from swisscore_tba_lite import objects as tg
 from swisscore_tba_lite.filters import commands, chat_types
 
 # Get your Telegram Bot API Token from @BotFather
@@ -21,35 +22,24 @@ async def on_startup():
     Runs on bot startup.  
     Sends a message to the admin indicating the bot has started.
     """
-    bot("sendMessage", {
-        "chat_id": ADMIN_ID, 
-        "text": "Hi, I was just started!"
-    })
+    bot.send_message(ADMIN_ID, "Hi, I was just started!")
 
 @bot.event("message", chat_types("private"), commands("myid"))
-async def on_cmd_myid(msg: dict[str]):
+async def on_cmd_myid(msg: tg.Message):
     """
     Runs when a user sends '/myid' in a private chat with the bot.  
     Sends the user's ID back to them.
     """
     user_id = msg["from"]["id"]
-    bot("sendMessage", {
-        "chat_id": user_id, 
-        "text": f"Your user ID is `{user_id}`",
-        "parse_mode": "MarkdownV2"
-    })
+    bot.send_message(user_id, f"Your user ID is `{user_id}`", parse_mode="Markdown")
 
 @bot.event("message", chat_types("private"))
-async def echo_message(msg: dict[str]):
+async def echo_message(msg: tg.Message):
     """
     Runs on any other message in a private chat with the bot.  
     Sends the same message back to the user.
     """
-    bot("copyMessage", {
-        "from_chat_id": msg["chat"]["id"],
-        "chat_id": msg["chat"]["id"],
-        "message_id": msg["message_id"]
-    })
+    bot.copy_message(msg["chat"]["id"], msg["chat"]["id"], msg["message_id"])
 
 @bot.event("shutdown")
 async def on_shutdown(exit_code: int):
@@ -58,10 +48,7 @@ async def on_shutdown(exit_code: int):
     Sends a message to the admin indicating the bot has stopped.
     """
     if exit_code == 0:
-        bot("sendMessage", {
-            "chat_id": ADMIN_ID, 
-            "text": "Bye, I was just shut down!"
-        })
+        bot.send_message(ADMIN_ID, "Bye, I was just shut down!")
 
 # Start the bot in long polling mode
 # This starts an async event loop and blocks the code.
