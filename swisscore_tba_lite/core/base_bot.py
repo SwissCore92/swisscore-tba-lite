@@ -22,7 +22,6 @@ JsonDict = dict[str, t.Any]
 CLOUD_BOT_API_URL = "https://api.telegram.org"
 CLOUD_BOT_FILE_URL = "https://api.telegram.org/file"
 
-# use lowercase for method names
 USE_CLOUD_URL = frozenset({"logout"})
 """
 methods that always must be dispatched to the cloud telegram bot api server
@@ -195,7 +194,8 @@ class BaseBot:
         *, 
         base_api_url: str = CLOUD_BOT_API_URL,
         base_file_url: str = CLOUD_BOT_FILE_URL,
-        event_manager: EventManager | None = None
+        event_manager: EventManager | None = None,
+        max_concurrent_requests: int = 50
     ) -> None:
         """
         Initialize your bot.  
@@ -287,12 +287,6 @@ class BaseBot:
         Limits the max timeout for retrying timed out requests.
         """
         
-        self.max_concurrent_tasks: int = 50
-        """
-        Max amount of concurrent tasks.  
-        If the limit is exceeded, the bot will automatically gather all pending tasks before it continues processing updates.
-        """
-        
         self._tasks: list[asyncio.Task] = []
         """
         Stores currently running tasks to protect them from beeing collected by the garbage collector.  
@@ -307,7 +301,7 @@ class BaseBot:
         **Is used internally to check if the bot is fully started**
         """
 
-        self.__rate_control = asyncio.Semaphore(30)
+        self.__rate_control = asyncio.Semaphore(max_concurrent_requests)
 
     #region tasks
     
@@ -451,7 +445,7 @@ class BaseBot:
                     retries += 1
                     continue
                 
-                except httpx.ConnectError as e:
+                except (httpx.ConnectError, httpx.RemoteProtocolError) as e:
                     wait_time = 2**retries
                     logger.warning(f"'{method_name}' Network issue detected. Check your internet connection. Retrying in {wait_time} seconds... "
                         f"({self.max_retries - retries} / {self.max_retries} retries left.)"
@@ -479,23 +473,11 @@ class BaseBot:
             update_object = update[update_type]
             
             await self.event._trigger_event(update_type, update_object, update_id)
-            
-            if len(self._tasks) >= self.max_concurrent_tasks:
-                logger.info(
-                    f"Max amount of concurrent tasks exceeded ({self.max_concurrent_tasks}). "
-                    "Gathering all pending tasks before processing further updates..."
-                )
-                await self._gather_pending_tasks()
         
         except exceptions.RestartBotException as e:
             logger.debug(f"{repr(e)} raised. Preparing Shutdown.")
             setattr(self, "restart_flag", True)
-        
-        except exceptions.FilterEvaluationError as e:
-            logger.error(f"Failed to process update of type '{update_type}'. Update was dropped. ({e})", exc_info=True)
-        
-        except exceptions.EventHandlerError as e:
-            logger.error(f"A event handler processing an update of type '{update_type}' crashed. ({e})", exc_info=True)
+
 
     #endregion core
 
@@ -559,12 +541,17 @@ class BaseBot:
             await run_builtin_event(self, "startup")
             
             logger.info(f"Start Bot in long polling mode. Press {utils.kb_interrupt()} to quit.")
-            logger.debug(f"Allowed updates: {params["allowed_updates"]}")
+            # logger.debug(f"Allowed updates: {params["allowed_updates"]}")
 
             self._is_ready = True
-            
+
             while True:
                 try: 
+                    if getattr(self.event, "restart_flag", False) is True:
+                        exit_code = exit_codes.RESTART
+                        logger.info(f"RestartBotException raised. Shutting down with {exit_code=}.")
+                        break
+
                     params = {
                         "offset": offset, 
                         "allowed_updates": self.event._get_handled_event_types(), 
@@ -576,16 +563,7 @@ class BaseBot:
 
                         for update in updates:
                             await self.process_update(update)
-                            params["offset"] = update["update_id"] + 1
-                        
-                        if getattr(self, "restart_flag", False):
-                            await self.__call__("getUpdates", {"offset": params["offset"], "timeout": 0})
-                            exit_code = exit_codes.RESTART
-                            logger.info(f"RestartBotException raised. Shutting down with {exit_code=}.")
-                            break
-                        
-                        elif getattr(self, "shutdown_flag", False):
-                            logger.info(f"Shutdown raised. Shutting down with {exit_code=}.")
+                            offset = update["update_id"] + 1
 
                 except exceptions.MaxRetriesExeededError as e:
                     logger.error(f"Failed to get updates. Check your Internet Connection. Retrying in 60 seconds...")
