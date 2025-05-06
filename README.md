@@ -338,7 +338,7 @@ unauthorized_chat = if_not(chat_ids(ADMIN_ID))
 async def on_unouthorized_chat(_):
     ... # ignore 
 
-... # this message event handler section will only be reached by the admin
+# this message event handler section will only be reached by the admin
 
 @bot.event("message", ...)
 async def on_msg(msg): ...
