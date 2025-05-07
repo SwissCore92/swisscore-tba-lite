@@ -347,7 +347,7 @@ class BaseBot:
         params: JsonDict | None = None,
         *, 
         check_input_files: list[str] | None = None, 
-        check_input_media: list[str] | None = None,
+        check_input_media: dict[str, list[str]] | None = None,
         convert_func: t.Callable[[t.Any], T] | None = None,
         **kwargs
     ) -> asyncio.Task[T]:

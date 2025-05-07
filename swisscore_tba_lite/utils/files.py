@@ -105,7 +105,7 @@ async def prepare_input_files(check_files: list[str] | None, params: dict[str, t
     return params, files
 
 
-async def prepare_input_media(check_media: list[str] | None, params: dict[str, t.Any]) -> tuple[dict[str, t.Any], dict[str, HttpXFile]]:
+async def prepare_input_media(check_media: dict[str, list[str]] | None, params: dict[str, t.Any]) -> tuple[dict[str, t.Any], dict[str, HttpXFile]]:
     if not check_media:
         return params, {}
     
@@ -126,43 +126,48 @@ async def prepare_input_media(check_media: list[str] | None, params: dict[str, t
             val = [val]
         
         for media in val:
-            if not "media" in media:
-                raise TypeError("field 'media' is missing.")
+            # if not "media" in media:
+            #     raise TypeError("field 'media' is missing.")
+            
+            for field in check_media[key]:
 
-            file_ref = media["media"]
-
-            filename: str | None = None
-
-            if isinstance(file_ref, dict) and all(key in file_ref for key in ["content", "filename"]):
-                filename = file_ref["filename"]
-                file_ref = file_ref["content"]
-
-            if isinstance(file_ref, str):
-                if is_local_file(file_ref):
-                    file_ref = Path(file_ref)
-                else:
+                if not field in media:
                     continue
-            
-            file_id = f"media_{len(files)}"
-            
-            if isinstance(file_ref, Path):
-                if not file_ref.exists():
-                    raise FileNotFoundError(f"{file_ref} was not found.")
+
+                file_ref = media[field]
+
+                filename: str | None = None
+
+                if isinstance(file_ref, dict) and all(key in file_ref for key in ["content", "filename"]):
+                    filename = file_ref["filename"]
+                    file_ref = file_ref["content"]
+
+                if isinstance(file_ref, str):
+                    if is_local_file(file_ref):
+                        file_ref = Path(file_ref)
+                    else:
+                        continue
                 
-                if not filename:
-                    filename = file_ref.name
+                file_id = f"file_{len(files)}"
+                
+                if isinstance(file_ref, Path):
+                    if not file_ref.exists():
+                        raise FileNotFoundError(f"{file_ref} was not found.")
+                    
+                    if not filename:
+                        filename = file_ref.name
 
-                file_ref = await read_file(file_ref)
+                    file_ref = await read_file(file_ref)
 
-                files[file_id] = (filename, file_ref, mimetypes.guess_type(filename)[0] or "application/octet-stream")
-                media["media"] = f"attach://{file_id}"
-            
-            elif isinstance(file_ref, bytes):
-                if not filename:
-                    filename = token_urlsafe()
+                    files[file_id] = (filename, file_ref, mimetypes.guess_type(filename)[0] or "application/octet-stream")
+                    media[field] = f"attach://{file_id}"
+                
+                elif isinstance(file_ref, bytes):
+                    if not filename:
+                        filename = token_urlsafe()
 
-                files[file_id] = (filename, file_ref, mimetypes.guess_type(filename)[0] or "application/octet-stream")
-                media["media"] = f"attach://{file_id}"
+                    files[file_id] = (filename, file_ref, mimetypes.guess_type(filename)[0] or "application/octet-stream")
+                    media[field] = f"attach://{file_id}"
         
         params[key] = json.dumps(val[0] if is_single else val)
 
