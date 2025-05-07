@@ -175,7 +175,7 @@ bot.send_photo(msg["chat"]["id"], {"content": photo, "filename": "my_photo.png"}
 
 The built-in `download` method allows you to quickly download files from the telegram server. Just don't forget to fetch the file first using the `getFile` API call.
 
-**There are some different ways to download a the file** see example below.
+**There are some different ways to download a file** see example below.
 
 <details>
 <summary>Downloading Files</summary>
