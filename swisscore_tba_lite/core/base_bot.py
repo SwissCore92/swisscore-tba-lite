@@ -194,17 +194,18 @@ class BaseBot:
         *, 
         base_api_url: str = CLOUD_BOT_API_URL,
         base_file_url: str = CLOUD_BOT_FILE_URL,
-        event_manager: EventManager | None = None,
-        max_concurrent_requests: int = 50
+        max_concurrent_requests: int = 50,
+        max_concurrent_handlers: int = 8,
     ) -> None:
         """
         Initialize your bot.  
         
         Args:
             token (str): The token you received from @BotFather
-            base_api_url (str, optional): The base url for api calls; **Only change this if you're using your own Telegram Bot API**.  
-            base_file_url (str, opional): The base url for files to download; **Only change this if you're using your own Telegram Bot API**. 
-            event_manager (EventManager, optional): The `EventManager` to use; **Only set this if you are expanding the bot and need a more advanced event manager.**
+            base_api_url (str, optional): The base url for api calls.  
+            base_file_url (str, opional): The base url for files to download. 
+            max_concurrent_requests(int, optional): The maximum number of concurrent request tasks
+            max_concurrent_handlers(int, optional): The maximum number of concurrent running event handlers
         """
         
         if not utils.is_valid_bot_api_token(token):
@@ -220,10 +221,7 @@ class BaseBot:
         The user ID of the bot.
         """
         
-        if event_manager and not isinstance(event_manager, EventManager):
-            raise TypeError("`event_manager` has to be an instance of `EventManager`")
-        
-        self.event = event_manager or EventManager()
+        self.event = EventManager(max_concurrent_handlers)
         """
         The event manager of the bot.
 
