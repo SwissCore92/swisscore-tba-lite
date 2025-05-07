@@ -219,7 +219,7 @@ By using tasks:
 
 This allows your bot to stay snappy and responsive, even during heavy workloads.
 
-> **Note:** The maximum number of cuncurrent request tasks can be set by `bot = Bot(..., max_concurrent_requests=<limit>)`.  
+> **Note:** The maximum number of cuncurrent request tasks can be set by `bot = Bot(..., max_concurrent_requests=<limit>)`. Default is 50.  
 
 <details>
 <summary>Example</summary>
@@ -254,7 +254,7 @@ The event type is derived from the update content — for example, an update wit
 
 You register event handlers using `@bot.event("<event_type>")`, with optional [filters](#filters) to narrow down when the handler should trigger.
 
-The event's object (eg.a `message`) is passed to your handler as a `dict`.
+The event's object (eg.a `message`) is passed to your handler as a `dict` (a deep copy of the original object).
 
 Important:
 * Handlers **must** be async functions.
@@ -262,8 +262,10 @@ Important:
 * If a handler is called, the event is considered handled and will not propagate to other handlers — unless you return `bot.event.UNHANDLED`. *See [Event Handler Chaining](#event-handler-chaining) for more info.*
 * Temporary event handlers can be registered at runtime. *See [Temporary Events](#temporary-events) for more info.*
 
+> **Note:** The maximum number of cuncurrent running event handlers can be set by `bot = Bot(..., max_concurrent_handlers=<limit>)`. Default is 8. 
+
 <details>
-<summary>Example</summary>
+<summary>Register Event Handlers</summary>
 
 ```python
 from swisscore-tba-lite.filters import chat_types, is_text, is_photo
@@ -276,7 +278,7 @@ async def on_private_message(msg: dict):
 async def on_supergroup_message(msg: dict):
     ... #Will run if a photo message in a supergroup chat is received
 
-... # define more filters
+...
 
 ```
 
@@ -393,13 +395,11 @@ Temporary event handlers are short-lived and are **not persisted across bot rest
 <summary>Example</summary>
 
 ```python
-from swisscore_tba_lite.filters import commands, chat_types, chat_ids
-
 # define a test command handler
 @bot.event("message", chat_types("private"), commands("test"))
-async def test_cmd(msg: dict):
+async def test_cmd(msg: tg.Message):
     # define a temporary handler
-    async def countdown(m: dict, ctx: dict):
+    async def countdown(m: tg.Message, ctx: dict):
         if ctx["count"] > 0:
             bot("sendMessage", {
                 "chat_id": m["chat"]["id"],
@@ -408,17 +408,11 @@ async def test_cmd(msg: dict):
             ctx["count"] -= 1
             return bot.event.UNHANDLED
         
-        bot("sendMessage", {
-            "chat_id": msg["chat"]["id"],
-            "text": "BOOM! 💥"
-        })
+        bot.send_message(msg["chat"]["id"], "BOOM! 💥")
     
     # define a temporary canel command handler
     async def cancel_countdown(msg: dict):
-        bot("sendMessage", {
-            "chat_id": msg["chat"]["id"],
-            "text": "Explosion canceled!"
-        })
+        bot.send_message(msg["chat"]["id"], "Explosion canceled!")
     
     context = {"count": 3}
     await countdown(msg, context)
@@ -438,36 +432,30 @@ async def test_cmd(msg: dict):
 <details>
 <summary>Advanced Example</summary>
 
-> ⚠️ ***deprecated!*** *will be updated soon*
-
 ```python
-from swisscore_tba_lite.filters import commands, chat_types, chat_ids, from_ids, if_all
-
-##########################################
 # Mimic @BotFather's /setuserpic command #
-##########################################
 
 # define a /cancel command event handler with an optional context argument
 @bot.event("message", chat_types("private"), commands("cancel"))
-async def on_cmd_cancel(msg: dict[str], ctx=None):
+async def on_cmd_cancel(msg: tg.Message, ctx: dict | None = None):
     if ctx:
         # context was passed, so tell the user that the action was cancelled
-        bot("sendMessage", {
-            "chat_id": msg["chat"]["id"], 
-            "text": f"The command {ctx["action"]} has been cancelled. Anything else I can do for you?",
-            "reply_markup": {"remove_keyboard": True}
-        })
+        bot.send_message(
+            msg["chat"]["id"], 
+            f"The command {ctx["action"]} has been cancelled. Anything else I can do for you?",
+            reply_markup={"remove_keyboard": True}
+        )
         # return nothing, so the temporary event is considered handled (finished)
-    else:
-        # no context was passed, so there is nothing to cancel
-        bot("sendMessage", {
-            "chat_id": msg["chat"]["id"], 
-            "text": "No active command to cancel. I wasn't doing anything anyway. Zzzzz...😴"
-        })
+        return
+
+    # no context was passed, so there is nothing to cancel
+    bot.send_message(msg["chat"]["id"], "No active command to cancel. I wasn't doing anything anyway. Zzzzz...😴")
+
 
 # define a /setuserpic command event handler 
 @bot.event("message", chat_types("private"), commands("setuserpic"))
-async def on_cmd_set_pic(msg: dict[str]):
+async def on_cmd_set_pic(msg: tg.Message):
+
     # define a filter to make sure to target the correct chat and user 
     is_valid_chat_user = if_all(
         chat_ids(msg["chat"]["id"]), 
@@ -476,46 +464,35 @@ async def on_cmd_set_pic(msg: dict[str]):
 
     # define an temporary event handler to check if the user has sent a valid photo 
     # accept the context as second argument which contains the chosen bot's name
-    async def set_bot_pic(msg: dict, ctx: dict):
+    async def set_bot_pic(msg: tg.Message, ctx: dict):
         if msg.get("photo"):
             # the user has sent a valid photo
-            bot("sendMessage", {
-                "chat_id": msg["chat"]["id"], 
-                "text": f"Success! Profile photo of {ctx["bot_name"]} updated."
-            })
+            bot.send_message(msg["chat"]["id"], f"Success! Profile photo of {ctx["bot_name"]} updated.")
+
             # return nothing, so the temporary event is considered handled (finished)
             return
         
         if msg.get("document"):
             # the user has sent a file instead of a photo
-            bot("sendMessage", {
-                "chat_id": msg["chat"]["id"], 
-                "text": "Please send me the picture as a 'Photo', not as a 'File'."
-            })
+            bot.send_message(msg["chat"]["id"], "Please send me the picture as a 'Photo', not as a 'File'.")
+
             # return bot.event.UNHANDLED, so the temporary event is considered unhandled and continues
             return bot.event.UNHANDLED
         
         # the user has sent something other than a file or a photo
-        bot("sendMessage", {
-            "chat_id": msg["chat"]["id"], 
-            "text": "I said send me a <b>photo</b>. Not some other nonesense.",
-            "parse_mode": "HTML"
-        })
+        bot.send_message(msg["chat"]["id"], "I said send me a <b>photo</b>. Not some other nonesense.", parse_mode="HTML")
+
         # return bot.event.UNHANDLED, so the temporary event is considered unhandled and continues
         return bot.event.UNHANDLED
     
     # define an temporary event handler to check if the user provided a valid bot name
     # accept the context as second argument which contains a list of valid bot names
-    async def check_selected_bot(msg: dict, ctx: dict):
+    async def check_selected_bot(msg: tg.Message, ctx: dict):
 
         bot_name = msg.get("text", "").strip()
         if bot_name in ctx["valid_bots"]:
             # the provided bot name was valid 
-            bot("sendMessage", {
-                "chat_id": msg["chat"]["id"], 
-                "text": "OK. Send me the new profile photo for the bot.",
-                "reply_markup": {"remove_keyboard": True}
-            })
+            bot.send_message(msg["chat"]["id"], "OK. Send me the new profile photo for the bot.", reply_markup={"remove_keyboard": True})
 
             # register the next step of the temporary event to check for a valid bot picture
             bot.event.wait_for("message", is_valid_chat_user,
@@ -531,10 +508,8 @@ async def on_cmd_set_pic(msg: dict[str]):
             return
         
         # the user didn't provide a valid bot name
-        bot("sendMessage", {
-            "chat_id": msg["chat"]["id"], 
-            "text": "Invalid bot selected. Please send a valid bot name."
-        })
+        bot.send_message(msg["chat"]["id"], "Invalid bot selected. Please send a valid bot name.")
+
         # return bot.event.UNHANDLED, so the temporary event is considered unhandled and continues
         return bot.event.UNHANDLED
 
@@ -542,16 +517,16 @@ async def on_cmd_set_pic(msg: dict[str]):
     bots = ["@my_cool_bot1", "@my_cool_bot2", "@my_coolest_bot3"]
 
     # send a message with a reply keyboard for the user to choose a bot
-    bot("sendMessage", {
-        "chat_id": msg["chat"]["id"], 
-        "text": "Choose a bot to change profile photo.",
-        "reply_markup": {"keyboard": [
-            [{"text": bot_name} for bot_name in bots]
-        ]},
-        "resize_keyboard": True,
-        "one_time_keyboard": True,
-        "input_field_placeholder": "Enter the bot's username"
-    })
+    bot.send_message(
+        msg["chat"]["id"],
+        "Choose a bot to change profile photo.",
+        reply_markup={
+            "keyboard": [[{"text": bot_name}] for bot_name in bots],
+            "one_time_keyboard": True,
+            "resize_keyboard": True,
+            "input_field_placeholder": "Enter the bot's username"
+        },
+    )
 
     # register the first step of the temporary event to check for a valid bot name
     bot.event.wait_for("message", is_valid_chat_user,
