@@ -248,7 +248,7 @@ results = await asyncio.gather(
 )
 ```
 
-***Important:*** *If an API call was unsuccesful, the task will return `None` and an error message will be logged.*  
+***Important:*** *If an API call was unsuccessful, the task will return `None` and an error message will be logged.*  
 So if you need to know if a request was successful, you can do the following:
 
 ```python
