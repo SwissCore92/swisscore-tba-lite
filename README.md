@@ -219,7 +219,7 @@ By using tasks:
 
 This allows your bot to stay snappy and responsive, even during heavy workloads.
 
-> **Note:** The maximum number of cuncurrent request tasks can be set by `bot = Bot(..., max_concurrent_requests=<limit>)`. Default is 50.  
+> **Note:** The maximum number of cuncurrent request tasks can be set by `bot = Bot(..., max_concurrent_requests=<limit>)`. Default is ***50***.  
 
 <details>
 <summary>Example</summary>
@@ -262,7 +262,7 @@ Important:
 * If a handler is called, the event is considered handled and will not propagate to other handlers — unless you return `bot.event.UNHANDLED`. *See [Event Handler Chaining](#event-handler-chaining) for more info.*
 * Temporary event handlers can be registered at runtime. *See [Temporary Events](#temporary-events) for more info.*
 
-> **Note:** The maximum number of cuncurrent running event handlers can be set by `bot = Bot(..., max_concurrent_handlers=<limit>)`. Default is 8. 
+> **Note:** The maximum number of cuncurrent running event handlers can be set by `bot = Bot(..., max_concurrent_handlers=<limit>)`. Default is ***8***. 
 
 <details>
 <summary>Register Event Handlers</summary>
@@ -301,16 +301,9 @@ Everything is well-documented and easy to use.
 <summary>Simple filter usage</summary>
 
 ```python
-from swisscore-tba-lite.filters import (
-    chat_ids,
-    user_ids, 
-    commands
-)
+from swisscore-tba-lite.filters import chat_ids, commands
 
-is_my_chat = chat_ids(<your_user_id>)
-is_me = user_ids(<your_user_id>)
-
-@bot.event("message", is_my_chat, commands("settings"))
+@bot.event("message", chat_ids(your_user_id), commands("settings"))
 async def on_cmd_settings(msg: dict):
     # runs only if YOU use the /settings command 
     # in private chat with the bot
@@ -326,59 +319,53 @@ You can also define your own filters.
 It's possible to chain event handlers without manual re-dispatching logic by just using `return bot.event.UNHANDLED` in an event handler.
 
 ***Why is this great?***
-* **Graceful fallbacks:** You can write a series of specific handlers followed by a general catch-all without filter spaghetti.
+* **Graceful fallbacks:** You can write a series of specific handlers followed by a general catch-all or vice versa without filter spaghetti.
 * **More expressive filters:** You can "fail" a match manually even if the filters pass, which is great for edge cases (like optional preconditions).
 
-You can also turn an event handler into a filter.
-
-```python
-ADMIN_ID = int(os.environ.get("ADMIN_ID", 1234))
-
-unauthorized_chat = if_not(chat_ids(ADMIN_ID))
-
-@bot.event("message", unauthorized_chat)
-async def on_unouthorized_chat(_):
-    ... # ignore 
-
-# this message event handler section will only be reached by the admin
-
-@bot.event("message", ...)
-async def on_msg(msg): ...
-
-@bot.event("message", ...)
-async def on_msg(msg): ...
-
-@bot.event("message", ...)
-async def on_msg(msg): ...
-
-```
-
-See [Temporary Events](#temporary-events) for more usecases of `bot.event.UNHANDLED`.
+This also allows you to filter early filter out unwanted messages.
 
 <details>
 <summary>Example</summary>
 
 ```python
+# filter all supergroup commands and allow further propagation only for admins
+# note: empty commands() filter returns True for ANY command
+@bot.event("message", chat_types("supergroup"), commands())
+async def check_performer(msg: tg.Message):
+    # get a list of supergroup admins 
+    admins = await bot.get_chat_administrators(msg["chat"]["id"])
 
-from swisscore_tba_lite.filters import sub_keys
+    # check if the performer of the command is an admin
+    if not msg["from"]["id"] in [admin["user"]["id"] for admin in admins]:
+        # the performer of the command is not an admin
 
-@bot.event("message", sub_keys("document", "mime_type"))
-async def handle_pdf(msg):
-    if msg["document"]["mime_type"] != "application/pdf":
-        return bot.event.UNHANDLED
+        await bot.send_message(msg["chat"]["id"], "You are not allowed to use commands.")
+
+        # stop propagation
+        return
     
-    ... # Handle pdf document
+    # allow the event to propagate by returning bot.event.UNHANDLED
+    return bot.event.UNHANDLED
 
-@bot.event("message", sub_keys("document", "mime_type"))
-async def handle_file(msg):
-    ... # Handle any other kind of document with a mime_type
+# every supergroup command handler can only be reached by an admin
+
+@bot.event("message", chat_types("supergroup"), commands("ban"))
+async def on_ban_command(msg: tg.Message):
+    ...
+
+@bot.event("message", chat_types("supergroup"), commands("promote"))
+async def on_promote_command(msg: tg.Message):
+    ...
 ```
+
+See [Temporary Events](#temporary-events) for more use-cases of `bot.event.UNHANDLED`.
 
 </details>
 
+
 ## Temporary Events
 
-This library allows you to **register temporary event handlers** at runtime `using bot.event.wait_for(...)`. These handlers are useful for managing dynamic, stateful conversation flows—such as wizards, confirmation dialogs, or guided inputs—where user interaction drives the next steps. 
+This library allows you to **register temporary event handlers** at runtime `using bot.event.wait_for(...)`. These handlers are useful for managing dynamic, stateful conversation flows—such as wizards, confirmation dialogs, or guided inputs—where user interaction drives the next steps. Just one very flexible method, no crazy state machine.
  
 Temporary event handlers are short-lived and are **not persisted across bot restarts**. They are best suited for ephemeral, in-session workflows where you want to "wait" for a specific user input before proceeding.
 
@@ -433,7 +420,7 @@ async def test_cmd(msg: tg.Message):
 <summary>Advanced Example</summary>
 
 ```python
-# Mimic @BotFather's /setuserpic command #
+# Mimic @BotFather's /setuserpic command
 
 # define a /cancel command event handler with an optional context argument
 @bot.event("message", chat_types("private"), commands("cancel"))
@@ -540,5 +527,6 @@ async def on_cmd_set_pic(msg: tg.Message):
 
 </details>
 
+---
 
-**That's all i got for now**, more will follow.
+And that's about all I've got for now.
