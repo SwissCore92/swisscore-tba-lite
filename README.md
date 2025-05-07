@@ -48,7 +48,7 @@ bot("sendMessage", {
     "text": "Hello, world!"
 })
 ```
-This lets you use new Telegram Bot API methods immediately, even if the library hasn’t added the method yet. If it’s in the official Telegram docs, you can call it directly.
+This lets you use new Telegram Bot API methods immediately, even if the library hasn’t added the method yet. If it’s in the [official Telegram docs](https://core.telegram.org/bots/api), you can call it directly.
 
 ### Filters that feel like writing logic, not wrangling syntax
 In *swisscore-tba-lite*, filtering updates is as natural as thinking in conditions. No black box magic, no custom DSLs, no endless nesting of objects. Just simple, readable functions that behave exactly like you'd expect. 
@@ -221,6 +221,8 @@ This allows your bot to stay snappy and responsive, even during heavy workloads.
 
 > **Note:** The maximum number of cuncurrent request tasks can be set by `bot = Bot(..., max_concurrent_requests=<limit>)`. Default is ***50***.  
 
+
+
 <details>
 <summary>Example</summary>
 
@@ -246,7 +248,26 @@ results = await asyncio.gather(
 )
 ```
 
+***Important:*** *If an API call was unsuccesful, the task will return `None` and an error message will be logged.*  
+So if you need to know if a request was successful, you can do the following:
+
+```python
+result = await bot.send_message(...)
+if result is not None:
+    ... # API call succeeded
+else:
+    ... # API call failed
+
+# or in short 
+if (result := await bot.send_message(...)) is not None:
+    ... # API call succeeded
+else:
+    ... # API call failed
+
+```
+
 </details>
+
 
 ## Events
 Every [Update](https://core.telegram.org/bots/api#update) received from Telegram is treated as an event.
