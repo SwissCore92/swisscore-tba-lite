@@ -328,7 +328,7 @@ class ReplyParameters(t.TypedDict, total=False):
     chat_id: int | str
     allow_sending_without_reply: bool
     quote: str
-    quote_parse_mode: str
+    quote_parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     quote_entities: list["MessageEntity"]
     quote_position: int
 
@@ -560,7 +560,7 @@ class InputPollOption(t.TypedDict, total=False):
     This object contains information about one answer option in a poll to be sent.
     """
     text: str
-    text_parse_mode: str
+    text_parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     text_entities: list["MessageEntity"]
 
 class PollAnswer(t.TypedDict, total=False):
@@ -1957,7 +1957,7 @@ class InputMediaPhoto(t.TypedDict, total=False):
     type: t.Literal["photo"]
     media: str | Path | bytes | InputFile
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     has_spoiler: bool
@@ -1974,7 +1974,7 @@ class InputMediaVideo(t.TypedDict, total=False):
     cover: str | Path | bytes | InputFile
     start_timestamp: int
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     width: int
@@ -1993,7 +1993,7 @@ class InputMediaAnimation(t.TypedDict, total=False):
     media: str | Path | bytes | InputFile
     thumbnail: str | Path | bytes | InputFile
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     width: int
@@ -2011,7 +2011,7 @@ class InputMediaAudio(t.TypedDict, total=False):
     media: str | Path | bytes | InputFile
     thumbnail: str | Path | bytes | InputFile
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     duration: int
     performer: str
@@ -2027,7 +2027,7 @@ class InputMediaDocument(t.TypedDict, total=False):
     media: str | Path | bytes | InputFile
     thumbnail: str | Path | bytes | InputFile
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     disable_content_type_detection: bool
 
@@ -2207,7 +2207,7 @@ class InlineQueryResultPhoto(t.TypedDict, total=False):
     title: str
     description: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     reply_markup: "InlineKeyboardMarkup"
@@ -2229,7 +2229,7 @@ class InlineQueryResultGif(t.TypedDict, total=False):
     thumbnail_mime_type: str
     title: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     reply_markup: "InlineKeyboardMarkup"
@@ -2251,7 +2251,7 @@ class InlineQueryResultMpeg4Gif(t.TypedDict, total=False):
     thumbnail_mime_type: str
     title: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     reply_markup: "InlineKeyboardMarkup"
@@ -2272,7 +2272,7 @@ class InlineQueryResultVideo(t.TypedDict, total=False):
     thumbnail_url: str
     title: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     video_width: int
@@ -2293,7 +2293,7 @@ class InlineQueryResultAudio(t.TypedDict, total=False):
     audio_url: str
     title: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     performer: str
     audio_duration: int
@@ -2311,7 +2311,7 @@ class InlineQueryResultVoice(t.TypedDict, total=False):
     voice_url: str
     title: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     voice_duration: int
     reply_markup: "InlineKeyboardMarkup"
@@ -2329,7 +2329,7 @@ class InlineQueryResultDocument(t.TypedDict, total=False):
     document_url: str
     mime_type: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     description: str
     reply_markup: "InlineKeyboardMarkup"
@@ -2422,7 +2422,7 @@ class InlineQueryResultCachedPhoto(t.TypedDict, total=False):
     title: str
     description: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     reply_markup: "InlineKeyboardMarkup"
@@ -2439,7 +2439,7 @@ class InlineQueryResultCachedGif(t.TypedDict, total=False):
     gif_file_id: str
     title: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     reply_markup: "InlineKeyboardMarkup"
@@ -2456,7 +2456,7 @@ class InlineQueryResultCachedMpeg4Gif(t.TypedDict, total=False):
     mpeg4_file_id: str
     title: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     reply_markup: "InlineKeyboardMarkup"
@@ -2486,7 +2486,7 @@ class InlineQueryResultCachedDocument(t.TypedDict, total=False):
     document_file_id: str
     description: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     reply_markup: "InlineKeyboardMarkup"
     input_message_content: "InputMessageContent"
@@ -2503,7 +2503,7 @@ class InlineQueryResultCachedVideo(t.TypedDict, total=False):
     title: str
     description: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     show_caption_above_media: bool
     reply_markup: "InlineKeyboardMarkup"
@@ -2520,7 +2520,7 @@ class InlineQueryResultCachedVoice(t.TypedDict, total=False):
     voice_file_id: str
     title: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     reply_markup: "InlineKeyboardMarkup"
     input_message_content: "InputMessageContent"
@@ -2535,7 +2535,7 @@ class InlineQueryResultCachedAudio(t.TypedDict, total=False):
     id: str
     audio_file_id: str
     caption: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     caption_entities: list["MessageEntity"]
     reply_markup: "InlineKeyboardMarkup"
     input_message_content: "InputMessageContent"
@@ -2547,7 +2547,7 @@ class InputTextMessageContent(t.TypedDict, total=False):
     Represents the [content](https://core.telegram.org/bots/api#inputmessagecontent) of a text message to be sent as the result of an inline query.
     """
     message_text: str
-    parse_mode: str
+    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
     entities: list["MessageEntity"]
     link_preview_options: "LinkPreviewOptions"
 
