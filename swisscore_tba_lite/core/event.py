@@ -28,7 +28,7 @@ class EventManager:
     Return this in an temporary event handler to mark the temporary event as unhandled and continue processing on next matching update.  
     """
     
-    def __init__(self, max_concurrent_handlers: int = 16):
+    def __init__(self, max_concurrent_handlers: int = 8):
         self.__startup_handler: EventHandler = None
         self.__shutdown_handler: EventHandler = None
         self.__temporary_handlers: dict[EventName, list[TemporaryEventHandler]] = {}
