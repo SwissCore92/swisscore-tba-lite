@@ -397,7 +397,7 @@ async def test_cmd(msg: tg.Message):
         
         bot.send_message(msg["chat"]["id"], "BOOM! 💥")
     
-    # define a temporary canel command handler
+    # define a temporary cancel command handler
     async def cancel_countdown(msg: dict):
         bot.send_message(msg["chat"]["id"], "Explosion canceled!")
     
