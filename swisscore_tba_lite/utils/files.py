@@ -49,7 +49,7 @@ async def read_file(path: Path) -> bytes:
     async with aiofiles.open(path, "rb") as f:
         return await f.read()
 
-async def prepare_files(params: dict[str, t.Any], check_files, check_media) -> tuple[dict[str, t.Any], dict[str, HttpXFile] | None]:
+async def prepare_files(params: dict[str, t.Any], check_files: list[str] | None, check_media: dict[str, list[str]] | None) -> tuple[dict[str, t.Any], dict[str, HttpXFile] | None]:
     try:
         params, files_1 = await prepare_input_files(check_files, params)
         params, files_2 = await prepare_input_media(check_media, params)
@@ -126,9 +126,6 @@ async def prepare_input_media(check_media: dict[str, list[str]] | None, params: 
             val = [val]
         
         for media in val:
-            # if not "media" in media:
-            #     raise TypeError("field 'media' is missing.")
-            
             for field in check_media[key]:
 
                 if not field in media:
