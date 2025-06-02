@@ -439,7 +439,7 @@ class BaseBot:
                         f"({self.max_retries - retries} / {self.max_retries} retries left.)"
                     )
                     await asyncio.sleep(wait_time)
-                    timeout += 10
+                    # timeout += 10
                     retries += 1
                     continue
                 
@@ -449,7 +449,7 @@ class BaseBot:
                         f"({self.max_retries - retries} / {self.max_retries} retries left.)"
                     )
                     await asyncio.sleep(wait_time)
-                    timeout += 10
+                    # timeout += 10
                     retries += 1
                     continue
                 
@@ -632,8 +632,6 @@ class BaseBot:
         asyncio.run(bot._idle_loop())
         ```
         """
-
-        
 
         exit_code: int = 0
         
