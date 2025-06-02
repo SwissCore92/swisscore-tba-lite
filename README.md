@@ -279,7 +279,7 @@ The event's object (eg.a `message`) is passed to your handler as a `dict` (a dee
 
 Important:
 * Handlers **must** be async functions.
-* Handlers checked in the order they were registered.
+* Handlers are checked in the order they were registered.
 * If a handler is called, the event is considered handled and will not propagate to other handlers — unless you return `bot.event.UNHANDLED`. *See [Event Handler Chaining](#event-handler-chaining) for more info.*
 * Temporary event handlers can be registered at runtime. *See [Temporary Events](#temporary-events) for more info.*
 
