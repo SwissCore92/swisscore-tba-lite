@@ -122,7 +122,7 @@ class FileDownloader:
         
         return create_task(_as_bytes(), f"{self.__class__.__name__}.as_bytes")
     
-    async def iter_bytes(self, bs: int | None = None) -> t.AsyncGenerator[bytes]:
+    async def iter_bytes(self, bs: int | None = None) -> t.AsyncGenerator[bytes, None]:
         """Iterate raw bytes"""
         async with self.client.stream("GET", self.file_url) as r:
             async for chunk in r.aiter_raw(bs):
