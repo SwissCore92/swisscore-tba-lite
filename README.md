@@ -1,7 +1,7 @@
 # **SwissCore TBA Lite**
 
 ![Python](https://img.shields.io/badge/Python-3.11+-2CA5E0?style=for-the-badge&logo=python&logoColor=white)
-![Telegram Bot API](https://img.shields.io/badge/Telegram%20Bot%20API-v9.1-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)
+![Telegram Bot API](https://img.shields.io/badge/Telegram%20Bot%20API-v9.2-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)
 <!-- ![PyPI](https://img.shields.io/badge/PyPI-1.0.0-2CA5E0?style=for-the-badge&logo=pypi&logoColor=white) -->
 
 

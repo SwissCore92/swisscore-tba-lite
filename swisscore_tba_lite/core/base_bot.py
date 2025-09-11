@@ -192,6 +192,7 @@ class BaseBot:
         self, 
         token: str, 
         *, 
+        client: httpx.AsyncClient | None = None,
         base_api_url: str = CLOUD_BOT_API_URL,
         base_file_url: str = CLOUD_BOT_FILE_URL,
         max_concurrent_requests: int = 50,

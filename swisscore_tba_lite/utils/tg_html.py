@@ -1,3 +1,5 @@
+"""Telegram HTML style helper functions"""
+
 from html import escape as __escape
 
 def escape(txt):
