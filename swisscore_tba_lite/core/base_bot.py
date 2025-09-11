@@ -132,7 +132,7 @@ def api_method_wrapper(
     """
     def wrapper(func):
         method_name = name or utils.snake_to_camel(func.__name__)
-
+        @wraps(func)
         def inner(*args, **kwargs):
             params = dict(zip(func.__code__.co_varnames, args))
             params.update(kwargs)
