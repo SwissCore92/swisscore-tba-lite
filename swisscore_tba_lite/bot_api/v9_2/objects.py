@@ -9,7 +9,7 @@ from . import literals
 from ...utils.files import InputFile
 
 
-class Update(t.TypedDict, total=False):
+class Update(t.TypedDict):
     """
     ### [Update](https://core.telegram.org/bots/api#update)  
     
@@ -17,31 +17,31 @@ class Update(t.TypedDict, total=False):
     At most **one** of the optional parameters can be present in any given update.
     """
     update_id: int
-    message: "Message"
-    edited_message: "Message"
-    channel_post: "Message"
-    edited_channel_post: "Message"
-    business_connection: "BusinessConnection"
-    business_message: "Message"
-    edited_business_message: "Message"
-    deleted_business_messages: "BusinessMessagesDeleted"
-    message_reaction: "MessageReactionUpdated"
-    message_reaction_count: "MessageReactionCountUpdated"
-    inline_query: "InlineQuery"
-    chosen_inline_result: "ChosenInlineResult"
-    callback_query: "CallbackQuery"
-    shipping_query: "ShippingQuery"
-    pre_checkout_query: "PreCheckoutQuery"
-    purchased_paid_media: "PaidMediaPurchased"
-    poll: "Poll"
-    poll_answer: "PollAnswer"
-    my_chat_member: "ChatMemberUpdated"
-    chat_member: "ChatMemberUpdated"
-    chat_join_request: "ChatJoinRequest"
-    chat_boost: "ChatBoostUpdated"
-    removed_chat_boost: "ChatBoostRemoved"
+    message: t.NotRequired["Message"]
+    edited_message: t.NotRequired["Message"]
+    channel_post: t.NotRequired["Message"]
+    edited_channel_post: t.NotRequired["Message"]
+    business_connection: t.NotRequired["BusinessConnection"]
+    business_message: t.NotRequired["Message"]
+    edited_business_message: t.NotRequired["Message"]
+    deleted_business_messages: t.NotRequired["BusinessMessagesDeleted"]
+    message_reaction: t.NotRequired["MessageReactionUpdated"]
+    message_reaction_count: t.NotRequired["MessageReactionCountUpdated"]
+    inline_query: t.NotRequired["InlineQuery"]
+    chosen_inline_result: t.NotRequired["ChosenInlineResult"]
+    callback_query: t.NotRequired["CallbackQuery"]
+    shipping_query: t.NotRequired["ShippingQuery"]
+    pre_checkout_query: t.NotRequired["PreCheckoutQuery"]
+    purchased_paid_media: t.NotRequired["PaidMediaPurchased"]
+    poll: t.NotRequired["Poll"]
+    poll_answer: t.NotRequired["PollAnswer"]
+    my_chat_member: t.NotRequired["ChatMemberUpdated"]
+    chat_member: t.NotRequired["ChatMemberUpdated"]
+    chat_join_request: t.NotRequired["ChatJoinRequest"]
+    chat_boost: t.NotRequired["ChatBoostUpdated"]
+    removed_chat_boost: t.NotRequired["ChatBoostRemoved"]
 
-class WebhookInfo(t.TypedDict, total=False):
+class WebhookInfo(t.TypedDict):
     """
     ### [WebhookInfo](https://core.telegram.org/bots/api#webhookinfo)  
     
@@ -56,14 +56,14 @@ class WebhookInfo(t.TypedDict, total=False):
     url: str
     has_custom_certificate: bool
     pending_update_count: int
-    ip_address: str
-    last_error_date: int
-    last_error_message: str
-    last_synchronization_error_date: int
-    max_connections: int
-    allowed_updates: list[str]
+    ip_address: t.NotRequired[str]
+    last_error_date: t.NotRequired[int]
+    last_error_message: t.NotRequired[str]
+    last_synchronization_error_date: t.NotRequired[int]
+    max_connections: t.NotRequired[int]
+    allowed_updates: t.NotRequired[list[str]]
 
-class User(t.TypedDict, total=False):
+class User(t.TypedDict):
     """
     ### [User](https://core.telegram.org/bots/api#user)  
     
@@ -72,18 +72,18 @@ class User(t.TypedDict, total=False):
     id: int
     is_bot: bool
     first_name: str
-    last_name: str
-    username: str
-    language_code: str
-    is_premium: t.Literal[True]
-    added_to_attachment_menu: t.Literal[True]
-    can_join_groups: bool
-    can_read_all_group_messages: bool
-    supports_inline_queries: bool
-    can_connect_to_business: bool
-    has_main_web_app: bool
+    last_name: t.NotRequired[str]
+    username: t.NotRequired[str]
+    language_code: t.NotRequired[str]
+    is_premium: t.NotRequired[t.Literal[True]]
+    added_to_attachment_menu: t.NotRequired[t.Literal[True]]
+    can_join_groups: t.NotRequired[bool]
+    can_read_all_group_messages: t.NotRequired[bool]
+    supports_inline_queries: t.NotRequired[bool]
+    can_connect_to_business: t.NotRequired[bool]
+    has_main_web_app: t.NotRequired[bool]
 
-class Chat(t.TypedDict, total=False):
+class Chat(t.TypedDict):
     """
     ### [Chat](https://core.telegram.org/bots/api#chat)  
     
@@ -91,14 +91,14 @@ class Chat(t.TypedDict, total=False):
     """
     id: int
     type: str
-    title: str
-    username: str
-    first_name: str
-    last_name: str
-    is_forum: t.Literal[True]
-    is_direct_messages: t.Literal[True]
+    title: t.NotRequired[str]
+    username: t.NotRequired[str]
+    first_name: t.NotRequired[str]
+    last_name: t.NotRequired[str]
+    is_forum: t.NotRequired[t.Literal[True]]
+    is_direct_messages: t.NotRequired[t.Literal[True]]
 
-class ChatFullInfo(t.TypedDict, total=False):
+class ChatFullInfo(t.TypedDict):
     """
     ### [ChatFullInfo](https://core.telegram.org/bots/api#chatfullinfo)  
     
@@ -109,50 +109,50 @@ class ChatFullInfo(t.TypedDict, total=False):
     accent_color_id: int
     max_reaction_count: int
     accepted_gift_types: "AcceptedGiftTypes"
-    title: str
-    username: str
-    first_name: str
-    last_name: str
-    is_forum: t.Literal[True]
-    is_direct_messages: t.Literal[True]
-    photo: "ChatPhoto"
-    active_usernames: list[str]
-    birthdate: "Birthdate"
-    business_intro: "BusinessIntro"
-    business_location: "BusinessLocation"
-    business_opening_hours: "BusinessOpeningHours"
-    personal_chat: "Chat"
-    parent_chat: "Chat"
-    available_reactions: list["ReactionType"]
-    background_custom_emoji_id: str
-    profile_accent_color_id: int
-    profile_background_custom_emoji_id: str
-    emoji_status_custom_emoji_id: str
-    emoji_status_expiration_date: int
-    bio: str
-    has_private_forwards: t.Literal[True]
-    has_restricted_voice_and_video_messages: t.Literal[True]
-    join_to_send_messages: t.Literal[True]
-    join_by_request: t.Literal[True]
-    description: str
-    invite_link: str
-    pinned_message: "Message"
-    permissions: "ChatPermissions"
-    can_send_paid_media: t.Literal[True]
-    slow_mode_delay: int
-    unrestrict_boost_count: int
-    message_auto_delete_time: int
-    has_aggressive_anti_spam_enabled: t.Literal[True]
-    has_hidden_members: t.Literal[True]
-    has_protected_content: t.Literal[True]
-    has_visible_history: t.Literal[True]
-    sticker_set_name: str
-    can_set_sticker_set: t.Literal[True]
-    custom_emoji_sticker_set_name: str
-    linked_chat_id: int
-    location: "ChatLocation"
+    title: t.NotRequired[str]
+    username: t.NotRequired[str]
+    first_name: t.NotRequired[str]
+    last_name: t.NotRequired[str]
+    is_forum: t.NotRequired[t.Literal[True]]
+    is_direct_messages: t.NotRequired[t.Literal[True]]
+    photo: t.NotRequired["ChatPhoto"]
+    active_usernames: t.NotRequired[list[str]]
+    birthdate: t.NotRequired["Birthdate"]
+    business_intro: t.NotRequired["BusinessIntro"]
+    business_location: t.NotRequired["BusinessLocation"]
+    business_opening_hours: t.NotRequired["BusinessOpeningHours"]
+    personal_chat: t.NotRequired["Chat"]
+    parent_chat: t.NotRequired["Chat"]
+    available_reactions: t.NotRequired[list["ReactionType"]]
+    background_custom_emoji_id: t.NotRequired[str]
+    profile_accent_color_id: t.NotRequired[int]
+    profile_background_custom_emoji_id: t.NotRequired[str]
+    emoji_status_custom_emoji_id: t.NotRequired[str]
+    emoji_status_expiration_date: t.NotRequired[int]
+    bio: t.NotRequired[str]
+    has_private_forwards: t.NotRequired[t.Literal[True]]
+    has_restricted_voice_and_video_messages: t.NotRequired[t.Literal[True]]
+    join_to_send_messages: t.NotRequired[t.Literal[True]]
+    join_by_request: t.NotRequired[t.Literal[True]]
+    description: t.NotRequired[str]
+    invite_link: t.NotRequired[str]
+    pinned_message: t.NotRequired["Message"]
+    permissions: t.NotRequired["ChatPermissions"]
+    can_send_paid_media: t.NotRequired[t.Literal[True]]
+    slow_mode_delay: t.NotRequired[int]
+    unrestrict_boost_count: t.NotRequired[int]
+    message_auto_delete_time: t.NotRequired[int]
+    has_aggressive_anti_spam_enabled: t.NotRequired[t.Literal[True]]
+    has_hidden_members: t.NotRequired[t.Literal[True]]
+    has_protected_content: t.NotRequired[t.Literal[True]]
+    has_visible_history: t.NotRequired[t.Literal[True]]
+    sticker_set_name: t.NotRequired[str]
+    can_set_sticker_set: t.NotRequired[t.Literal[True]]
+    custom_emoji_sticker_set_name: t.NotRequired[str]
+    linked_chat_id: t.NotRequired[int]
+    location: t.NotRequired["ChatLocation"]
 
-class Message(t.TypedDict("Message", {"from": "User"}), total=False):
+class Message(t.TypedDict("Message", {"from": "User"})):
     """
     ### [Message](https://core.telegram.org/bots/api#message)  
     
@@ -161,106 +161,106 @@ class Message(t.TypedDict("Message", {"from": "User"}), total=False):
     message_id: int
     date: int
     chat: "Chat"
-    message_thread_id: int
-    direct_messages_topic: "DirectMessagesTopic"
-    sender_chat: "Chat"
-    sender_boost_count: int
-    sender_business_bot: "User"
-    business_connection_id: str
-    forward_origin: "MessageOrigin"
-    is_topic_message: t.Literal[True]
-    is_automatic_forward: t.Literal[True]
-    reply_to_message: "Message"
-    external_reply: "ExternalReplyInfo"
-    quote: "TextQuote"
-    reply_to_story: "Story"
-    reply_to_checklist_task_id: int
-    via_bot: "User"
-    edit_date: int
-    has_protected_content: t.Literal[True]
-    is_from_offline: t.Literal[True]
-    is_paid_post: t.Literal[True]
-    media_group_id: str
-    author_signature: str
-    paid_star_count: int
-    text: str
-    entities: list["MessageEntity"]
-    link_preview_options: "LinkPreviewOptions"
-    suggested_post_info: "SuggestedPostInfo"
-    effect_id: str
-    animation: "Animation"
-    audio: "Audio"
-    document: "Document"
-    paid_media: "PaidMediaInfo"
-    photo: list["PhotoSize"]
-    sticker: "Sticker"
-    story: "Story"
-    video: "Video"
-    video_note: "VideoNote"
-    voice: "Voice"
-    caption: str
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: t.Literal[True]
-    has_media_spoiler: t.Literal[True]
-    checklist: "Checklist"
-    contact: "Contact"
-    dice: "Dice"
-    game: "Game"
-    poll: "Poll"
-    venue: "Venue"
-    location: "Location"
-    new_chat_members: list["User"]
-    left_chat_member: "User"
-    new_chat_title: str
-    new_chat_photo: list["PhotoSize"]
-    delete_chat_photo: t.Literal[True]
-    group_chat_created: t.Literal[True]
-    supergroup_chat_created: t.Literal[True]
-    channel_chat_created: t.Literal[True]
-    message_auto_delete_timer_changed: "MessageAutoDeleteTimerChanged"
-    migrate_to_chat_id: int
-    migrate_from_chat_id: int
-    pinned_message: "MaybeInaccessibleMessage"
-    invoice: "Invoice"
-    successful_payment: "SuccessfulPayment"
-    refunded_payment: "RefundedPayment"
-    users_shared: "UsersShared"
-    chat_shared: "ChatShared"
-    gift: "GiftInfo"
-    unique_gift: "UniqueGiftInfo"
-    connected_website: str
-    write_access_allowed: "WriteAccessAllowed"
-    passport_data: "PassportData"
-    proximity_alert_triggered: "ProximityAlertTriggered"
-    boost_added: "ChatBoostAdded"
-    chat_background_set: "ChatBackground"
-    checklist_tasks_done: "ChecklistTasksDone"
-    checklist_tasks_added: "ChecklistTasksAdded"
-    direct_message_price_changed: "DirectMessagePriceChanged"
-    forum_topic_created: "ForumTopicCreated"
-    forum_topic_edited: "ForumTopicEdited"
-    forum_topic_closed: "ForumTopicClosed"
-    forum_topic_reopened: "ForumTopicReopened"
-    general_forum_topic_hidden: "GeneralForumTopicHidden"
-    general_forum_topic_unhidden: "GeneralForumTopicUnhidden"
-    giveaway_created: "GiveawayCreated"
-    giveaway: "Giveaway"
-    giveaway_winners: "GiveawayWinners"
-    giveaway_completed: "GiveawayCompleted"
-    paid_message_price_changed: "PaidMessagePriceChanged"
-    suggested_post_approved: "SuggestedPostApproved"
-    suggested_post_approval_failed: "SuggestedPostApprovalFailed"
-    suggested_post_declined: "SuggestedPostDeclined"
-    suggested_post_paid: "SuggestedPostPaid"
-    suggested_post_refunded: "SuggestedPostRefunded"
-    video_chat_scheduled: "VideoChatScheduled"
-    video_chat_started: "VideoChatStarted"
-    video_chat_ended: "VideoChatEnded"
-    video_chat_participants_invited: "VideoChatParticipantsInvited"
-    web_app_data: "WebAppData"
-    reply_markup: "InlineKeyboardMarkup"
+    message_thread_id: t.NotRequired[int]
+    direct_messages_topic: t.NotRequired["DirectMessagesTopic"]
+    sender_chat: t.NotRequired["Chat"]
+    sender_boost_count: t.NotRequired[int]
+    sender_business_bot: t.NotRequired["User"]
+    business_connection_id: t.NotRequired[str]
+    forward_origin: t.NotRequired["MessageOrigin"]
+    is_topic_message: t.NotRequired[t.Literal[True]]
+    is_automatic_forward: t.NotRequired[t.Literal[True]]
+    reply_to_message: t.NotRequired["Message"]
+    external_reply: t.NotRequired["ExternalReplyInfo"]
+    quote: t.NotRequired["TextQuote"]
+    reply_to_story: t.NotRequired["Story"]
+    reply_to_checklist_task_id: t.NotRequired[int]
+    via_bot: t.NotRequired["User"]
+    edit_date: t.NotRequired[int]
+    has_protected_content: t.NotRequired[t.Literal[True]]
+    is_from_offline: t.NotRequired[t.Literal[True]]
+    is_paid_post: t.NotRequired[t.Literal[True]]
+    media_group_id: t.NotRequired[str]
+    author_signature: t.NotRequired[str]
+    paid_star_count: t.NotRequired[int]
+    text: t.NotRequired[str]
+    entities: t.NotRequired[list["MessageEntity"]]
+    link_preview_options: t.NotRequired["LinkPreviewOptions"]
+    suggested_post_info: t.NotRequired["SuggestedPostInfo"]
+    effect_id: t.NotRequired[str]
+    animation: t.NotRequired["Animation"]
+    audio: t.NotRequired["Audio"]
+    document: t.NotRequired["Document"]
+    paid_media: t.NotRequired["PaidMediaInfo"]
+    photo: t.NotRequired[list["PhotoSize"]]
+    sticker: t.NotRequired["Sticker"]
+    story: t.NotRequired["Story"]
+    video: t.NotRequired["Video"]
+    video_note: t.NotRequired["VideoNote"]
+    voice: t.NotRequired["Voice"]
+    caption: t.NotRequired[str]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[t.Literal[True]]
+    has_media_spoiler: t.NotRequired[t.Literal[True]]
+    checklist: t.NotRequired["Checklist"]
+    contact: t.NotRequired["Contact"]
+    dice: t.NotRequired["Dice"]
+    game: t.NotRequired["Game"]
+    poll: t.NotRequired["Poll"]
+    venue: t.NotRequired["Venue"]
+    location: t.NotRequired["Location"]
+    new_chat_members: t.NotRequired[list["User"]]
+    left_chat_member: t.NotRequired["User"]
+    new_chat_title: t.NotRequired[str]
+    new_chat_photo: t.NotRequired[list["PhotoSize"]]
+    delete_chat_photo: t.NotRequired[t.Literal[True]]
+    group_chat_created: t.NotRequired[t.Literal[True]]
+    supergroup_chat_created: t.NotRequired[t.Literal[True]]
+    channel_chat_created: t.NotRequired[t.Literal[True]]
+    message_auto_delete_timer_changed: t.NotRequired["MessageAutoDeleteTimerChanged"]
+    migrate_to_chat_id: t.NotRequired[int]
+    migrate_from_chat_id: t.NotRequired[int]
+    pinned_message: t.NotRequired["MaybeInaccessibleMessage"]
+    invoice: t.NotRequired["Invoice"]
+    successful_payment: t.NotRequired["SuccessfulPayment"]
+    refunded_payment: t.NotRequired["RefundedPayment"]
+    users_shared: t.NotRequired["UsersShared"]
+    chat_shared: t.NotRequired["ChatShared"]
+    gift: t.NotRequired["GiftInfo"]
+    unique_gift: t.NotRequired["UniqueGiftInfo"]
+    connected_website: t.NotRequired[str]
+    write_access_allowed: t.NotRequired["WriteAccessAllowed"]
+    passport_data: t.NotRequired["PassportData"]
+    proximity_alert_triggered: t.NotRequired["ProximityAlertTriggered"]
+    boost_added: t.NotRequired["ChatBoostAdded"]
+    chat_background_set: t.NotRequired["ChatBackground"]
+    checklist_tasks_done: t.NotRequired["ChecklistTasksDone"]
+    checklist_tasks_added: t.NotRequired["ChecklistTasksAdded"]
+    direct_message_price_changed: t.NotRequired["DirectMessagePriceChanged"]
+    forum_topic_created: t.NotRequired["ForumTopicCreated"]
+    forum_topic_edited: t.NotRequired["ForumTopicEdited"]
+    forum_topic_closed: t.NotRequired["ForumTopicClosed"]
+    forum_topic_reopened: t.NotRequired["ForumTopicReopened"]
+    general_forum_topic_hidden: t.NotRequired["GeneralForumTopicHidden"]
+    general_forum_topic_unhidden: t.NotRequired["GeneralForumTopicUnhidden"]
+    giveaway_created: t.NotRequired["GiveawayCreated"]
+    giveaway: t.NotRequired["Giveaway"]
+    giveaway_winners: t.NotRequired["GiveawayWinners"]
+    giveaway_completed: t.NotRequired["GiveawayCompleted"]
+    paid_message_price_changed: t.NotRequired["PaidMessagePriceChanged"]
+    suggested_post_approved: t.NotRequired["SuggestedPostApproved"]
+    suggested_post_approval_failed: t.NotRequired["SuggestedPostApprovalFailed"]
+    suggested_post_declined: t.NotRequired["SuggestedPostDeclined"]
+    suggested_post_paid: t.NotRequired["SuggestedPostPaid"]
+    suggested_post_refunded: t.NotRequired["SuggestedPostRefunded"]
+    video_chat_scheduled: t.NotRequired["VideoChatScheduled"]
+    video_chat_started: t.NotRequired["VideoChatStarted"]
+    video_chat_ended: t.NotRequired["VideoChatEnded"]
+    video_chat_participants_invited: t.NotRequired["VideoChatParticipantsInvited"]
+    web_app_data: t.NotRequired["WebAppData"]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
 
-class MessageId(t.TypedDict, total=False):
+class MessageId(t.TypedDict):
     """
     ### [MessageId](https://core.telegram.org/bots/api#messageid)  
     
@@ -268,7 +268,7 @@ class MessageId(t.TypedDict, total=False):
     """
     message_id: int
 
-class InaccessibleMessage(t.TypedDict, total=False):
+class InaccessibleMessage(t.TypedDict):
     """
     ### [InaccessibleMessage](https://core.telegram.org/bots/api#inaccessiblemessage)  
     
@@ -278,7 +278,7 @@ class InaccessibleMessage(t.TypedDict, total=False):
     message_id: int
     date: int
 
-class MessageEntity(t.TypedDict, total=False):
+class MessageEntity(t.TypedDict):
     """
     ### [MessageEntity](https://core.telegram.org/bots/api#messageentity)  
     
@@ -287,12 +287,12 @@ class MessageEntity(t.TypedDict, total=False):
     type: str
     offset: int
     length: int
-    url: str
-    user: "User"
-    language: str
-    custom_emoji_id: str
+    url: t.NotRequired[str]
+    user: t.NotRequired["User"]
+    language: t.NotRequired[str]
+    custom_emoji_id: t.NotRequired[str]
 
-class TextQuote(t.TypedDict, total=False):
+class TextQuote(t.TypedDict):
     """
     ### [TextQuote](https://core.telegram.org/bots/api#textquote)  
     
@@ -300,57 +300,57 @@ class TextQuote(t.TypedDict, total=False):
     """
     text: str
     position: int
-    entities: list["MessageEntity"]
-    is_manual: t.Literal[True]
+    entities: t.NotRequired[list["MessageEntity"]]
+    is_manual: t.NotRequired[t.Literal[True]]
 
-class ExternalReplyInfo(t.TypedDict, total=False):
+class ExternalReplyInfo(t.TypedDict):
     """
     ### [ExternalReplyInfo](https://core.telegram.org/bots/api#externalreplyinfo)  
     
     This object contains information about a message that is being replied to, which may come from another chat or forum topic.
     """
     origin: "MessageOrigin"
-    chat: "Chat"
-    message_id: int
-    link_preview_options: "LinkPreviewOptions"
-    animation: "Animation"
-    audio: "Audio"
-    document: "Document"
-    paid_media: "PaidMediaInfo"
-    photo: list["PhotoSize"]
-    sticker: "Sticker"
-    story: "Story"
-    video: "Video"
-    video_note: "VideoNote"
-    voice: "Voice"
-    has_media_spoiler: t.Literal[True]
-    checklist: "Checklist"
-    contact: "Contact"
-    dice: "Dice"
-    game: "Game"
-    giveaway: "Giveaway"
-    giveaway_winners: "GiveawayWinners"
-    invoice: "Invoice"
-    location: "Location"
-    poll: "Poll"
-    venue: "Venue"
+    chat: t.NotRequired["Chat"]
+    message_id: t.NotRequired[int]
+    link_preview_options: t.NotRequired["LinkPreviewOptions"]
+    animation: t.NotRequired["Animation"]
+    audio: t.NotRequired["Audio"]
+    document: t.NotRequired["Document"]
+    paid_media: t.NotRequired["PaidMediaInfo"]
+    photo: t.NotRequired[list["PhotoSize"]]
+    sticker: t.NotRequired["Sticker"]
+    story: t.NotRequired["Story"]
+    video: t.NotRequired["Video"]
+    video_note: t.NotRequired["VideoNote"]
+    voice: t.NotRequired["Voice"]
+    has_media_spoiler: t.NotRequired[t.Literal[True]]
+    checklist: t.NotRequired["Checklist"]
+    contact: t.NotRequired["Contact"]
+    dice: t.NotRequired["Dice"]
+    game: t.NotRequired["Game"]
+    giveaway: t.NotRequired["Giveaway"]
+    giveaway_winners: t.NotRequired["GiveawayWinners"]
+    invoice: t.NotRequired["Invoice"]
+    location: t.NotRequired["Location"]
+    poll: t.NotRequired["Poll"]
+    venue: t.NotRequired["Venue"]
 
-class ReplyParameters(t.TypedDict, total=False):
+class ReplyParameters(t.TypedDict):
     """
     ### [ReplyParameters](https://core.telegram.org/bots/api#replyparameters)  
     
     Describes reply parameters for the message that is being sent.
     """
     message_id: int
-    chat_id: int | str
-    allow_sending_without_reply: bool
-    quote: str
-    quote_parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    quote_entities: list["MessageEntity"]
-    quote_position: int
-    checklist_task_id: int
+    chat_id: t.NotRequired[int | str]
+    allow_sending_without_reply: t.NotRequired[bool]
+    quote: t.NotRequired[str]
+    quote_parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    quote_entities: t.NotRequired[list["MessageEntity"]]
+    quote_position: t.NotRequired[int]
+    checklist_task_id: t.NotRequired[int]
 
-class MessageOriginUser(t.TypedDict, total=False):
+class MessageOriginUser(t.TypedDict):
     """
     ### [MessageOriginUser](https://core.telegram.org/bots/api#messageoriginuser)  
     
@@ -360,7 +360,7 @@ class MessageOriginUser(t.TypedDict, total=False):
     date: int
     sender_user: "User"
 
-class MessageOriginHiddenUser(t.TypedDict, total=False):
+class MessageOriginHiddenUser(t.TypedDict):
     """
     ### [MessageOriginHiddenUser](https://core.telegram.org/bots/api#messageoriginhiddenuser)  
     
@@ -370,7 +370,7 @@ class MessageOriginHiddenUser(t.TypedDict, total=False):
     date: int
     sender_user_name: str
 
-class MessageOriginChat(t.TypedDict, total=False):
+class MessageOriginChat(t.TypedDict):
     """
     ### [MessageOriginChat](https://core.telegram.org/bots/api#messageoriginchat)  
     
@@ -379,9 +379,9 @@ class MessageOriginChat(t.TypedDict, total=False):
     type: t.Literal["chat"]
     date: int
     sender_chat: "Chat"
-    author_signature: str
+    author_signature: t.NotRequired[str]
 
-class MessageOriginChannel(t.TypedDict, total=False):
+class MessageOriginChannel(t.TypedDict):
     """
     ### [MessageOriginChannel](https://core.telegram.org/bots/api#messageoriginchannel)  
     
@@ -391,9 +391,9 @@ class MessageOriginChannel(t.TypedDict, total=False):
     date: int
     chat: "Chat"
     message_id: int
-    author_signature: str
+    author_signature: t.NotRequired[str]
 
-class PhotoSize(t.TypedDict, total=False):
+class PhotoSize(t.TypedDict):
     """
     ### [PhotoSize](https://core.telegram.org/bots/api#photosize)  
     
@@ -403,9 +403,9 @@ class PhotoSize(t.TypedDict, total=False):
     file_unique_id: str
     width: int
     height: int
-    file_size: int
+    file_size: t.NotRequired[int]
 
-class Animation(t.TypedDict, total=False):
+class Animation(t.TypedDict):
     """
     ### [Animation](https://core.telegram.org/bots/api#animation)  
     
@@ -416,12 +416,12 @@ class Animation(t.TypedDict, total=False):
     width: int
     height: int
     duration: int
-    thumbnail: "PhotoSize"
-    file_name: str
-    mime_type: str
-    file_size: int
+    thumbnail: t.NotRequired["PhotoSize"]
+    file_name: t.NotRequired[str]
+    mime_type: t.NotRequired[str]
+    file_size: t.NotRequired[int]
 
-class Audio(t.TypedDict, total=False):
+class Audio(t.TypedDict):
     """
     ### [Audio](https://core.telegram.org/bots/api#audio)  
     
@@ -430,14 +430,14 @@ class Audio(t.TypedDict, total=False):
     file_id: str
     file_unique_id: str
     duration: int
-    performer: str
-    title: str
-    file_name: str
-    mime_type: str
-    file_size: int
-    thumbnail: "PhotoSize"
+    performer: t.NotRequired[str]
+    title: t.NotRequired[str]
+    file_name: t.NotRequired[str]
+    mime_type: t.NotRequired[str]
+    file_size: t.NotRequired[int]
+    thumbnail: t.NotRequired["PhotoSize"]
 
-class Document(t.TypedDict, total=False):
+class Document(t.TypedDict):
     """
     ### [Document](https://core.telegram.org/bots/api#document)  
     
@@ -445,12 +445,12 @@ class Document(t.TypedDict, total=False):
     """
     file_id: str
     file_unique_id: str
-    thumbnail: "PhotoSize"
-    file_name: str
-    mime_type: str
-    file_size: int
+    thumbnail: t.NotRequired["PhotoSize"]
+    file_name: t.NotRequired[str]
+    mime_type: t.NotRequired[str]
+    file_size: t.NotRequired[int]
 
-class Story(t.TypedDict, total=False):
+class Story(t.TypedDict):
     """
     ### [Story](https://core.telegram.org/bots/api#story)  
     
@@ -459,7 +459,7 @@ class Story(t.TypedDict, total=False):
     chat: "Chat"
     id: int
 
-class Video(t.TypedDict, total=False):
+class Video(t.TypedDict):
     """
     ### [Video](https://core.telegram.org/bots/api#video)  
     
@@ -470,14 +470,14 @@ class Video(t.TypedDict, total=False):
     width: int
     height: int
     duration: int
-    thumbnail: "PhotoSize"
-    cover: list["PhotoSize"]
-    start_timestamp: int
-    file_name: str
-    mime_type: str
-    file_size: int
+    thumbnail: t.NotRequired["PhotoSize"]
+    cover: t.NotRequired[list["PhotoSize"]]
+    start_timestamp: t.NotRequired[int]
+    file_name: t.NotRequired[str]
+    mime_type: t.NotRequired[str]
+    file_size: t.NotRequired[int]
 
-class VideoNote(t.TypedDict, total=False):
+class VideoNote(t.TypedDict):
     """
     ### [VideoNote](https://core.telegram.org/bots/api#videonote)  
     
@@ -487,10 +487,10 @@ class VideoNote(t.TypedDict, total=False):
     file_unique_id: str
     length: int
     duration: int
-    thumbnail: "PhotoSize"
-    file_size: int
+    thumbnail: t.NotRequired["PhotoSize"]
+    file_size: t.NotRequired[int]
 
-class Voice(t.TypedDict, total=False):
+class Voice(t.TypedDict):
     """
     ### [Voice](https://core.telegram.org/bots/api#voice)  
     
@@ -499,10 +499,10 @@ class Voice(t.TypedDict, total=False):
     file_id: str
     file_unique_id: str
     duration: int
-    mime_type: str
-    file_size: int
+    mime_type: t.NotRequired[str]
+    file_size: t.NotRequired[int]
 
-class PaidMediaInfo(t.TypedDict, total=False):
+class PaidMediaInfo(t.TypedDict):
     """
     ### [PaidMediaInfo](https://core.telegram.org/bots/api#paidmediainfo)  
     
@@ -511,18 +511,18 @@ class PaidMediaInfo(t.TypedDict, total=False):
     star_count: int
     paid_media: list["PaidMedia"]
 
-class PaidMediaPreview(t.TypedDict, total=False):
+class PaidMediaPreview(t.TypedDict):
     """
     ### [PaidMediaPreview](https://core.telegram.org/bots/api#paidmediapreview)  
     
     The paid media isn't available before the payment.
     """
     type: t.Literal["preview"]
-    width: int
-    height: int
-    duration: int
+    width: t.NotRequired[int]
+    height: t.NotRequired[int]
+    duration: t.NotRequired[int]
 
-class PaidMediaPhoto(t.TypedDict, total=False):
+class PaidMediaPhoto(t.TypedDict):
     """
     ### [PaidMediaPhoto](https://core.telegram.org/bots/api#paidmediaphoto)  
     
@@ -531,7 +531,7 @@ class PaidMediaPhoto(t.TypedDict, total=False):
     type: t.Literal["photo"]
     photo: list["PhotoSize"]
 
-class PaidMediaVideo(t.TypedDict, total=False):
+class PaidMediaVideo(t.TypedDict):
     """
     ### [PaidMediaVideo](https://core.telegram.org/bots/api#paidmediavideo)  
     
@@ -540,7 +540,7 @@ class PaidMediaVideo(t.TypedDict, total=False):
     type: t.Literal["video"]
     video: "Video"
 
-class Contact(t.TypedDict, total=False):
+class Contact(t.TypedDict):
     """
     ### [Contact](https://core.telegram.org/bots/api#contact)  
     
@@ -548,11 +548,11 @@ class Contact(t.TypedDict, total=False):
     """
     phone_number: str
     first_name: str
-    last_name: str
-    user_id: int
-    vcard: str
+    last_name: t.NotRequired[str]
+    user_id: t.NotRequired[int]
+    vcard: t.NotRequired[str]
 
-class Dice(t.TypedDict, total=False):
+class Dice(t.TypedDict):
     """
     ### [Dice](https://core.telegram.org/bots/api#dice)  
     
@@ -561,7 +561,7 @@ class Dice(t.TypedDict, total=False):
     emoji: str
     value: int
 
-class PollOption(t.TypedDict, total=False):
+class PollOption(t.TypedDict):
     """
     ### [PollOption](https://core.telegram.org/bots/api#polloption)  
     
@@ -569,19 +569,19 @@ class PollOption(t.TypedDict, total=False):
     """
     text: str
     voter_count: int
-    text_entities: list["MessageEntity"]
+    text_entities: t.NotRequired[list["MessageEntity"]]
 
-class InputPollOption(t.TypedDict, total=False):
+class InputPollOption(t.TypedDict):
     """
     ### [InputPollOption](https://core.telegram.org/bots/api#inputpolloption)  
     
     This object contains information about one answer option in a poll to be sent.
     """
     text: str
-    text_parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    text_entities: list["MessageEntity"]
+    text_parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    text_entities: t.NotRequired[list["MessageEntity"]]
 
-class PollAnswer(t.TypedDict, total=False):
+class PollAnswer(t.TypedDict):
     """
     ### [PollAnswer](https://core.telegram.org/bots/api#pollanswer)  
     
@@ -589,10 +589,10 @@ class PollAnswer(t.TypedDict, total=False):
     """
     poll_id: str
     option_ids: list[int]
-    voter_chat: "Chat"
-    user: "User"
+    voter_chat: t.NotRequired["Chat"]
+    user: t.NotRequired["User"]
 
-class Poll(t.TypedDict, total=False):
+class Poll(t.TypedDict):
     """
     ### [Poll](https://core.telegram.org/bots/api#poll)  
     
@@ -606,14 +606,14 @@ class Poll(t.TypedDict, total=False):
     is_anonymous: bool
     type: str
     allows_multiple_answers: bool
-    question_entities: list["MessageEntity"]
-    correct_option_id: int
-    explanation: str
-    explanation_entities: list["MessageEntity"]
-    open_period: int
-    close_date: int
+    question_entities: t.NotRequired[list["MessageEntity"]]
+    correct_option_id: t.NotRequired[int]
+    explanation: t.NotRequired[str]
+    explanation_entities: t.NotRequired[list["MessageEntity"]]
+    open_period: t.NotRequired[int]
+    close_date: t.NotRequired[int]
 
-class ChecklistTask(t.TypedDict, total=False):
+class ChecklistTask(t.TypedDict):
     """
     ### [ChecklistTask](https://core.telegram.org/bots/api#checklisttask)  
     
@@ -621,11 +621,11 @@ class ChecklistTask(t.TypedDict, total=False):
     """
     id: int
     text: str
-    text_entities: list["MessageEntity"]
-    completed_by_user: "User"
-    completion_date: int
+    text_entities: t.NotRequired[list["MessageEntity"]]
+    completed_by_user: t.NotRequired["User"]
+    completion_date: t.NotRequired[int]
 
-class Checklist(t.TypedDict, total=False):
+class Checklist(t.TypedDict):
     """
     ### [Checklist](https://core.telegram.org/bots/api#checklist)  
     
@@ -633,11 +633,11 @@ class Checklist(t.TypedDict, total=False):
     """
     title: str
     tasks: list["ChecklistTask"]
-    title_entities: list["MessageEntity"]
-    others_can_add_tasks: t.Literal[True]
-    others_can_mark_tasks_as_done: t.Literal[True]
+    title_entities: t.NotRequired[list["MessageEntity"]]
+    others_can_add_tasks: t.NotRequired[t.Literal[True]]
+    others_can_mark_tasks_as_done: t.NotRequired[t.Literal[True]]
 
-class InputChecklistTask(t.TypedDict, total=False):
+class InputChecklistTask(t.TypedDict):
     """
     ### [InputChecklistTask](https://core.telegram.org/bots/api#inputchecklisttask)  
     
@@ -645,10 +645,10 @@ class InputChecklistTask(t.TypedDict, total=False):
     """
     id: int
     text: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    text_entities: list["MessageEntity"]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    text_entities: t.NotRequired[list["MessageEntity"]]
 
-class InputChecklist(t.TypedDict, total=False):
+class InputChecklist(t.TypedDict):
     """
     ### [InputChecklist](https://core.telegram.org/bots/api#inputchecklist)  
     
@@ -656,31 +656,31 @@ class InputChecklist(t.TypedDict, total=False):
     """
     title: str
     tasks: list["InputChecklistTask"]
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    title_entities: list["MessageEntity"]
-    others_can_add_tasks: bool
-    others_can_mark_tasks_as_done: bool
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    title_entities: t.NotRequired[list["MessageEntity"]]
+    others_can_add_tasks: t.NotRequired[bool]
+    others_can_mark_tasks_as_done: t.NotRequired[bool]
 
-class ChecklistTasksDone(t.TypedDict, total=False):
+class ChecklistTasksDone(t.TypedDict):
     """
     ### [ChecklistTasksDone](https://core.telegram.org/bots/api#checklisttasksdone)  
     
     Describes a service message about checklist tasks marked as done or not done.
     """
-    checklist_message: "Message"
-    marked_as_done_task_ids: list[int]
-    marked_as_not_done_task_ids: list[int]
+    checklist_message: t.NotRequired["Message"]
+    marked_as_done_task_ids: t.NotRequired[list[int]]
+    marked_as_not_done_task_ids: t.NotRequired[list[int]]
 
-class ChecklistTasksAdded(t.TypedDict, total=False):
+class ChecklistTasksAdded(t.TypedDict):
     """
     ### [ChecklistTasksAdded](https://core.telegram.org/bots/api#checklisttasksadded)  
     
     Describes a service message about tasks added to a checklist.
     """
     tasks: list["ChecklistTask"]
-    checklist_message: "Message"
+    checklist_message: t.NotRequired["Message"]
 
-class Location(t.TypedDict, total=False):
+class Location(t.TypedDict):
     """
     ### [Location](https://core.telegram.org/bots/api#location)  
     
@@ -688,12 +688,12 @@ class Location(t.TypedDict, total=False):
     """
     latitude: float
     longitude: float
-    horizontal_accuracy: float
-    live_period: int
-    heading: int
-    proximity_alert_radius: int
+    horizontal_accuracy: t.NotRequired[float]
+    live_period: t.NotRequired[int]
+    heading: t.NotRequired[int]
+    proximity_alert_radius: t.NotRequired[int]
 
-class Venue(t.TypedDict, total=False):
+class Venue(t.TypedDict):
     """
     ### [Venue](https://core.telegram.org/bots/api#venue)  
     
@@ -702,12 +702,12 @@ class Venue(t.TypedDict, total=False):
     location: "Location"
     title: str
     address: str
-    foursquare_id: str
-    foursquare_type: str
-    google_place_id: str
-    google_place_type: str
+    foursquare_id: t.NotRequired[str]
+    foursquare_type: t.NotRequired[str]
+    google_place_id: t.NotRequired[str]
+    google_place_type: t.NotRequired[str]
 
-class WebAppData(t.TypedDict, total=False):
+class WebAppData(t.TypedDict):
     """
     ### [WebAppData](https://core.telegram.org/bots/api#webappdata)  
     
@@ -716,7 +716,7 @@ class WebAppData(t.TypedDict, total=False):
     data: str
     button_text: str
 
-class ProximityAlertTriggered(t.TypedDict, total=False):
+class ProximityAlertTriggered(t.TypedDict):
     """
     ### [ProximityAlertTriggered](https://core.telegram.org/bots/api#proximityalerttriggered)  
     
@@ -726,7 +726,7 @@ class ProximityAlertTriggered(t.TypedDict, total=False):
     watcher: "User"
     distance: int
 
-class MessageAutoDeleteTimerChanged(t.TypedDict, total=False):
+class MessageAutoDeleteTimerChanged(t.TypedDict):
     """
     ### [MessageAutoDeleteTimerChanged](https://core.telegram.org/bots/api#messageautodeletetimerchanged)  
     
@@ -734,7 +734,7 @@ class MessageAutoDeleteTimerChanged(t.TypedDict, total=False):
     """
     message_auto_delete_time: int
 
-class ChatBoostAdded(t.TypedDict, total=False):
+class ChatBoostAdded(t.TypedDict):
     """
     ### [ChatBoostAdded](https://core.telegram.org/bots/api#chatboostadded)  
     
@@ -742,7 +742,7 @@ class ChatBoostAdded(t.TypedDict, total=False):
     """
     boost_count: int
 
-class BackgroundFillSolid(t.TypedDict, total=False):
+class BackgroundFillSolid(t.TypedDict):
     """
     ### [BackgroundFillSolid](https://core.telegram.org/bots/api#backgroundfillsolid)  
     
@@ -751,7 +751,7 @@ class BackgroundFillSolid(t.TypedDict, total=False):
     type: t.Literal["solid"]
     color: int
 
-class BackgroundFillGradient(t.TypedDict, total=False):
+class BackgroundFillGradient(t.TypedDict):
     """
     ### [BackgroundFillGradient](https://core.telegram.org/bots/api#backgroundfillgradient)  
     
@@ -762,7 +762,7 @@ class BackgroundFillGradient(t.TypedDict, total=False):
     bottom_color: int
     rotation_angle: int
 
-class BackgroundFillFreeformGradient(t.TypedDict, total=False):
+class BackgroundFillFreeformGradient(t.TypedDict):
     """
     ### [BackgroundFillFreeformGradient](https://core.telegram.org/bots/api#backgroundfillfreeformgradient)  
     
@@ -771,7 +771,7 @@ class BackgroundFillFreeformGradient(t.TypedDict, total=False):
     type: t.Literal["freeform_gradient"]
     colors: list[int]
 
-class BackgroundTypeFill(t.TypedDict, total=False):
+class BackgroundTypeFill(t.TypedDict):
     """
     ### [BackgroundTypeFill](https://core.telegram.org/bots/api#backgroundtypefill)  
     
@@ -781,7 +781,7 @@ class BackgroundTypeFill(t.TypedDict, total=False):
     fill: "BackgroundFill"
     dark_theme_dimming: int
 
-class BackgroundTypeWallpaper(t.TypedDict, total=False):
+class BackgroundTypeWallpaper(t.TypedDict):
     """
     ### [BackgroundTypeWallpaper](https://core.telegram.org/bots/api#backgroundtypewallpaper)  
     
@@ -790,10 +790,10 @@ class BackgroundTypeWallpaper(t.TypedDict, total=False):
     type: t.Literal["wallpaper"]
     document: "Document"
     dark_theme_dimming: int
-    is_blurred: t.Literal[True]
-    is_moving: t.Literal[True]
+    is_blurred: t.NotRequired[t.Literal[True]]
+    is_moving: t.NotRequired[t.Literal[True]]
 
-class BackgroundTypePattern(t.TypedDict, total=False):
+class BackgroundTypePattern(t.TypedDict):
     """
     ### [BackgroundTypePattern](https://core.telegram.org/bots/api#backgroundtypepattern)  
     
@@ -803,10 +803,10 @@ class BackgroundTypePattern(t.TypedDict, total=False):
     document: "Document"
     fill: "BackgroundFill"
     intensity: int
-    is_inverted: t.Literal[True]
-    is_moving: t.Literal[True]
+    is_inverted: t.NotRequired[t.Literal[True]]
+    is_moving: t.NotRequired[t.Literal[True]]
 
-class BackgroundTypeChatTheme(t.TypedDict, total=False):
+class BackgroundTypeChatTheme(t.TypedDict):
     """
     ### [BackgroundTypeChatTheme](https://core.telegram.org/bots/api#backgroundtypechattheme)  
     
@@ -815,7 +815,7 @@ class BackgroundTypeChatTheme(t.TypedDict, total=False):
     type: t.Literal["chat_theme"]
     theme_name: str
 
-class ChatBackground(t.TypedDict, total=False):
+class ChatBackground(t.TypedDict):
     """
     ### [ChatBackground](https://core.telegram.org/bots/api#chatbackground)  
     
@@ -823,7 +823,7 @@ class ChatBackground(t.TypedDict, total=False):
     """
     type: "BackgroundType"
 
-class ForumTopicCreated(t.TypedDict, total=False):
+class ForumTopicCreated(t.TypedDict):
     """
     ### [ForumTopicCreated](https://core.telegram.org/bots/api#forumtopiccreated)  
     
@@ -831,9 +831,9 @@ class ForumTopicCreated(t.TypedDict, total=False):
     """
     name: str
     icon_color: int
-    icon_custom_emoji_id: str
+    icon_custom_emoji_id: t.NotRequired[str]
 
-class ForumTopicClosed(t.TypedDict, total=False):
+class ForumTopicClosed(t.TypedDict):
     """
     ### [ForumTopicClosed](https://core.telegram.org/bots/api#forumtopicclosed)  
     
@@ -841,16 +841,16 @@ class ForumTopicClosed(t.TypedDict, total=False):
     """
     
 
-class ForumTopicEdited(t.TypedDict, total=False):
+class ForumTopicEdited(t.TypedDict):
     """
     ### [ForumTopicEdited](https://core.telegram.org/bots/api#forumtopicedited)  
     
     This object represents a service message about an edited forum topic.
     """
-    name: str
-    icon_custom_emoji_id: str
+    name: t.NotRequired[str]
+    icon_custom_emoji_id: t.NotRequired[str]
 
-class ForumTopicReopened(t.TypedDict, total=False):
+class ForumTopicReopened(t.TypedDict):
     """
     ### [ForumTopicReopened](https://core.telegram.org/bots/api#forumtopicreopened)  
     
@@ -858,7 +858,7 @@ class ForumTopicReopened(t.TypedDict, total=False):
     """
     
 
-class GeneralForumTopicHidden(t.TypedDict, total=False):
+class GeneralForumTopicHidden(t.TypedDict):
     """
     ### [GeneralForumTopicHidden](https://core.telegram.org/bots/api#generalforumtopichidden)  
     
@@ -866,7 +866,7 @@ class GeneralForumTopicHidden(t.TypedDict, total=False):
     """
     
 
-class GeneralForumTopicUnhidden(t.TypedDict, total=False):
+class GeneralForumTopicUnhidden(t.TypedDict):
     """
     ### [GeneralForumTopicUnhidden](https://core.telegram.org/bots/api#generalforumtopicunhidden)  
     
@@ -874,19 +874,19 @@ class GeneralForumTopicUnhidden(t.TypedDict, total=False):
     """
     
 
-class SharedUser(t.TypedDict, total=False):
+class SharedUser(t.TypedDict):
     """
     ### [SharedUser](https://core.telegram.org/bots/api#shareduser)  
     
     This object contains information about a user that was shared with the bot using a [KeyboardButtonRequestUsers](https://core.telegram.org/bots/api#keyboardbuttonrequestusers) button.
     """
     user_id: int
-    first_name: str
-    last_name: str
-    username: str
-    photo: list["PhotoSize"]
+    first_name: t.NotRequired[str]
+    last_name: t.NotRequired[str]
+    username: t.NotRequired[str]
+    photo: t.NotRequired[list["PhotoSize"]]
 
-class UsersShared(t.TypedDict, total=False):
+class UsersShared(t.TypedDict):
     """
     ### [UsersShared](https://core.telegram.org/bots/api#usersshared)  
     
@@ -895,7 +895,7 @@ class UsersShared(t.TypedDict, total=False):
     request_id: int
     users: list["SharedUser"]
 
-class ChatShared(t.TypedDict, total=False):
+class ChatShared(t.TypedDict):
     """
     ### [ChatShared](https://core.telegram.org/bots/api#chatshared)  
     
@@ -903,21 +903,21 @@ class ChatShared(t.TypedDict, total=False):
     """
     request_id: int
     chat_id: int
-    title: str
-    username: str
-    photo: list["PhotoSize"]
+    title: t.NotRequired[str]
+    username: t.NotRequired[str]
+    photo: t.NotRequired[list["PhotoSize"]]
 
-class WriteAccessAllowed(t.TypedDict, total=False):
+class WriteAccessAllowed(t.TypedDict):
     """
     ### [WriteAccessAllowed](https://core.telegram.org/bots/api#writeaccessallowed)  
     
     This object represents a service message about a user allowing a bot to write messages after adding it to the attachment menu, launching a Web App from a link, or accepting an explicit request from a Web App sent by the method [requestWriteAccess](https://core.telegram.org/bots/webapps#initializing-mini-apps).
     """
-    from_request: bool
-    web_app_name: str
-    from_attachment_menu: bool
+    from_request: t.NotRequired[bool]
+    web_app_name: t.NotRequired[str]
+    from_attachment_menu: t.NotRequired[bool]
 
-class VideoChatScheduled(t.TypedDict, total=False):
+class VideoChatScheduled(t.TypedDict):
     """
     ### [VideoChatScheduled](https://core.telegram.org/bots/api#videochatscheduled)  
     
@@ -925,7 +925,7 @@ class VideoChatScheduled(t.TypedDict, total=False):
     """
     start_date: int
 
-class VideoChatStarted(t.TypedDict, total=False):
+class VideoChatStarted(t.TypedDict):
     """
     ### [VideoChatStarted](https://core.telegram.org/bots/api#videochatstarted)  
     
@@ -933,7 +933,7 @@ class VideoChatStarted(t.TypedDict, total=False):
     """
     
 
-class VideoChatEnded(t.TypedDict, total=False):
+class VideoChatEnded(t.TypedDict):
     """
     ### [VideoChatEnded](https://core.telegram.org/bots/api#videochatended)  
     
@@ -941,7 +941,7 @@ class VideoChatEnded(t.TypedDict, total=False):
     """
     duration: int
 
-class VideoChatParticipantsInvited(t.TypedDict, total=False):
+class VideoChatParticipantsInvited(t.TypedDict):
     """
     ### [VideoChatParticipantsInvited](https://core.telegram.org/bots/api#videochatparticipantsinvited)  
     
@@ -949,7 +949,7 @@ class VideoChatParticipantsInvited(t.TypedDict, total=False):
     """
     users: list["User"]
 
-class PaidMessagePriceChanged(t.TypedDict, total=False):
+class PaidMessagePriceChanged(t.TypedDict):
     """
     ### [PaidMessagePriceChanged](https://core.telegram.org/bots/api#paidmessagepricechanged)  
     
@@ -957,72 +957,72 @@ class PaidMessagePriceChanged(t.TypedDict, total=False):
     """
     paid_message_star_count: int
 
-class DirectMessagePriceChanged(t.TypedDict, total=False):
+class DirectMessagePriceChanged(t.TypedDict):
     """
     ### [DirectMessagePriceChanged](https://core.telegram.org/bots/api#directmessagepricechanged)  
     
     Describes a service message about a change in the price of direct messages sent to a channel chat.
     """
     are_direct_messages_enabled: bool
-    direct_message_star_count: int
+    direct_message_star_count: t.NotRequired[int]
 
-class SuggestedPostApproved(t.TypedDict, total=False):
+class SuggestedPostApproved(t.TypedDict):
     """
     ### [SuggestedPostApproved](https://core.telegram.org/bots/api#suggestedpostapproved)  
     
     Describes a service message about the approval of a suggested post.
     """
     send_date: int
-    suggested_post_message: "Message"
-    price: "SuggestedPostPrice"
+    suggested_post_message: t.NotRequired["Message"]
+    price: t.NotRequired["SuggestedPostPrice"]
 
-class SuggestedPostApprovalFailed(t.TypedDict, total=False):
+class SuggestedPostApprovalFailed(t.TypedDict):
     """
     ### [SuggestedPostApprovalFailed](https://core.telegram.org/bots/api#suggestedpostapprovalfailed)  
     
     Describes a service message about the failed approval of a suggested post. Currently, only caused by insufficient user funds at the time of approval.
     """
     price: "SuggestedPostPrice"
-    suggested_post_message: "Message"
+    suggested_post_message: t.NotRequired["Message"]
 
-class SuggestedPostDeclined(t.TypedDict, total=False):
+class SuggestedPostDeclined(t.TypedDict):
     """
     ### [SuggestedPostDeclined](https://core.telegram.org/bots/api#suggestedpostdeclined)  
     
     Describes a service message about the rejection of a suggested post.
     """
-    suggested_post_message: "Message"
-    comment: str
+    suggested_post_message: t.NotRequired["Message"]
+    comment: t.NotRequired[str]
 
-class SuggestedPostPaid(t.TypedDict, total=False):
+class SuggestedPostPaid(t.TypedDict):
     """
     ### [SuggestedPostPaid](https://core.telegram.org/bots/api#suggestedpostpaid)  
     
     Describes a service message about a successful payment for a suggested post.
     """
     currency: str
-    suggested_post_message: "Message"
-    amount: int
-    star_amount: "StarAmount"
+    suggested_post_message: t.NotRequired["Message"]
+    amount: t.NotRequired[int]
+    star_amount: t.NotRequired["StarAmount"]
 
-class SuggestedPostRefunded(t.TypedDict, total=False):
+class SuggestedPostRefunded(t.TypedDict):
     """
     ### [SuggestedPostRefunded](https://core.telegram.org/bots/api#suggestedpostrefunded)  
     
     Describes a service message about a payment refund for a suggested post.
     """
     reason: str
-    suggested_post_message: "Message"
+    suggested_post_message: t.NotRequired["Message"]
 
-class GiveawayCreated(t.TypedDict, total=False):
+class GiveawayCreated(t.TypedDict):
     """
     ### [GiveawayCreated](https://core.telegram.org/bots/api#giveawaycreated)  
     
     This object represents a service message about the creation of a scheduled giveaway.
     """
-    prize_star_count: int
+    prize_star_count: t.NotRequired[int]
 
-class Giveaway(t.TypedDict, total=False):
+class Giveaway(t.TypedDict):
     """
     ### [Giveaway](https://core.telegram.org/bots/api#giveaway)  
     
@@ -1031,14 +1031,14 @@ class Giveaway(t.TypedDict, total=False):
     chats: list["Chat"]
     winners_selection_date: int
     winner_count: int
-    only_new_members: t.Literal[True]
-    has_public_winners: t.Literal[True]
-    prize_description: str
-    country_codes: list[str]
-    prize_star_count: int
-    premium_subscription_month_count: int
+    only_new_members: t.NotRequired[t.Literal[True]]
+    has_public_winners: t.NotRequired[t.Literal[True]]
+    prize_description: t.NotRequired[str]
+    country_codes: t.NotRequired[list[str]]
+    prize_star_count: t.NotRequired[int]
+    premium_subscription_month_count: t.NotRequired[int]
 
-class GiveawayWinners(t.TypedDict, total=False):
+class GiveawayWinners(t.TypedDict):
     """
     ### [GiveawayWinners](https://core.telegram.org/bots/api#giveawaywinners)  
     
@@ -1049,38 +1049,38 @@ class GiveawayWinners(t.TypedDict, total=False):
     winners_selection_date: int
     winner_count: int
     winners: list["User"]
-    additional_chat_count: int
-    prize_star_count: int
-    premium_subscription_month_count: int
-    unclaimed_prize_count: int
-    only_new_members: t.Literal[True]
-    was_refunded: t.Literal[True]
-    prize_description: str
+    additional_chat_count: t.NotRequired[int]
+    prize_star_count: t.NotRequired[int]
+    premium_subscription_month_count: t.NotRequired[int]
+    unclaimed_prize_count: t.NotRequired[int]
+    only_new_members: t.NotRequired[t.Literal[True]]
+    was_refunded: t.NotRequired[t.Literal[True]]
+    prize_description: t.NotRequired[str]
 
-class GiveawayCompleted(t.TypedDict, total=False):
+class GiveawayCompleted(t.TypedDict):
     """
     ### [GiveawayCompleted](https://core.telegram.org/bots/api#giveawaycompleted)  
     
     This object represents a service message about the completion of a giveaway without public winners.
     """
     winner_count: int
-    unclaimed_prize_count: int
-    giveaway_message: "Message"
-    is_star_giveaway: t.Literal[True]
+    unclaimed_prize_count: t.NotRequired[int]
+    giveaway_message: t.NotRequired["Message"]
+    is_star_giveaway: t.NotRequired[t.Literal[True]]
 
-class LinkPreviewOptions(t.TypedDict, total=False):
+class LinkPreviewOptions(t.TypedDict):
     """
     ### [LinkPreviewOptions](https://core.telegram.org/bots/api#linkpreviewoptions)  
     
     Describes the options used for link preview generation.
     """
-    is_disabled: bool
-    url: str
-    prefer_small_media: bool
-    prefer_large_media: bool
-    show_above_text: bool
+    is_disabled: t.NotRequired[bool]
+    url: t.NotRequired[str]
+    prefer_small_media: t.NotRequired[bool]
+    prefer_large_media: t.NotRequired[bool]
+    show_above_text: t.NotRequired[bool]
 
-class SuggestedPostPrice(t.TypedDict, total=False):
+class SuggestedPostPrice(t.TypedDict):
     """
     ### [SuggestedPostPrice](https://core.telegram.org/bots/api#suggestedpostprice)  
     
@@ -1089,35 +1089,35 @@ class SuggestedPostPrice(t.TypedDict, total=False):
     currency: str
     amount: int
 
-class SuggestedPostInfo(t.TypedDict, total=False):
+class SuggestedPostInfo(t.TypedDict):
     """
     ### [SuggestedPostInfo](https://core.telegram.org/bots/api#suggestedpostinfo)  
     
     Contains information about a suggested post.
     """
     state: str
-    price: "SuggestedPostPrice"
-    send_date: int
+    price: t.NotRequired["SuggestedPostPrice"]
+    send_date: t.NotRequired[int]
 
-class SuggestedPostParameters(t.TypedDict, total=False):
+class SuggestedPostParameters(t.TypedDict):
     """
     ### [SuggestedPostParameters](https://core.telegram.org/bots/api#suggestedpostparameters)  
     
     Contains parameters of a post that is being suggested by the bot.
     """
-    price: "SuggestedPostPrice"
-    send_date: int
+    price: t.NotRequired["SuggestedPostPrice"]
+    send_date: t.NotRequired[int]
 
-class DirectMessagesTopic(t.TypedDict, total=False):
+class DirectMessagesTopic(t.TypedDict):
     """
     ### [DirectMessagesTopic](https://core.telegram.org/bots/api#directmessagestopic)  
     
     Describes a topic of a direct messages chat.
     """
     topic_id: int
-    user: "User"
+    user: t.NotRequired["User"]
 
-class UserProfilePhotos(t.TypedDict, total=False):
+class UserProfilePhotos(t.TypedDict):
     """
     ### [UserProfilePhotos](https://core.telegram.org/bots/api#userprofilephotos)  
     
@@ -1126,7 +1126,7 @@ class UserProfilePhotos(t.TypedDict, total=False):
     total_count: int
     photos: list[list["PhotoSize"]]
 
-class File(t.TypedDict, total=False):
+class File(t.TypedDict):
     """
     ### [File](https://core.telegram.org/bots/api#file)  
     
@@ -1136,10 +1136,10 @@ class File(t.TypedDict, total=False):
     """
     file_id: str
     file_unique_id: str
-    file_size: int
-    file_path: str
+    file_size: t.NotRequired[int]
+    file_path: t.NotRequired[str]
 
-class WebAppInfo(t.TypedDict, total=False):
+class WebAppInfo(t.TypedDict):
     """
     ### [WebAppInfo](https://core.telegram.org/bots/api#webappinfo)  
     
@@ -1147,20 +1147,20 @@ class WebAppInfo(t.TypedDict, total=False):
     """
     url: str
 
-class ReplyKeyboardMarkup(t.TypedDict, total=False):
+class ReplyKeyboardMarkup(t.TypedDict):
     """
     ### [ReplyKeyboardMarkup](https://core.telegram.org/bots/api#replykeyboardmarkup)  
     
     This object represents a [custom keyboard](https://core.telegram.org/bots/features#keyboards) with reply options (see [Introduction to bots](https://core.telegram.org/bots/features#keyboards) for details and examples). Not supported in channels and for messages sent on behalf of a Telegram Business account.
     """
     keyboard: list[list["KeyboardButton"]]
-    is_persistent: bool
-    resize_keyboard: bool
-    one_time_keyboard: bool
-    input_field_placeholder: str
-    selective: bool
+    is_persistent: t.NotRequired[bool]
+    resize_keyboard: t.NotRequired[bool]
+    one_time_keyboard: t.NotRequired[bool]
+    input_field_placeholder: t.NotRequired[str]
+    selective: t.NotRequired[bool]
 
-class KeyboardButton(t.TypedDict, total=False):
+class KeyboardButton(t.TypedDict):
     """
     ### [KeyboardButton](https://core.telegram.org/bots/api#keyboardbutton)  
     
@@ -1169,28 +1169,28 @@ class KeyboardButton(t.TypedDict, total=False):
     **Note:** *request\\_users* and *request\\_chat* options will only work in Telegram versions released after 3 February, 2023\\. Older clients will display *unsupported message*.
     """
     text: str
-    request_users: "KeyboardButtonRequestUsers"
-    request_chat: "KeyboardButtonRequestChat"
-    request_contact: bool
-    request_location: bool
-    request_poll: "KeyboardButtonPollType"
-    web_app: "WebAppInfo"
+    request_users: t.NotRequired["KeyboardButtonRequestUsers"]
+    request_chat: t.NotRequired["KeyboardButtonRequestChat"]
+    request_contact: t.NotRequired[bool]
+    request_location: t.NotRequired[bool]
+    request_poll: t.NotRequired["KeyboardButtonPollType"]
+    web_app: t.NotRequired["WebAppInfo"]
 
-class KeyboardButtonRequestUsers(t.TypedDict, total=False):
+class KeyboardButtonRequestUsers(t.TypedDict):
     """
     ### [KeyboardButtonRequestUsers](https://core.telegram.org/bots/api#keyboardbuttonrequestusers)  
     
     This object defines the criteria used to request suitable users. Information about the selected users will be shared with the bot when the corresponding button is pressed. [More about requesting users »](https://core.telegram.org/bots/features#chat-and-user-selection)
     """
     request_id: int
-    user_is_bot: bool
-    user_is_premium: bool
-    max_quantity: int
-    request_name: bool
-    request_username: bool
-    request_photo: bool
+    user_is_bot: t.NotRequired[bool]
+    user_is_premium: t.NotRequired[bool]
+    max_quantity: t.NotRequired[int]
+    request_name: t.NotRequired[bool]
+    request_username: t.NotRequired[bool]
+    request_photo: t.NotRequired[bool]
 
-class KeyboardButtonRequestChat(t.TypedDict, total=False):
+class KeyboardButtonRequestChat(t.TypedDict):
     """
     ### [KeyboardButtonRequestChat](https://core.telegram.org/bots/api#keyboardbuttonrequestchat)  
     
@@ -1198,34 +1198,34 @@ class KeyboardButtonRequestChat(t.TypedDict, total=False):
     """
     request_id: int
     chat_is_channel: bool
-    chat_is_forum: bool
-    chat_has_username: bool
-    chat_is_created: bool
-    user_administrator_rights: "ChatAdministratorRights"
-    bot_administrator_rights: "ChatAdministratorRights"
-    bot_is_member: bool
-    request_title: bool
-    request_username: bool
-    request_photo: bool
+    chat_is_forum: t.NotRequired[bool]
+    chat_has_username: t.NotRequired[bool]
+    chat_is_created: t.NotRequired[bool]
+    user_administrator_rights: t.NotRequired["ChatAdministratorRights"]
+    bot_administrator_rights: t.NotRequired["ChatAdministratorRights"]
+    bot_is_member: t.NotRequired[bool]
+    request_title: t.NotRequired[bool]
+    request_username: t.NotRequired[bool]
+    request_photo: t.NotRequired[bool]
 
-class KeyboardButtonPollType(t.TypedDict, total=False):
+class KeyboardButtonPollType(t.TypedDict):
     """
     ### [KeyboardButtonPollType](https://core.telegram.org/bots/api#keyboardbuttonpolltype)  
     
     This object represents type of a poll, which is allowed to be created and sent when the corresponding button is pressed.
     """
-    type: str
+    type: t.NotRequired[str]
 
-class ReplyKeyboardRemove(t.TypedDict, total=False):
+class ReplyKeyboardRemove(t.TypedDict):
     """
     ### [ReplyKeyboardRemove](https://core.telegram.org/bots/api#replykeyboardremove)  
     
     Upon receiving a message with this object, Telegram clients will remove the current custom keyboard and display the default letter\\-keyboard. By default, custom keyboards are displayed until a new keyboard is sent by a bot. An exception is made for one\\-time keyboards that are hidden immediately after the user presses a button (see [ReplyKeyboardMarkup](https://core.telegram.org/bots/api#replykeyboardmarkup)). Not supported in channels and for messages sent on behalf of a Telegram Business account.
     """
     remove_keyboard: t.Literal[True]
-    selective: bool
+    selective: t.NotRequired[bool]
 
-class InlineKeyboardMarkup(t.TypedDict, total=False):
+class InlineKeyboardMarkup(t.TypedDict):
     """
     ### [InlineKeyboardMarkup](https://core.telegram.org/bots/api#inlinekeyboardmarkup)  
     
@@ -1233,25 +1233,25 @@ class InlineKeyboardMarkup(t.TypedDict, total=False):
     """
     inline_keyboard: list[list["InlineKeyboardButton"]]
 
-class InlineKeyboardButton(t.TypedDict, total=False):
+class InlineKeyboardButton(t.TypedDict):
     """
     ### [InlineKeyboardButton](https://core.telegram.org/bots/api#inlinekeyboardbutton)  
     
     This object represents one button of an inline keyboard. Exactly one of the optional fields must be used to specify type of the button.
     """
     text: str
-    url: str
-    callback_data: str
-    web_app: "WebAppInfo"
-    login_url: "LoginUrl"
-    switch_inline_query: str
-    switch_inline_query_current_chat: str
-    switch_inline_query_chosen_chat: "SwitchInlineQueryChosenChat"
-    copy_text: "CopyTextButton"
-    callback_game: "CallbackGame"
-    pay: bool
+    url: t.NotRequired[str]
+    callback_data: t.NotRequired[str]
+    web_app: t.NotRequired["WebAppInfo"]
+    login_url: t.NotRequired["LoginUrl"]
+    switch_inline_query: t.NotRequired[str]
+    switch_inline_query_current_chat: t.NotRequired[str]
+    switch_inline_query_chosen_chat: t.NotRequired["SwitchInlineQueryChosenChat"]
+    copy_text: t.NotRequired["CopyTextButton"]
+    callback_game: t.NotRequired["CallbackGame"]
+    pay: t.NotRequired[bool]
 
-class LoginUrl(t.TypedDict, total=False):
+class LoginUrl(t.TypedDict):
     """
     ### [LoginUrl](https://core.telegram.org/bots/api#loginurl)  
     
@@ -1262,23 +1262,23 @@ class LoginUrl(t.TypedDict, total=False):
     Sample bot: [@discussbot](https://t.me/discussbot)
     """
     url: str
-    forward_text: str
-    bot_username: str
-    request_write_access: bool
+    forward_text: t.NotRequired[str]
+    bot_username: t.NotRequired[str]
+    request_write_access: t.NotRequired[bool]
 
-class SwitchInlineQueryChosenChat(t.TypedDict, total=False):
+class SwitchInlineQueryChosenChat(t.TypedDict):
     """
     ### [SwitchInlineQueryChosenChat](https://core.telegram.org/bots/api#switchinlinequerychosenchat)  
     
     This object represents an inline button that switches the current user to inline mode in a chosen chat, with an optional default inline query.
     """
-    query: str
-    allow_user_chats: bool
-    allow_bot_chats: bool
-    allow_group_chats: bool
-    allow_channel_chats: bool
+    query: t.NotRequired[str]
+    allow_user_chats: t.NotRequired[bool]
+    allow_bot_chats: t.NotRequired[bool]
+    allow_group_chats: t.NotRequired[bool]
+    allow_channel_chats: t.NotRequired[bool]
 
-class CopyTextButton(t.TypedDict, total=False):
+class CopyTextButton(t.TypedDict):
     """
     ### [CopyTextButton](https://core.telegram.org/bots/api#copytextbutton)  
     
@@ -1286,7 +1286,7 @@ class CopyTextButton(t.TypedDict, total=False):
     """
     text: str
 
-class CallbackQuery(t.TypedDict("CallbackQuery", {"from": "User"}), total=False):
+class CallbackQuery(t.TypedDict("CallbackQuery", {"from": "User"})):
     """
     ### [CallbackQuery](https://core.telegram.org/bots/api#callbackquery)  
     
@@ -1296,12 +1296,12 @@ class CallbackQuery(t.TypedDict("CallbackQuery", {"from": "User"}), total=False)
     """
     id: str
     chat_instance: str
-    message: "MaybeInaccessibleMessage"
-    inline_message_id: str
-    data: str
-    game_short_name: str
+    message: t.NotRequired["MaybeInaccessibleMessage"]
+    inline_message_id: t.NotRequired[str]
+    data: t.NotRequired[str]
+    game_short_name: t.NotRequired[str]
 
-class ForceReply(t.TypedDict, total=False):
+class ForceReply(t.TypedDict):
     """
     ### [ForceReply](https://core.telegram.org/bots/api#forcereply)  
     
@@ -1315,10 +1315,10 @@ class ForceReply(t.TypedDict, total=False):
     The last option is definitely more attractive. And if you use [ForceReply](https://core.telegram.org/bots/api#forcereply) in your bot's questions, it will receive the user's answers even if it only receives replies, commands and mentions \\- without any extra work for the user.
     """
     force_reply: t.Literal[True]
-    input_field_placeholder: str
-    selective: bool
+    input_field_placeholder: t.NotRequired[str]
+    selective: t.NotRequired[bool]
 
-class ChatPhoto(t.TypedDict, total=False):
+class ChatPhoto(t.TypedDict):
     """
     ### [ChatPhoto](https://core.telegram.org/bots/api#chatphoto)  
     
@@ -1329,7 +1329,7 @@ class ChatPhoto(t.TypedDict, total=False):
     big_file_id: str
     big_file_unique_id: str
 
-class ChatInviteLink(t.TypedDict, total=False):
+class ChatInviteLink(t.TypedDict):
     """
     ### [ChatInviteLink](https://core.telegram.org/bots/api#chatinvitelink)  
     
@@ -1340,14 +1340,14 @@ class ChatInviteLink(t.TypedDict, total=False):
     creates_join_request: bool
     is_primary: bool
     is_revoked: bool
-    name: str
-    expire_date: int
-    member_limit: int
-    pending_join_request_count: int
-    subscription_period: int
-    subscription_price: int
+    name: t.NotRequired[str]
+    expire_date: t.NotRequired[int]
+    member_limit: t.NotRequired[int]
+    pending_join_request_count: t.NotRequired[int]
+    subscription_period: t.NotRequired[int]
+    subscription_price: t.NotRequired[int]
 
-class ChatAdministratorRights(t.TypedDict, total=False):
+class ChatAdministratorRights(t.TypedDict):
     """
     ### [ChatAdministratorRights](https://core.telegram.org/bots/api#chatadministratorrights)  
     
@@ -1364,13 +1364,13 @@ class ChatAdministratorRights(t.TypedDict, total=False):
     can_post_stories: bool
     can_edit_stories: bool
     can_delete_stories: bool
-    can_post_messages: bool
-    can_edit_messages: bool
-    can_pin_messages: bool
-    can_manage_topics: bool
-    can_manage_direct_messages: bool
+    can_post_messages: t.NotRequired[bool]
+    can_edit_messages: t.NotRequired[bool]
+    can_pin_messages: t.NotRequired[bool]
+    can_manage_topics: t.NotRequired[bool]
+    can_manage_direct_messages: t.NotRequired[bool]
 
-class ChatMemberUpdated(t.TypedDict("ChatMemberUpdated", {"from": "User"}), total=False):
+class ChatMemberUpdated(t.TypedDict("ChatMemberUpdated", {"from": "User"})):
     """
     ### [ChatMemberUpdated](https://core.telegram.org/bots/api#chatmemberupdated)  
     
@@ -1380,11 +1380,11 @@ class ChatMemberUpdated(t.TypedDict("ChatMemberUpdated", {"from": "User"}), tota
     date: int
     old_chat_member: "ChatMember"
     new_chat_member: "ChatMember"
-    invite_link: "ChatInviteLink"
-    via_join_request: bool
-    via_chat_folder_invite_link: bool
+    invite_link: t.NotRequired["ChatInviteLink"]
+    via_join_request: t.NotRequired[bool]
+    via_chat_folder_invite_link: t.NotRequired[bool]
 
-class ChatMemberOwner(t.TypedDict, total=False):
+class ChatMemberOwner(t.TypedDict):
     """
     ### [ChatMemberOwner](https://core.telegram.org/bots/api#chatmemberowner)  
     
@@ -1393,9 +1393,9 @@ class ChatMemberOwner(t.TypedDict, total=False):
     status: t.Literal["creator"]
     user: "User"
     is_anonymous: bool
-    custom_title: str
+    custom_title: t.NotRequired[str]
 
-class ChatMemberAdministrator(t.TypedDict, total=False):
+class ChatMemberAdministrator(t.TypedDict):
     """
     ### [ChatMemberAdministrator](https://core.telegram.org/bots/api#chatmemberadministrator)  
     
@@ -1415,14 +1415,14 @@ class ChatMemberAdministrator(t.TypedDict, total=False):
     can_post_stories: bool
     can_edit_stories: bool
     can_delete_stories: bool
-    can_post_messages: bool
-    can_edit_messages: bool
-    can_pin_messages: bool
-    can_manage_topics: bool
-    can_manage_direct_messages: bool
-    custom_title: str
+    can_post_messages: t.NotRequired[bool]
+    can_edit_messages: t.NotRequired[bool]
+    can_pin_messages: t.NotRequired[bool]
+    can_manage_topics: t.NotRequired[bool]
+    can_manage_direct_messages: t.NotRequired[bool]
+    custom_title: t.NotRequired[str]
 
-class ChatMemberMember(t.TypedDict, total=False):
+class ChatMemberMember(t.TypedDict):
     """
     ### [ChatMemberMember](https://core.telegram.org/bots/api#chatmembermember)  
     
@@ -1430,9 +1430,9 @@ class ChatMemberMember(t.TypedDict, total=False):
     """
     status: t.Literal["member"]
     user: "User"
-    until_date: int
+    until_date: t.NotRequired[int]
 
-class ChatMemberRestricted(t.TypedDict, total=False):
+class ChatMemberRestricted(t.TypedDict):
     """
     ### [ChatMemberRestricted](https://core.telegram.org/bots/api#chatmemberrestricted)  
     
@@ -1457,7 +1457,7 @@ class ChatMemberRestricted(t.TypedDict, total=False):
     can_manage_topics: bool
     until_date: int
 
-class ChatMemberLeft(t.TypedDict, total=False):
+class ChatMemberLeft(t.TypedDict):
     """
     ### [ChatMemberLeft](https://core.telegram.org/bots/api#chatmemberleft)  
     
@@ -1466,7 +1466,7 @@ class ChatMemberLeft(t.TypedDict, total=False):
     status: t.Literal["left"]
     user: "User"
 
-class ChatMemberBanned(t.TypedDict, total=False):
+class ChatMemberBanned(t.TypedDict):
     """
     ### [ChatMemberBanned](https://core.telegram.org/bots/api#chatmemberbanned)  
     
@@ -1476,7 +1476,7 @@ class ChatMemberBanned(t.TypedDict, total=False):
     user: "User"
     until_date: int
 
-class ChatJoinRequest(t.TypedDict("ChatJoinRequest", {"from": "User"}), total=False):
+class ChatJoinRequest(t.TypedDict("ChatJoinRequest", {"from": "User"})):
     """
     ### [ChatJoinRequest](https://core.telegram.org/bots/api#chatjoinrequest)  
     
@@ -1485,31 +1485,31 @@ class ChatJoinRequest(t.TypedDict("ChatJoinRequest", {"from": "User"}), total=Fa
     chat: "Chat"
     user_chat_id: int
     date: int
-    bio: str
-    invite_link: "ChatInviteLink"
+    bio: t.NotRequired[str]
+    invite_link: t.NotRequired["ChatInviteLink"]
 
-class ChatPermissions(t.TypedDict, total=False):
+class ChatPermissions(t.TypedDict):
     """
     ### [ChatPermissions](https://core.telegram.org/bots/api#chatpermissions)  
     
     Describes actions that a non\\-administrator user is allowed to take in a chat.
     """
-    can_send_messages: bool
-    can_send_audios: bool
-    can_send_documents: bool
-    can_send_photos: bool
-    can_send_videos: bool
-    can_send_video_notes: bool
-    can_send_voice_notes: bool
-    can_send_polls: bool
-    can_send_other_messages: bool
-    can_add_web_page_previews: bool
-    can_change_info: bool
-    can_invite_users: bool
-    can_pin_messages: bool
-    can_manage_topics: bool
+    can_send_messages: t.NotRequired[bool]
+    can_send_audios: t.NotRequired[bool]
+    can_send_documents: t.NotRequired[bool]
+    can_send_photos: t.NotRequired[bool]
+    can_send_videos: t.NotRequired[bool]
+    can_send_video_notes: t.NotRequired[bool]
+    can_send_voice_notes: t.NotRequired[bool]
+    can_send_polls: t.NotRequired[bool]
+    can_send_other_messages: t.NotRequired[bool]
+    can_add_web_page_previews: t.NotRequired[bool]
+    can_change_info: t.NotRequired[bool]
+    can_invite_users: t.NotRequired[bool]
+    can_pin_messages: t.NotRequired[bool]
+    can_manage_topics: t.NotRequired[bool]
 
-class Birthdate(t.TypedDict, total=False):
+class Birthdate(t.TypedDict):
     """
     ### [Birthdate](https://core.telegram.org/bots/api#birthdate)  
     
@@ -1517,28 +1517,28 @@ class Birthdate(t.TypedDict, total=False):
     """
     day: int
     month: int
-    year: int
+    year: t.NotRequired[int]
 
-class BusinessIntro(t.TypedDict, total=False):
+class BusinessIntro(t.TypedDict):
     """
     ### [BusinessIntro](https://core.telegram.org/bots/api#businessintro)  
     
     Contains information about the start page settings of a Telegram Business account.
     """
-    title: str
-    message: str
-    sticker: "Sticker"
+    title: t.NotRequired[str]
+    message: t.NotRequired[str]
+    sticker: t.NotRequired["Sticker"]
 
-class BusinessLocation(t.TypedDict, total=False):
+class BusinessLocation(t.TypedDict):
     """
     ### [BusinessLocation](https://core.telegram.org/bots/api#businesslocation)  
     
     Contains information about the location of a Telegram Business account.
     """
     address: str
-    location: "Location"
+    location: t.NotRequired["Location"]
 
-class BusinessOpeningHoursInterval(t.TypedDict, total=False):
+class BusinessOpeningHoursInterval(t.TypedDict):
     """
     ### [BusinessOpeningHoursInterval](https://core.telegram.org/bots/api#businessopeninghoursinterval)  
     
@@ -1547,7 +1547,7 @@ class BusinessOpeningHoursInterval(t.TypedDict, total=False):
     opening_minute: int
     closing_minute: int
 
-class BusinessOpeningHours(t.TypedDict, total=False):
+class BusinessOpeningHours(t.TypedDict):
     """
     ### [BusinessOpeningHours](https://core.telegram.org/bots/api#businessopeninghours)  
     
@@ -1556,7 +1556,7 @@ class BusinessOpeningHours(t.TypedDict, total=False):
     time_zone_name: str
     opening_hours: list["BusinessOpeningHoursInterval"]
 
-class StoryAreaPosition(t.TypedDict, total=False):
+class StoryAreaPosition(t.TypedDict):
     """
     ### [StoryAreaPosition](https://core.telegram.org/bots/api#storyareaposition)  
     
@@ -1569,18 +1569,18 @@ class StoryAreaPosition(t.TypedDict, total=False):
     rotation_angle: float
     corner_radius_percentage: float
 
-class LocationAddress(t.TypedDict, total=False):
+class LocationAddress(t.TypedDict):
     """
     ### [LocationAddress](https://core.telegram.org/bots/api#locationaddress)  
     
     Describes the physical address of a location.
     """
     country_code: str
-    state: str
-    city: str
-    street: str
+    state: t.NotRequired[str]
+    city: t.NotRequired[str]
+    street: t.NotRequired[str]
 
-class StoryAreaTypeLocation(t.TypedDict, total=False):
+class StoryAreaTypeLocation(t.TypedDict):
     """
     ### [StoryAreaTypeLocation](https://core.telegram.org/bots/api#storyareatypelocation)  
     
@@ -1589,9 +1589,9 @@ class StoryAreaTypeLocation(t.TypedDict, total=False):
     type: t.Literal["location"]
     latitude: float
     longitude: float
-    address: "LocationAddress"
+    address: t.NotRequired["LocationAddress"]
 
-class StoryAreaTypeSuggestedReaction(t.TypedDict, total=False):
+class StoryAreaTypeSuggestedReaction(t.TypedDict):
     """
     ### [StoryAreaTypeSuggestedReaction](https://core.telegram.org/bots/api#storyareatypesuggestedreaction)  
     
@@ -1599,10 +1599,10 @@ class StoryAreaTypeSuggestedReaction(t.TypedDict, total=False):
     """
     type: t.Literal["suggested_reaction"]
     reaction_type: "ReactionType"
-    is_dark: bool
-    is_flipped: bool
+    is_dark: t.NotRequired[bool]
+    is_flipped: t.NotRequired[bool]
 
-class StoryAreaTypeLink(t.TypedDict, total=False):
+class StoryAreaTypeLink(t.TypedDict):
     """
     ### [StoryAreaTypeLink](https://core.telegram.org/bots/api#storyareatypelink)  
     
@@ -1611,7 +1611,7 @@ class StoryAreaTypeLink(t.TypedDict, total=False):
     type: t.Literal["link"]
     url: str
 
-class StoryAreaTypeWeather(t.TypedDict, total=False):
+class StoryAreaTypeWeather(t.TypedDict):
     """
     ### [StoryAreaTypeWeather](https://core.telegram.org/bots/api#storyareatypeweather)  
     
@@ -1622,7 +1622,7 @@ class StoryAreaTypeWeather(t.TypedDict, total=False):
     emoji: str
     background_color: int
 
-class StoryAreaTypeUniqueGift(t.TypedDict, total=False):
+class StoryAreaTypeUniqueGift(t.TypedDict):
     """
     ### [StoryAreaTypeUniqueGift](https://core.telegram.org/bots/api#storyareatypeuniquegift)  
     
@@ -1631,7 +1631,7 @@ class StoryAreaTypeUniqueGift(t.TypedDict, total=False):
     type: t.Literal["unique_gift"]
     name: str
 
-class StoryArea(t.TypedDict, total=False):
+class StoryArea(t.TypedDict):
     """
     ### [StoryArea](https://core.telegram.org/bots/api#storyarea)  
     
@@ -1640,7 +1640,7 @@ class StoryArea(t.TypedDict, total=False):
     position: "StoryAreaPosition"
     type: "StoryAreaType"
 
-class ChatLocation(t.TypedDict, total=False):
+class ChatLocation(t.TypedDict):
     """
     ### [ChatLocation](https://core.telegram.org/bots/api#chatlocation)  
     
@@ -1649,7 +1649,7 @@ class ChatLocation(t.TypedDict, total=False):
     location: "Location"
     address: str
 
-class ReactionTypeEmoji(t.TypedDict, total=False):
+class ReactionTypeEmoji(t.TypedDict):
     """
     ### [ReactionTypeEmoji](https://core.telegram.org/bots/api#reactiontypeemoji)  
     
@@ -1658,7 +1658,7 @@ class ReactionTypeEmoji(t.TypedDict, total=False):
     type: t.Literal["emoji"]
     emoji: literals.ReactionEmoji
 
-class ReactionTypeCustomEmoji(t.TypedDict, total=False):
+class ReactionTypeCustomEmoji(t.TypedDict):
     """
     ### [ReactionTypeCustomEmoji](https://core.telegram.org/bots/api#reactiontypecustomemoji)  
     
@@ -1667,7 +1667,7 @@ class ReactionTypeCustomEmoji(t.TypedDict, total=False):
     type: t.Literal["custom_emoji"]
     custom_emoji_id: str
 
-class ReactionTypePaid(t.TypedDict, total=False):
+class ReactionTypePaid(t.TypedDict):
     """
     ### [ReactionTypePaid](https://core.telegram.org/bots/api#reactiontypepaid)  
     
@@ -1675,7 +1675,7 @@ class ReactionTypePaid(t.TypedDict, total=False):
     """
     type: t.Literal["paid"]
 
-class ReactionCount(t.TypedDict, total=False):
+class ReactionCount(t.TypedDict):
     """
     ### [ReactionCount](https://core.telegram.org/bots/api#reactioncount)  
     
@@ -1684,7 +1684,7 @@ class ReactionCount(t.TypedDict, total=False):
     type: "ReactionType"
     total_count: int
 
-class MessageReactionUpdated(t.TypedDict, total=False):
+class MessageReactionUpdated(t.TypedDict):
     """
     ### [MessageReactionUpdated](https://core.telegram.org/bots/api#messagereactionupdated)  
     
@@ -1695,10 +1695,10 @@ class MessageReactionUpdated(t.TypedDict, total=False):
     date: int
     old_reaction: list["ReactionType"]
     new_reaction: list["ReactionType"]
-    user: "User"
-    actor_chat: "Chat"
+    user: t.NotRequired["User"]
+    actor_chat: t.NotRequired["Chat"]
 
-class MessageReactionCountUpdated(t.TypedDict, total=False):
+class MessageReactionCountUpdated(t.TypedDict):
     """
     ### [MessageReactionCountUpdated](https://core.telegram.org/bots/api#messagereactioncountupdated)  
     
@@ -1709,7 +1709,7 @@ class MessageReactionCountUpdated(t.TypedDict, total=False):
     date: int
     reactions: list["ReactionCount"]
 
-class ForumTopic(t.TypedDict, total=False):
+class ForumTopic(t.TypedDict):
     """
     ### [ForumTopic](https://core.telegram.org/bots/api#forumtopic)  
     
@@ -1718,9 +1718,9 @@ class ForumTopic(t.TypedDict, total=False):
     message_thread_id: int
     name: str
     icon_color: int
-    icon_custom_emoji_id: str
+    icon_custom_emoji_id: t.NotRequired[str]
 
-class Gift(t.TypedDict, total=False):
+class Gift(t.TypedDict):
     """
     ### [Gift](https://core.telegram.org/bots/api#gift)  
     
@@ -1729,12 +1729,12 @@ class Gift(t.TypedDict, total=False):
     id: str
     sticker: "Sticker"
     star_count: int
-    upgrade_star_count: int
-    total_count: int
-    remaining_count: int
-    publisher_chat: "Chat"
+    upgrade_star_count: t.NotRequired[int]
+    total_count: t.NotRequired[int]
+    remaining_count: t.NotRequired[int]
+    publisher_chat: t.NotRequired["Chat"]
 
-class Gifts(t.TypedDict, total=False):
+class Gifts(t.TypedDict):
     """
     ### [Gifts](https://core.telegram.org/bots/api#gifts)  
     
@@ -1742,7 +1742,7 @@ class Gifts(t.TypedDict, total=False):
     """
     gifts: list["Gift"]
 
-class UniqueGiftModel(t.TypedDict, total=False):
+class UniqueGiftModel(t.TypedDict):
     """
     ### [UniqueGiftModel](https://core.telegram.org/bots/api#uniquegiftmodel)  
     
@@ -1752,7 +1752,7 @@ class UniqueGiftModel(t.TypedDict, total=False):
     sticker: "Sticker"
     rarity_per_mille: int
 
-class UniqueGiftSymbol(t.TypedDict, total=False):
+class UniqueGiftSymbol(t.TypedDict):
     """
     ### [UniqueGiftSymbol](https://core.telegram.org/bots/api#uniquegiftsymbol)  
     
@@ -1762,7 +1762,7 @@ class UniqueGiftSymbol(t.TypedDict, total=False):
     sticker: "Sticker"
     rarity_per_mille: int
 
-class UniqueGiftBackdropColors(t.TypedDict, total=False):
+class UniqueGiftBackdropColors(t.TypedDict):
     """
     ### [UniqueGiftBackdropColors](https://core.telegram.org/bots/api#uniquegiftbackdropcolors)  
     
@@ -1773,7 +1773,7 @@ class UniqueGiftBackdropColors(t.TypedDict, total=False):
     symbol_color: int
     text_color: int
 
-class UniqueGiftBackdrop(t.TypedDict, total=False):
+class UniqueGiftBackdrop(t.TypedDict):
     """
     ### [UniqueGiftBackdrop](https://core.telegram.org/bots/api#uniquegiftbackdrop)  
     
@@ -1783,7 +1783,7 @@ class UniqueGiftBackdrop(t.TypedDict, total=False):
     colors: "UniqueGiftBackdropColors"
     rarity_per_mille: int
 
-class UniqueGift(t.TypedDict, total=False):
+class UniqueGift(t.TypedDict):
     """
     ### [UniqueGift](https://core.telegram.org/bots/api#uniquegift)  
     
@@ -1795,24 +1795,24 @@ class UniqueGift(t.TypedDict, total=False):
     model: "UniqueGiftModel"
     symbol: "UniqueGiftSymbol"
     backdrop: "UniqueGiftBackdrop"
-    publisher_chat: "Chat"
+    publisher_chat: t.NotRequired["Chat"]
 
-class GiftInfo(t.TypedDict, total=False):
+class GiftInfo(t.TypedDict):
     """
     ### [GiftInfo](https://core.telegram.org/bots/api#giftinfo)  
     
     Describes a service message about a regular gift that was sent or received.
     """
     gift: "Gift"
-    owned_gift_id: str
-    convert_star_count: int
-    prepaid_upgrade_star_count: int
-    can_be_upgraded: t.Literal[True]
-    text: str
-    entities: list["MessageEntity"]
-    is_private: t.Literal[True]
+    owned_gift_id: t.NotRequired[str]
+    convert_star_count: t.NotRequired[int]
+    prepaid_upgrade_star_count: t.NotRequired[int]
+    can_be_upgraded: t.NotRequired[t.Literal[True]]
+    text: t.NotRequired[str]
+    entities: t.NotRequired[list["MessageEntity"]]
+    is_private: t.NotRequired[t.Literal[True]]
 
-class UniqueGiftInfo(t.TypedDict, total=False):
+class UniqueGiftInfo(t.TypedDict):
     """
     ### [UniqueGiftInfo](https://core.telegram.org/bots/api#uniquegiftinfo)  
     
@@ -1820,12 +1820,12 @@ class UniqueGiftInfo(t.TypedDict, total=False):
     """
     gift: "UniqueGift"
     origin: str
-    last_resale_star_count: int
-    owned_gift_id: str
-    transfer_star_count: int
-    next_transfer_date: int
+    last_resale_star_count: t.NotRequired[int]
+    owned_gift_id: t.NotRequired[str]
+    transfer_star_count: t.NotRequired[int]
+    next_transfer_date: t.NotRequired[int]
 
-class OwnedGiftRegular(t.TypedDict, total=False):
+class OwnedGiftRegular(t.TypedDict):
     """
     ### [OwnedGiftRegular](https://core.telegram.org/bots/api#ownedgiftregular)  
     
@@ -1834,18 +1834,18 @@ class OwnedGiftRegular(t.TypedDict, total=False):
     type: t.Literal["regular"]
     gift: "Gift"
     send_date: int
-    owned_gift_id: str
-    sender_user: "User"
-    text: str
-    entities: list["MessageEntity"]
-    is_private: t.Literal[True]
-    is_saved: t.Literal[True]
-    can_be_upgraded: t.Literal[True]
-    was_refunded: t.Literal[True]
-    convert_star_count: int
-    prepaid_upgrade_star_count: int
+    owned_gift_id: t.NotRequired[str]
+    sender_user: t.NotRequired["User"]
+    text: t.NotRequired[str]
+    entities: t.NotRequired[list["MessageEntity"]]
+    is_private: t.NotRequired[t.Literal[True]]
+    is_saved: t.NotRequired[t.Literal[True]]
+    can_be_upgraded: t.NotRequired[t.Literal[True]]
+    was_refunded: t.NotRequired[t.Literal[True]]
+    convert_star_count: t.NotRequired[int]
+    prepaid_upgrade_star_count: t.NotRequired[int]
 
-class OwnedGiftUnique(t.TypedDict, total=False):
+class OwnedGiftUnique(t.TypedDict):
     """
     ### [OwnedGiftUnique](https://core.telegram.org/bots/api#ownedgiftunique)  
     
@@ -1854,14 +1854,14 @@ class OwnedGiftUnique(t.TypedDict, total=False):
     type: t.Literal["unique"]
     gift: "UniqueGift"
     send_date: int
-    owned_gift_id: str
-    sender_user: "User"
-    is_saved: t.Literal[True]
-    can_be_transferred: t.Literal[True]
-    transfer_star_count: int
-    next_transfer_date: int
+    owned_gift_id: t.NotRequired[str]
+    sender_user: t.NotRequired["User"]
+    is_saved: t.NotRequired[t.Literal[True]]
+    can_be_transferred: t.NotRequired[t.Literal[True]]
+    transfer_star_count: t.NotRequired[int]
+    next_transfer_date: t.NotRequired[int]
 
-class OwnedGifts(t.TypedDict, total=False):
+class OwnedGifts(t.TypedDict):
     """
     ### [OwnedGifts](https://core.telegram.org/bots/api#ownedgifts)  
     
@@ -1869,9 +1869,9 @@ class OwnedGifts(t.TypedDict, total=False):
     """
     total_count: int
     gifts: list["OwnedGift"]
-    next_offset: str
+    next_offset: t.NotRequired[str]
 
-class AcceptedGiftTypes(t.TypedDict, total=False):
+class AcceptedGiftTypes(t.TypedDict):
     """
     ### [AcceptedGiftTypes](https://core.telegram.org/bots/api#acceptedgifttypes)  
     
@@ -1882,16 +1882,16 @@ class AcceptedGiftTypes(t.TypedDict, total=False):
     unique_gifts: bool
     premium_subscription: bool
 
-class StarAmount(t.TypedDict, total=False):
+class StarAmount(t.TypedDict):
     """
     ### [StarAmount](https://core.telegram.org/bots/api#staramount)  
     
     Describes an amount of Telegram Stars.
     """
     amount: int
-    nanostar_amount: int
+    nanostar_amount: t.NotRequired[int]
 
-class BotCommand(t.TypedDict, total=False):
+class BotCommand(t.TypedDict):
     """
     ### [BotCommand](https://core.telegram.org/bots/api#botcommand)  
     
@@ -1900,7 +1900,7 @@ class BotCommand(t.TypedDict, total=False):
     command: str
     description: str
 
-class BotCommandScopeDefault(t.TypedDict, total=False):
+class BotCommandScopeDefault(t.TypedDict):
     """
     ### [BotCommandScopeDefault](https://core.telegram.org/bots/api#botcommandscopedefault)  
     
@@ -1908,7 +1908,7 @@ class BotCommandScopeDefault(t.TypedDict, total=False):
     """
     type: t.Literal["default"]
 
-class BotCommandScopeAllPrivateChats(t.TypedDict, total=False):
+class BotCommandScopeAllPrivateChats(t.TypedDict):
     """
     ### [BotCommandScopeAllPrivateChats](https://core.telegram.org/bots/api#botcommandscopeallprivatechats)  
     
@@ -1916,7 +1916,7 @@ class BotCommandScopeAllPrivateChats(t.TypedDict, total=False):
     """
     type: t.Literal["all_private_chats"]
 
-class BotCommandScopeAllGroupChats(t.TypedDict, total=False):
+class BotCommandScopeAllGroupChats(t.TypedDict):
     """
     ### [BotCommandScopeAllGroupChats](https://core.telegram.org/bots/api#botcommandscopeallgroupchats)  
     
@@ -1924,7 +1924,7 @@ class BotCommandScopeAllGroupChats(t.TypedDict, total=False):
     """
     type: t.Literal["all_group_chats"]
 
-class BotCommandScopeAllChatAdministrators(t.TypedDict, total=False):
+class BotCommandScopeAllChatAdministrators(t.TypedDict):
     """
     ### [BotCommandScopeAllChatAdministrators](https://core.telegram.org/bots/api#botcommandscopeallchatadministrators)  
     
@@ -1932,7 +1932,7 @@ class BotCommandScopeAllChatAdministrators(t.TypedDict, total=False):
     """
     type: t.Literal["all_chat_administrators"]
 
-class BotCommandScopeChat(t.TypedDict, total=False):
+class BotCommandScopeChat(t.TypedDict):
     """
     ### [BotCommandScopeChat](https://core.telegram.org/bots/api#botcommandscopechat)  
     
@@ -1941,7 +1941,7 @@ class BotCommandScopeChat(t.TypedDict, total=False):
     type: t.Literal["chat"]
     chat_id: int | str
 
-class BotCommandScopeChatAdministrators(t.TypedDict, total=False):
+class BotCommandScopeChatAdministrators(t.TypedDict):
     """
     ### [BotCommandScopeChatAdministrators](https://core.telegram.org/bots/api#botcommandscopechatadministrators)  
     
@@ -1950,7 +1950,7 @@ class BotCommandScopeChatAdministrators(t.TypedDict, total=False):
     type: t.Literal["chat_administrators"]
     chat_id: int | str
 
-class BotCommandScopeChatMember(t.TypedDict, total=False):
+class BotCommandScopeChatMember(t.TypedDict):
     """
     ### [BotCommandScopeChatMember](https://core.telegram.org/bots/api#botcommandscopechatmember)  
     
@@ -1960,7 +1960,7 @@ class BotCommandScopeChatMember(t.TypedDict, total=False):
     chat_id: int | str
     user_id: int
 
-class BotName(t.TypedDict, total=False):
+class BotName(t.TypedDict):
     """
     ### [BotName](https://core.telegram.org/bots/api#botname)  
     
@@ -1968,7 +1968,7 @@ class BotName(t.TypedDict, total=False):
     """
     name: str
 
-class BotDescription(t.TypedDict, total=False):
+class BotDescription(t.TypedDict):
     """
     ### [BotDescription](https://core.telegram.org/bots/api#botdescription)  
     
@@ -1976,7 +1976,7 @@ class BotDescription(t.TypedDict, total=False):
     """
     description: str
 
-class BotShortDescription(t.TypedDict, total=False):
+class BotShortDescription(t.TypedDict):
     """
     ### [BotShortDescription](https://core.telegram.org/bots/api#botshortdescription)  
     
@@ -1984,7 +1984,7 @@ class BotShortDescription(t.TypedDict, total=False):
     """
     short_description: str
 
-class MenuButtonCommands(t.TypedDict, total=False):
+class MenuButtonCommands(t.TypedDict):
     """
     ### [MenuButtonCommands](https://core.telegram.org/bots/api#menubuttoncommands)  
     
@@ -1992,7 +1992,7 @@ class MenuButtonCommands(t.TypedDict, total=False):
     """
     type: t.Literal["commands"]
 
-class MenuButtonWebApp(t.TypedDict, total=False):
+class MenuButtonWebApp(t.TypedDict):
     """
     ### [MenuButtonWebApp](https://core.telegram.org/bots/api#menubuttonwebapp)  
     
@@ -2002,7 +2002,7 @@ class MenuButtonWebApp(t.TypedDict, total=False):
     text: str
     web_app: "WebAppInfo"
 
-class MenuButtonDefault(t.TypedDict, total=False):
+class MenuButtonDefault(t.TypedDict):
     """
     ### [MenuButtonDefault](https://core.telegram.org/bots/api#menubuttondefault)  
     
@@ -2010,7 +2010,7 @@ class MenuButtonDefault(t.TypedDict, total=False):
     """
     type: t.Literal["default"]
 
-class ChatBoostSourcePremium(t.TypedDict, total=False):
+class ChatBoostSourcePremium(t.TypedDict):
     """
     ### [ChatBoostSourcePremium](https://core.telegram.org/bots/api#chatboostsourcepremium)  
     
@@ -2019,7 +2019,7 @@ class ChatBoostSourcePremium(t.TypedDict, total=False):
     source: t.Literal["premium"]
     user: "User"
 
-class ChatBoostSourceGiftCode(t.TypedDict, total=False):
+class ChatBoostSourceGiftCode(t.TypedDict):
     """
     ### [ChatBoostSourceGiftCode](https://core.telegram.org/bots/api#chatboostsourcegiftcode)  
     
@@ -2028,7 +2028,7 @@ class ChatBoostSourceGiftCode(t.TypedDict, total=False):
     source: t.Literal["gift_code"]
     user: "User"
 
-class ChatBoostSourceGiveaway(t.TypedDict, total=False):
+class ChatBoostSourceGiveaway(t.TypedDict):
     """
     ### [ChatBoostSourceGiveaway](https://core.telegram.org/bots/api#chatboostsourcegiveaway)  
     
@@ -2036,11 +2036,11 @@ class ChatBoostSourceGiveaway(t.TypedDict, total=False):
     """
     source: t.Literal["giveaway"]
     giveaway_message_id: int
-    user: "User"
-    prize_star_count: int
-    is_unclaimed: t.Literal[True]
+    user: t.NotRequired["User"]
+    prize_star_count: t.NotRequired[int]
+    is_unclaimed: t.NotRequired[t.Literal[True]]
 
-class ChatBoost(t.TypedDict, total=False):
+class ChatBoost(t.TypedDict):
     """
     ### [ChatBoost](https://core.telegram.org/bots/api#chatboost)  
     
@@ -2051,7 +2051,7 @@ class ChatBoost(t.TypedDict, total=False):
     expiration_date: int
     source: "ChatBoostSource"
 
-class ChatBoostUpdated(t.TypedDict, total=False):
+class ChatBoostUpdated(t.TypedDict):
     """
     ### [ChatBoostUpdated](https://core.telegram.org/bots/api#chatboostupdated)  
     
@@ -2060,7 +2060,7 @@ class ChatBoostUpdated(t.TypedDict, total=False):
     chat: "Chat"
     boost: "ChatBoost"
 
-class ChatBoostRemoved(t.TypedDict, total=False):
+class ChatBoostRemoved(t.TypedDict):
     """
     ### [ChatBoostRemoved](https://core.telegram.org/bots/api#chatboostremoved)  
     
@@ -2071,7 +2071,7 @@ class ChatBoostRemoved(t.TypedDict, total=False):
     remove_date: int
     source: "ChatBoostSource"
 
-class UserChatBoosts(t.TypedDict, total=False):
+class UserChatBoosts(t.TypedDict):
     """
     ### [UserChatBoosts](https://core.telegram.org/bots/api#userchatboosts)  
     
@@ -2079,28 +2079,28 @@ class UserChatBoosts(t.TypedDict, total=False):
     """
     boosts: list["ChatBoost"]
 
-class BusinessBotRights(t.TypedDict, total=False):
+class BusinessBotRights(t.TypedDict):
     """
     ### [BusinessBotRights](https://core.telegram.org/bots/api#businessbotrights)  
     
     Represents the rights of a business bot.
     """
-    can_reply: t.Literal[True]
-    can_read_messages: t.Literal[True]
-    can_delete_sent_messages: t.Literal[True]
-    can_delete_all_messages: t.Literal[True]
-    can_edit_name: t.Literal[True]
-    can_edit_bio: t.Literal[True]
-    can_edit_profile_photo: t.Literal[True]
-    can_edit_username: t.Literal[True]
-    can_change_gift_settings: t.Literal[True]
-    can_view_gifts_and_stars: t.Literal[True]
-    can_convert_gifts_to_stars: t.Literal[True]
-    can_transfer_and_upgrade_gifts: t.Literal[True]
-    can_transfer_stars: t.Literal[True]
-    can_manage_stories: t.Literal[True]
+    can_reply: t.NotRequired[t.Literal[True]]
+    can_read_messages: t.NotRequired[t.Literal[True]]
+    can_delete_sent_messages: t.NotRequired[t.Literal[True]]
+    can_delete_all_messages: t.NotRequired[t.Literal[True]]
+    can_edit_name: t.NotRequired[t.Literal[True]]
+    can_edit_bio: t.NotRequired[t.Literal[True]]
+    can_edit_profile_photo: t.NotRequired[t.Literal[True]]
+    can_edit_username: t.NotRequired[t.Literal[True]]
+    can_change_gift_settings: t.NotRequired[t.Literal[True]]
+    can_view_gifts_and_stars: t.NotRequired[t.Literal[True]]
+    can_convert_gifts_to_stars: t.NotRequired[t.Literal[True]]
+    can_transfer_and_upgrade_gifts: t.NotRequired[t.Literal[True]]
+    can_transfer_stars: t.NotRequired[t.Literal[True]]
+    can_manage_stories: t.NotRequired[t.Literal[True]]
 
-class BusinessConnection(t.TypedDict, total=False):
+class BusinessConnection(t.TypedDict):
     """
     ### [BusinessConnection](https://core.telegram.org/bots/api#businessconnection)  
     
@@ -2111,9 +2111,9 @@ class BusinessConnection(t.TypedDict, total=False):
     user_chat_id: int
     date: int
     is_enabled: bool
-    rights: "BusinessBotRights"
+    rights: t.NotRequired["BusinessBotRights"]
 
-class BusinessMessagesDeleted(t.TypedDict, total=False):
+class BusinessMessagesDeleted(t.TypedDict):
     """
     ### [BusinessMessagesDeleted](https://core.telegram.org/bots/api#businessmessagesdeleted)  
     
@@ -2123,16 +2123,16 @@ class BusinessMessagesDeleted(t.TypedDict, total=False):
     chat: "Chat"
     message_ids: list[int]
 
-class ResponseParameters(t.TypedDict, total=False):
+class ResponseParameters(t.TypedDict):
     """
     ### [ResponseParameters](https://core.telegram.org/bots/api#responseparameters)  
     
     Describes why a request was unsuccessful.
     """
-    migrate_to_chat_id: int
-    retry_after: int
+    migrate_to_chat_id: t.NotRequired[int]
+    retry_after: t.NotRequired[int]
 
-class InputMediaPhoto(t.TypedDict, total=False):
+class InputMediaPhoto(t.TypedDict):
     """
     ### [InputMediaPhoto](https://core.telegram.org/bots/api#inputmediaphoto)  
     
@@ -2140,13 +2140,13 @@ class InputMediaPhoto(t.TypedDict, total=False):
     """
     type: t.Literal["photo"]
     media: str | Path | bytes | InputFile
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    has_spoiler: bool
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    has_spoiler: t.NotRequired[bool]
 
-class InputMediaVideo(t.TypedDict, total=False):
+class InputMediaVideo(t.TypedDict):
     """
     ### [InputMediaVideo](https://core.telegram.org/bots/api#inputmediavideo)  
     
@@ -2154,20 +2154,20 @@ class InputMediaVideo(t.TypedDict, total=False):
     """
     type: t.Literal["video"]
     media: str | Path | bytes | InputFile
-    thumbnail: str | Path | bytes | InputFile
-    cover: str | Path | bytes | InputFile
-    start_timestamp: int
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    width: int
-    height: int
-    duration: int
-    supports_streaming: bool
-    has_spoiler: bool
+    thumbnail: t.NotRequired[str | Path | bytes | InputFile]
+    cover: t.NotRequired[str | Path | bytes | InputFile]
+    start_timestamp: t.NotRequired[int]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    width: t.NotRequired[int]
+    height: t.NotRequired[int]
+    duration: t.NotRequired[int]
+    supports_streaming: t.NotRequired[bool]
+    has_spoiler: t.NotRequired[bool]
 
-class InputMediaAnimation(t.TypedDict, total=False):
+class InputMediaAnimation(t.TypedDict):
     """
     ### [InputMediaAnimation](https://core.telegram.org/bots/api#inputmediaanimation)  
     
@@ -2175,17 +2175,17 @@ class InputMediaAnimation(t.TypedDict, total=False):
     """
     type: t.Literal["animation"]
     media: str | Path | bytes | InputFile
-    thumbnail: str | Path | bytes | InputFile
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    width: int
-    height: int
-    duration: int
-    has_spoiler: bool
+    thumbnail: t.NotRequired[str | Path | bytes | InputFile]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    width: t.NotRequired[int]
+    height: t.NotRequired[int]
+    duration: t.NotRequired[int]
+    has_spoiler: t.NotRequired[bool]
 
-class InputMediaAudio(t.TypedDict, total=False):
+class InputMediaAudio(t.TypedDict):
     """
     ### [InputMediaAudio](https://core.telegram.org/bots/api#inputmediaaudio)  
     
@@ -2193,15 +2193,15 @@ class InputMediaAudio(t.TypedDict, total=False):
     """
     type: t.Literal["audio"]
     media: str | Path | bytes | InputFile
-    thumbnail: str | Path | bytes | InputFile
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    duration: int
-    performer: str
-    title: str
+    thumbnail: t.NotRequired[str | Path | bytes | InputFile]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    duration: t.NotRequired[int]
+    performer: t.NotRequired[str]
+    title: t.NotRequired[str]
 
-class InputMediaDocument(t.TypedDict, total=False):
+class InputMediaDocument(t.TypedDict):
     """
     ### [InputMediaDocument](https://core.telegram.org/bots/api#inputmediadocument)  
     
@@ -2209,13 +2209,13 @@ class InputMediaDocument(t.TypedDict, total=False):
     """
     type: t.Literal["document"]
     media: str | Path | bytes | InputFile
-    thumbnail: str | Path | bytes | InputFile
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    disable_content_type_detection: bool
+    thumbnail: t.NotRequired[str | Path | bytes | InputFile]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    disable_content_type_detection: t.NotRequired[bool]
 
-class InputPaidMediaPhoto(t.TypedDict, total=False):
+class InputPaidMediaPhoto(t.TypedDict):
     """
     ### [InputPaidMediaPhoto](https://core.telegram.org/bots/api#inputpaidmediaphoto)  
     
@@ -2224,7 +2224,7 @@ class InputPaidMediaPhoto(t.TypedDict, total=False):
     type: t.Literal["photo"]
     media: str | Path | bytes | InputFile
 
-class InputPaidMediaVideo(t.TypedDict, total=False):
+class InputPaidMediaVideo(t.TypedDict):
     """
     ### [InputPaidMediaVideo](https://core.telegram.org/bots/api#inputpaidmediavideo)  
     
@@ -2232,15 +2232,15 @@ class InputPaidMediaVideo(t.TypedDict, total=False):
     """
     type: t.Literal["video"]
     media: str | Path | bytes | InputFile
-    thumbnail: str | Path | bytes | InputFile
-    cover: str | Path | bytes | InputFile
-    start_timestamp: int
-    width: int
-    height: int
-    duration: int
-    supports_streaming: bool
+    thumbnail: t.NotRequired[str | Path | bytes | InputFile]
+    cover: t.NotRequired[str | Path | bytes | InputFile]
+    start_timestamp: t.NotRequired[int]
+    width: t.NotRequired[int]
+    height: t.NotRequired[int]
+    duration: t.NotRequired[int]
+    supports_streaming: t.NotRequired[bool]
 
-class InputProfilePhotoStatic(t.TypedDict, total=False):
+class InputProfilePhotoStatic(t.TypedDict):
     """
     ### [InputProfilePhotoStatic](https://core.telegram.org/bots/api#inputprofilephotostatic)  
     
@@ -2249,7 +2249,7 @@ class InputProfilePhotoStatic(t.TypedDict, total=False):
     type: t.Literal["static"]
     photo: str | Path | bytes | InputFile
 
-class InputProfilePhotoAnimated(t.TypedDict, total=False):
+class InputProfilePhotoAnimated(t.TypedDict):
     """
     ### [InputProfilePhotoAnimated](https://core.telegram.org/bots/api#inputprofilephotoanimated)  
     
@@ -2257,9 +2257,9 @@ class InputProfilePhotoAnimated(t.TypedDict, total=False):
     """
     type: t.Literal["animated"]
     animation: str | Path | bytes | InputFile
-    main_frame_timestamp: float
+    main_frame_timestamp: t.NotRequired[float]
 
-class InputStoryContentPhoto(t.TypedDict, total=False):
+class InputStoryContentPhoto(t.TypedDict):
     """
     ### [InputStoryContentPhoto](https://core.telegram.org/bots/api#inputstorycontentphoto)  
     
@@ -2268,7 +2268,7 @@ class InputStoryContentPhoto(t.TypedDict, total=False):
     type: t.Literal["photo"]
     photo: str | Path | bytes | InputFile
 
-class InputStoryContentVideo(t.TypedDict, total=False):
+class InputStoryContentVideo(t.TypedDict):
     """
     ### [InputStoryContentVideo](https://core.telegram.org/bots/api#inputstorycontentvideo)  
     
@@ -2276,11 +2276,11 @@ class InputStoryContentVideo(t.TypedDict, total=False):
     """
     type: t.Literal["video"]
     video: str | Path | bytes | InputFile
-    duration: float
-    cover_frame_timestamp: float
-    is_animation: bool
+    duration: t.NotRequired[float]
+    cover_frame_timestamp: t.NotRequired[float]
+    is_animation: t.NotRequired[bool]
 
-class Sticker(t.TypedDict, total=False):
+class Sticker(t.TypedDict):
     """
     ### [Sticker](https://core.telegram.org/bots/api#sticker)  
     
@@ -2293,16 +2293,16 @@ class Sticker(t.TypedDict, total=False):
     height: int
     is_animated: bool
     is_video: bool
-    thumbnail: "PhotoSize"
-    emoji: str
-    set_name: str
-    premium_animation: "File"
-    mask_position: "MaskPosition"
-    custom_emoji_id: str
-    needs_repainting: t.Literal[True]
-    file_size: int
+    thumbnail: t.NotRequired["PhotoSize"]
+    emoji: t.NotRequired[str]
+    set_name: t.NotRequired[str]
+    premium_animation: t.NotRequired["File"]
+    mask_position: t.NotRequired["MaskPosition"]
+    custom_emoji_id: t.NotRequired[str]
+    needs_repainting: t.NotRequired[t.Literal[True]]
+    file_size: t.NotRequired[int]
 
-class StickerSet(t.TypedDict, total=False):
+class StickerSet(t.TypedDict):
     """
     ### [StickerSet](https://core.telegram.org/bots/api#stickerset)  
     
@@ -2312,9 +2312,9 @@ class StickerSet(t.TypedDict, total=False):
     title: str
     sticker_type: str
     stickers: list["Sticker"]
-    thumbnail: "PhotoSize"
+    thumbnail: t.NotRequired["PhotoSize"]
 
-class MaskPosition(t.TypedDict, total=False):
+class MaskPosition(t.TypedDict):
     """
     ### [MaskPosition](https://core.telegram.org/bots/api#maskposition)  
     
@@ -2325,7 +2325,7 @@ class MaskPosition(t.TypedDict, total=False):
     y_shift: float
     scale: float
 
-class InputSticker(t.TypedDict, total=False):
+class InputSticker(t.TypedDict):
     """
     ### [InputSticker](https://core.telegram.org/bots/api#inputsticker)  
     
@@ -2334,10 +2334,10 @@ class InputSticker(t.TypedDict, total=False):
     sticker: str | Path | bytes | InputFile
     format: str
     emoji_list: list[str]
-    mask_position: "MaskPosition"
-    keywords: list[str]
+    mask_position: t.NotRequired["MaskPosition"]
+    keywords: t.NotRequired[list[str]]
 
-class InlineQuery(t.TypedDict("InlineQuery", {"from": "User"}), total=False):
+class InlineQuery(t.TypedDict("InlineQuery", {"from": "User"})):
     """
     ### [InlineQuery](https://core.telegram.org/bots/api#inlinequery)  
     
@@ -2346,20 +2346,20 @@ class InlineQuery(t.TypedDict("InlineQuery", {"from": "User"}), total=False):
     id: str
     query: str
     offset: str
-    chat_type: str
-    location: "Location"
+    chat_type: t.NotRequired[str]
+    location: t.NotRequired["Location"]
 
-class InlineQueryResultsButton(t.TypedDict, total=False):
+class InlineQueryResultsButton(t.TypedDict):
     """
     ### [InlineQueryResultsButton](https://core.telegram.org/bots/api#inlinequeryresultsbutton)  
     
     This object represents a button to be shown above inline query results. You **must** use exactly one of the optional fields.
     """
     text: str
-    web_app: "WebAppInfo"
-    start_parameter: str
+    web_app: t.NotRequired["WebAppInfo"]
+    start_parameter: t.NotRequired[str]
 
-class InlineQueryResultArticle(t.TypedDict, total=False):
+class InlineQueryResultArticle(t.TypedDict):
     """
     ### [InlineQueryResultArticle](https://core.telegram.org/bots/api#inlinequeryresultarticle)  
     
@@ -2369,14 +2369,14 @@ class InlineQueryResultArticle(t.TypedDict, total=False):
     id: str
     title: str
     input_message_content: "InputMessageContent"
-    reply_markup: "InlineKeyboardMarkup"
-    url: str
-    description: str
-    thumbnail_url: str
-    thumbnail_width: int
-    thumbnail_height: int
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    url: t.NotRequired[str]
+    description: t.NotRequired[str]
+    thumbnail_url: t.NotRequired[str]
+    thumbnail_width: t.NotRequired[int]
+    thumbnail_height: t.NotRequired[int]
 
-class InlineQueryResultPhoto(t.TypedDict, total=False):
+class InlineQueryResultPhoto(t.TypedDict):
     """
     ### [InlineQueryResultPhoto](https://core.telegram.org/bots/api#inlinequeryresultphoto)  
     
@@ -2386,18 +2386,18 @@ class InlineQueryResultPhoto(t.TypedDict, total=False):
     id: str
     photo_url: str
     thumbnail_url: str
-    photo_width: int
-    photo_height: int
-    title: str
-    description: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    photo_width: t.NotRequired[int]
+    photo_height: t.NotRequired[int]
+    title: t.NotRequired[str]
+    description: t.NotRequired[str]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultGif(t.TypedDict, total=False):
+class InlineQueryResultGif(t.TypedDict):
     """
     ### [InlineQueryResultGif](https://core.telegram.org/bots/api#inlinequeryresultgif)  
     
@@ -2407,19 +2407,19 @@ class InlineQueryResultGif(t.TypedDict, total=False):
     id: str
     gif_url: str
     thumbnail_url: str
-    gif_width: int
-    gif_height: int
-    gif_duration: int
-    thumbnail_mime_type: str
-    title: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    gif_width: t.NotRequired[int]
+    gif_height: t.NotRequired[int]
+    gif_duration: t.NotRequired[int]
+    thumbnail_mime_type: t.NotRequired[str]
+    title: t.NotRequired[str]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultMpeg4Gif(t.TypedDict, total=False):
+class InlineQueryResultMpeg4Gif(t.TypedDict):
     """
     ### [InlineQueryResultMpeg4Gif](https://core.telegram.org/bots/api#inlinequeryresultmpeg4gif)  
     
@@ -2429,19 +2429,19 @@ class InlineQueryResultMpeg4Gif(t.TypedDict, total=False):
     id: str
     mpeg4_url: str
     thumbnail_url: str
-    mpeg4_width: int
-    mpeg4_height: int
-    mpeg4_duration: int
-    thumbnail_mime_type: str
-    title: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    mpeg4_width: t.NotRequired[int]
+    mpeg4_height: t.NotRequired[int]
+    mpeg4_duration: t.NotRequired[int]
+    thumbnail_mime_type: t.NotRequired[str]
+    title: t.NotRequired[str]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultVideo(t.TypedDict, total=False):
+class InlineQueryResultVideo(t.TypedDict):
     """
     ### [InlineQueryResultVideo](https://core.telegram.org/bots/api#inlinequeryresultvideo)  
     
@@ -2455,18 +2455,18 @@ class InlineQueryResultVideo(t.TypedDict, total=False):
     mime_type: str
     thumbnail_url: str
     title: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    video_width: int
-    video_height: int
-    video_duration: int
-    description: str
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    video_width: t.NotRequired[int]
+    video_height: t.NotRequired[int]
+    video_duration: t.NotRequired[int]
+    description: t.NotRequired[str]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultAudio(t.TypedDict, total=False):
+class InlineQueryResultAudio(t.TypedDict):
     """
     ### [InlineQueryResultAudio](https://core.telegram.org/bots/api#inlinequeryresultaudio)  
     
@@ -2476,15 +2476,15 @@ class InlineQueryResultAudio(t.TypedDict, total=False):
     id: str
     audio_url: str
     title: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    performer: str
-    audio_duration: int
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    performer: t.NotRequired[str]
+    audio_duration: t.NotRequired[int]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultVoice(t.TypedDict, total=False):
+class InlineQueryResultVoice(t.TypedDict):
     """
     ### [InlineQueryResultVoice](https://core.telegram.org/bots/api#inlinequeryresultvoice)  
     
@@ -2494,14 +2494,14 @@ class InlineQueryResultVoice(t.TypedDict, total=False):
     id: str
     voice_url: str
     title: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    voice_duration: int
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    voice_duration: t.NotRequired[int]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultDocument(t.TypedDict, total=False):
+class InlineQueryResultDocument(t.TypedDict):
     """
     ### [InlineQueryResultDocument](https://core.telegram.org/bots/api#inlinequeryresultdocument)  
     
@@ -2512,17 +2512,17 @@ class InlineQueryResultDocument(t.TypedDict, total=False):
     title: str
     document_url: str
     mime_type: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    description: str
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
-    thumbnail_url: str
-    thumbnail_width: int
-    thumbnail_height: int
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    description: t.NotRequired[str]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
+    thumbnail_url: t.NotRequired[str]
+    thumbnail_width: t.NotRequired[int]
+    thumbnail_height: t.NotRequired[int]
 
-class InlineQueryResultLocation(t.TypedDict, total=False):
+class InlineQueryResultLocation(t.TypedDict):
     """
     ### [InlineQueryResultLocation](https://core.telegram.org/bots/api#inlinequeryresultlocation)  
     
@@ -2533,17 +2533,17 @@ class InlineQueryResultLocation(t.TypedDict, total=False):
     latitude: float
     longitude: float
     title: str
-    horizontal_accuracy: float
-    live_period: int
-    heading: int
-    proximity_alert_radius: int
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
-    thumbnail_url: str
-    thumbnail_width: int
-    thumbnail_height: int
+    horizontal_accuracy: t.NotRequired[float]
+    live_period: t.NotRequired[int]
+    heading: t.NotRequired[int]
+    proximity_alert_radius: t.NotRequired[int]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
+    thumbnail_url: t.NotRequired[str]
+    thumbnail_width: t.NotRequired[int]
+    thumbnail_height: t.NotRequired[int]
 
-class InlineQueryResultVenue(t.TypedDict, total=False):
+class InlineQueryResultVenue(t.TypedDict):
     """
     ### [InlineQueryResultVenue](https://core.telegram.org/bots/api#inlinequeryresultvenue)  
     
@@ -2555,17 +2555,17 @@ class InlineQueryResultVenue(t.TypedDict, total=False):
     longitude: float
     title: str
     address: str
-    foursquare_id: str
-    foursquare_type: str
-    google_place_id: str
-    google_place_type: str
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
-    thumbnail_url: str
-    thumbnail_width: int
-    thumbnail_height: int
+    foursquare_id: t.NotRequired[str]
+    foursquare_type: t.NotRequired[str]
+    google_place_id: t.NotRequired[str]
+    google_place_type: t.NotRequired[str]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
+    thumbnail_url: t.NotRequired[str]
+    thumbnail_width: t.NotRequired[int]
+    thumbnail_height: t.NotRequired[int]
 
-class InlineQueryResultContact(t.TypedDict, total=False):
+class InlineQueryResultContact(t.TypedDict):
     """
     ### [InlineQueryResultContact](https://core.telegram.org/bots/api#inlinequeryresultcontact)  
     
@@ -2575,15 +2575,15 @@ class InlineQueryResultContact(t.TypedDict, total=False):
     id: str
     phone_number: str
     first_name: str
-    last_name: str
-    vcard: str
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
-    thumbnail_url: str
-    thumbnail_width: int
-    thumbnail_height: int
+    last_name: t.NotRequired[str]
+    vcard: t.NotRequired[str]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
+    thumbnail_url: t.NotRequired[str]
+    thumbnail_width: t.NotRequired[int]
+    thumbnail_height: t.NotRequired[int]
 
-class InlineQueryResultGame(t.TypedDict, total=False):
+class InlineQueryResultGame(t.TypedDict):
     """
     ### [InlineQueryResultGame](https://core.telegram.org/bots/api#inlinequeryresultgame)  
     
@@ -2592,9 +2592,9 @@ class InlineQueryResultGame(t.TypedDict, total=False):
     type: t.Literal["game"]
     id: str
     game_short_name: str
-    reply_markup: "InlineKeyboardMarkup"
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
 
-class InlineQueryResultCachedPhoto(t.TypedDict, total=False):
+class InlineQueryResultCachedPhoto(t.TypedDict):
     """
     ### [InlineQueryResultCachedPhoto](https://core.telegram.org/bots/api#inlinequeryresultcachedphoto)  
     
@@ -2603,16 +2603,16 @@ class InlineQueryResultCachedPhoto(t.TypedDict, total=False):
     type: t.Literal["photo"]
     id: str
     photo_file_id: str
-    title: str
-    description: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    title: t.NotRequired[str]
+    description: t.NotRequired[str]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultCachedGif(t.TypedDict, total=False):
+class InlineQueryResultCachedGif(t.TypedDict):
     """
     ### [InlineQueryResultCachedGif](https://core.telegram.org/bots/api#inlinequeryresultcachedgif)  
     
@@ -2621,15 +2621,15 @@ class InlineQueryResultCachedGif(t.TypedDict, total=False):
     type: t.Literal["gif"]
     id: str
     gif_file_id: str
-    title: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    title: t.NotRequired[str]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultCachedMpeg4Gif(t.TypedDict, total=False):
+class InlineQueryResultCachedMpeg4Gif(t.TypedDict):
     """
     ### [InlineQueryResultCachedMpeg4Gif](https://core.telegram.org/bots/api#inlinequeryresultcachedmpeg4gif)  
     
@@ -2638,15 +2638,15 @@ class InlineQueryResultCachedMpeg4Gif(t.TypedDict, total=False):
     type: t.Literal["mpeg4_gif"]
     id: str
     mpeg4_file_id: str
-    title: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    title: t.NotRequired[str]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultCachedSticker(t.TypedDict, total=False):
+class InlineQueryResultCachedSticker(t.TypedDict):
     """
     ### [InlineQueryResultCachedSticker](https://core.telegram.org/bots/api#inlinequeryresultcachedsticker)  
     
@@ -2655,10 +2655,10 @@ class InlineQueryResultCachedSticker(t.TypedDict, total=False):
     type: t.Literal["sticker"]
     id: str
     sticker_file_id: str
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultCachedDocument(t.TypedDict, total=False):
+class InlineQueryResultCachedDocument(t.TypedDict):
     """
     ### [InlineQueryResultCachedDocument](https://core.telegram.org/bots/api#inlinequeryresultcacheddocument)  
     
@@ -2668,14 +2668,14 @@ class InlineQueryResultCachedDocument(t.TypedDict, total=False):
     id: str
     title: str
     document_file_id: str
-    description: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    description: t.NotRequired[str]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultCachedVideo(t.TypedDict, total=False):
+class InlineQueryResultCachedVideo(t.TypedDict):
     """
     ### [InlineQueryResultCachedVideo](https://core.telegram.org/bots/api#inlinequeryresultcachedvideo)  
     
@@ -2685,15 +2685,15 @@ class InlineQueryResultCachedVideo(t.TypedDict, total=False):
     id: str
     video_file_id: str
     title: str
-    description: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    show_caption_above_media: bool
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    description: t.NotRequired[str]
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    show_caption_above_media: t.NotRequired[bool]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultCachedVoice(t.TypedDict, total=False):
+class InlineQueryResultCachedVoice(t.TypedDict):
     """
     ### [InlineQueryResultCachedVoice](https://core.telegram.org/bots/api#inlinequeryresultcachedvoice)  
     
@@ -2703,13 +2703,13 @@ class InlineQueryResultCachedVoice(t.TypedDict, total=False):
     id: str
     voice_file_id: str
     title: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InlineQueryResultCachedAudio(t.TypedDict, total=False):
+class InlineQueryResultCachedAudio(t.TypedDict):
     """
     ### [InlineQueryResultCachedAudio](https://core.telegram.org/bots/api#inlinequeryresultcachedaudio)  
     
@@ -2718,24 +2718,24 @@ class InlineQueryResultCachedAudio(t.TypedDict, total=False):
     type: t.Literal["audio"]
     id: str
     audio_file_id: str
-    caption: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    caption_entities: list["MessageEntity"]
-    reply_markup: "InlineKeyboardMarkup"
-    input_message_content: "InputMessageContent"
+    caption: t.NotRequired[str]
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    caption_entities: t.NotRequired[list["MessageEntity"]]
+    reply_markup: t.NotRequired["InlineKeyboardMarkup"]
+    input_message_content: t.NotRequired["InputMessageContent"]
 
-class InputTextMessageContent(t.TypedDict, total=False):
+class InputTextMessageContent(t.TypedDict):
     """
     ### [InputTextMessageContent](https://core.telegram.org/bots/api#inputtextmessagecontent)  
     
     Represents the [content](https://core.telegram.org/bots/api#inputmessagecontent) of a text message to be sent as the result of an inline query.
     """
     message_text: str
-    parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"]
-    entities: list["MessageEntity"]
-    link_preview_options: "LinkPreviewOptions"
+    parse_mode: t.NotRequired[t.Literal["HTML", "Markdown", "MarkdownV2"]]
+    entities: t.NotRequired[list["MessageEntity"]]
+    link_preview_options: t.NotRequired["LinkPreviewOptions"]
 
-class InputLocationMessageContent(t.TypedDict, total=False):
+class InputLocationMessageContent(t.TypedDict):
     """
     ### [InputLocationMessageContent](https://core.telegram.org/bots/api#inputlocationmessagecontent)  
     
@@ -2743,12 +2743,12 @@ class InputLocationMessageContent(t.TypedDict, total=False):
     """
     latitude: float
     longitude: float
-    horizontal_accuracy: float
-    live_period: int
-    heading: int
-    proximity_alert_radius: int
+    horizontal_accuracy: t.NotRequired[float]
+    live_period: t.NotRequired[int]
+    heading: t.NotRequired[int]
+    proximity_alert_radius: t.NotRequired[int]
 
-class InputVenueMessageContent(t.TypedDict, total=False):
+class InputVenueMessageContent(t.TypedDict):
     """
     ### [InputVenueMessageContent](https://core.telegram.org/bots/api#inputvenuemessagecontent)  
     
@@ -2758,12 +2758,12 @@ class InputVenueMessageContent(t.TypedDict, total=False):
     longitude: float
     title: str
     address: str
-    foursquare_id: str
-    foursquare_type: str
-    google_place_id: str
-    google_place_type: str
+    foursquare_id: t.NotRequired[str]
+    foursquare_type: t.NotRequired[str]
+    google_place_id: t.NotRequired[str]
+    google_place_type: t.NotRequired[str]
 
-class InputContactMessageContent(t.TypedDict, total=False):
+class InputContactMessageContent(t.TypedDict):
     """
     ### [InputContactMessageContent](https://core.telegram.org/bots/api#inputcontactmessagecontent)  
     
@@ -2771,10 +2771,10 @@ class InputContactMessageContent(t.TypedDict, total=False):
     """
     phone_number: str
     first_name: str
-    last_name: str
-    vcard: str
+    last_name: t.NotRequired[str]
+    vcard: t.NotRequired[str]
 
-class InputInvoiceMessageContent(t.TypedDict, total=False):
+class InputInvoiceMessageContent(t.TypedDict):
     """
     ### [InputInvoiceMessageContent](https://core.telegram.org/bots/api#inputinvoicemessagecontent)  
     
@@ -2785,23 +2785,23 @@ class InputInvoiceMessageContent(t.TypedDict, total=False):
     payload: str
     currency: str
     prices: list["LabeledPrice"]
-    provider_token: str
-    max_tip_amount: int
-    suggested_tip_amounts: list[int]
-    provider_data: str
-    photo_url: str
-    photo_size: int
-    photo_width: int
-    photo_height: int
-    need_name: bool
-    need_phone_number: bool
-    need_email: bool
-    need_shipping_address: bool
-    send_phone_number_to_provider: bool
-    send_email_to_provider: bool
-    is_flexible: bool
+    provider_token: t.NotRequired[str]
+    max_tip_amount: t.NotRequired[int]
+    suggested_tip_amounts: t.NotRequired[list[int]]
+    provider_data: t.NotRequired[str]
+    photo_url: t.NotRequired[str]
+    photo_size: t.NotRequired[int]
+    photo_width: t.NotRequired[int]
+    photo_height: t.NotRequired[int]
+    need_name: t.NotRequired[bool]
+    need_phone_number: t.NotRequired[bool]
+    need_email: t.NotRequired[bool]
+    need_shipping_address: t.NotRequired[bool]
+    send_phone_number_to_provider: t.NotRequired[bool]
+    send_email_to_provider: t.NotRequired[bool]
+    is_flexible: t.NotRequired[bool]
 
-class ChosenInlineResult(t.TypedDict("ChosenInlineResult", {"from": "User"}), total=False):
+class ChosenInlineResult(t.TypedDict("ChosenInlineResult", {"from": "User"})):
     """
     ### [ChosenInlineResult](https://core.telegram.org/bots/api#choseninlineresult)  
     
@@ -2811,18 +2811,18 @@ class ChosenInlineResult(t.TypedDict("ChosenInlineResult", {"from": "User"}), to
     """
     result_id: str
     query: str
-    location: "Location"
-    inline_message_id: str
+    location: t.NotRequired["Location"]
+    inline_message_id: t.NotRequired[str]
 
-class SentWebAppMessage(t.TypedDict, total=False):
+class SentWebAppMessage(t.TypedDict):
     """
     ### [SentWebAppMessage](https://core.telegram.org/bots/api#sentwebappmessage)  
     
     Describes an inline message sent by a [Web App](https://core.telegram.org/bots/webapps) on behalf of a user.
     """
-    inline_message_id: str
+    inline_message_id: t.NotRequired[str]
 
-class PreparedInlineMessage(t.TypedDict, total=False):
+class PreparedInlineMessage(t.TypedDict):
     """
     ### [PreparedInlineMessage](https://core.telegram.org/bots/api#preparedinlinemessage)  
     
@@ -2833,7 +2833,7 @@ class PreparedInlineMessage(t.TypedDict, total=False):
     id: str
     expiration_date: int
 
-class LabeledPrice(t.TypedDict, total=False):
+class LabeledPrice(t.TypedDict):
     """
     ### [LabeledPrice](https://core.telegram.org/bots/api#labeledprice)  
     
@@ -2842,7 +2842,7 @@ class LabeledPrice(t.TypedDict, total=False):
     label: str
     amount: int
 
-class Invoice(t.TypedDict, total=False):
+class Invoice(t.TypedDict):
     """
     ### [Invoice](https://core.telegram.org/bots/api#invoice)  
     
@@ -2854,7 +2854,7 @@ class Invoice(t.TypedDict, total=False):
     currency: str
     total_amount: int
 
-class ShippingAddress(t.TypedDict, total=False):
+class ShippingAddress(t.TypedDict):
     """
     ### [ShippingAddress](https://core.telegram.org/bots/api#shippingaddress)  
     
@@ -2867,18 +2867,18 @@ class ShippingAddress(t.TypedDict, total=False):
     street_line2: str
     post_code: str
 
-class OrderInfo(t.TypedDict, total=False):
+class OrderInfo(t.TypedDict):
     """
     ### [OrderInfo](https://core.telegram.org/bots/api#orderinfo)  
     
     This object represents information about an order.
     """
-    name: str
-    phone_number: str
-    email: str
-    shipping_address: "ShippingAddress"
+    name: t.NotRequired[str]
+    phone_number: t.NotRequired[str]
+    email: t.NotRequired[str]
+    shipping_address: t.NotRequired["ShippingAddress"]
 
-class ShippingOption(t.TypedDict, total=False):
+class ShippingOption(t.TypedDict):
     """
     ### [ShippingOption](https://core.telegram.org/bots/api#shippingoption)  
     
@@ -2888,7 +2888,7 @@ class ShippingOption(t.TypedDict, total=False):
     title: str
     prices: list["LabeledPrice"]
 
-class SuccessfulPayment(t.TypedDict, total=False):
+class SuccessfulPayment(t.TypedDict):
     """
     ### [SuccessfulPayment](https://core.telegram.org/bots/api#successfulpayment)  
     
@@ -2899,13 +2899,13 @@ class SuccessfulPayment(t.TypedDict, total=False):
     invoice_payload: str
     telegram_payment_charge_id: str
     provider_payment_charge_id: str
-    subscription_expiration_date: int
-    is_recurring: t.Literal[True]
-    is_first_recurring: t.Literal[True]
-    shipping_option_id: str
-    order_info: "OrderInfo"
+    subscription_expiration_date: t.NotRequired[int]
+    is_recurring: t.NotRequired[t.Literal[True]]
+    is_first_recurring: t.NotRequired[t.Literal[True]]
+    shipping_option_id: t.NotRequired[str]
+    order_info: t.NotRequired["OrderInfo"]
 
-class RefundedPayment(t.TypedDict, total=False):
+class RefundedPayment(t.TypedDict):
     """
     ### [RefundedPayment](https://core.telegram.org/bots/api#refundedpayment)  
     
@@ -2915,9 +2915,9 @@ class RefundedPayment(t.TypedDict, total=False):
     total_amount: int
     invoice_payload: str
     telegram_payment_charge_id: str
-    provider_payment_charge_id: str
+    provider_payment_charge_id: t.NotRequired[str]
 
-class ShippingQuery(t.TypedDict("ShippingQuery", {"from": "User"}), total=False):
+class ShippingQuery(t.TypedDict("ShippingQuery", {"from": "User"})):
     """
     ### [ShippingQuery](https://core.telegram.org/bots/api#shippingquery)  
     
@@ -2927,7 +2927,7 @@ class ShippingQuery(t.TypedDict("ShippingQuery", {"from": "User"}), total=False)
     invoice_payload: str
     shipping_address: "ShippingAddress"
 
-class PreCheckoutQuery(t.TypedDict("PreCheckoutQuery", {"from": "User"}), total=False):
+class PreCheckoutQuery(t.TypedDict("PreCheckoutQuery", {"from": "User"})):
     """
     ### [PreCheckoutQuery](https://core.telegram.org/bots/api#precheckoutquery)  
     
@@ -2937,10 +2937,10 @@ class PreCheckoutQuery(t.TypedDict("PreCheckoutQuery", {"from": "User"}), total=
     currency: str
     total_amount: int
     invoice_payload: str
-    shipping_option_id: str
-    order_info: "OrderInfo"
+    shipping_option_id: t.NotRequired[str]
+    order_info: t.NotRequired["OrderInfo"]
 
-class PaidMediaPurchased(t.TypedDict("PaidMediaPurchased", {"from": "User"}), total=False):
+class PaidMediaPurchased(t.TypedDict("PaidMediaPurchased", {"from": "User"})):
     """
     ### [PaidMediaPurchased](https://core.telegram.org/bots/api#paidmediapurchased)  
     
@@ -2948,7 +2948,7 @@ class PaidMediaPurchased(t.TypedDict("PaidMediaPurchased", {"from": "User"}), to
     """
     paid_media_payload: str
 
-class RevenueWithdrawalStatePending(t.TypedDict, total=False):
+class RevenueWithdrawalStatePending(t.TypedDict):
     """
     ### [RevenueWithdrawalStatePending](https://core.telegram.org/bots/api#revenuewithdrawalstatepending)  
     
@@ -2956,7 +2956,7 @@ class RevenueWithdrawalStatePending(t.TypedDict, total=False):
     """
     type: t.Literal["pending"]
 
-class RevenueWithdrawalStateSucceeded(t.TypedDict, total=False):
+class RevenueWithdrawalStateSucceeded(t.TypedDict):
     """
     ### [RevenueWithdrawalStateSucceeded](https://core.telegram.org/bots/api#revenuewithdrawalstatesucceeded)  
     
@@ -2966,7 +2966,7 @@ class RevenueWithdrawalStateSucceeded(t.TypedDict, total=False):
     date: int
     url: str
 
-class RevenueWithdrawalStateFailed(t.TypedDict, total=False):
+class RevenueWithdrawalStateFailed(t.TypedDict):
     """
     ### [RevenueWithdrawalStateFailed](https://core.telegram.org/bots/api#revenuewithdrawalstatefailed)  
     
@@ -2974,7 +2974,7 @@ class RevenueWithdrawalStateFailed(t.TypedDict, total=False):
     """
     type: t.Literal["failed"]
 
-class AffiliateInfo(t.TypedDict, total=False):
+class AffiliateInfo(t.TypedDict):
     """
     ### [AffiliateInfo](https://core.telegram.org/bots/api#affiliateinfo)  
     
@@ -2982,11 +2982,11 @@ class AffiliateInfo(t.TypedDict, total=False):
     """
     commission_per_mille: int
     amount: int
-    affiliate_user: "User"
-    affiliate_chat: "Chat"
-    nanostar_amount: int
+    affiliate_user: t.NotRequired["User"]
+    affiliate_chat: t.NotRequired["Chat"]
+    nanostar_amount: t.NotRequired[int]
 
-class TransactionPartnerUser(t.TypedDict, total=False):
+class TransactionPartnerUser(t.TypedDict):
     """
     ### [TransactionPartnerUser](https://core.telegram.org/bots/api#transactionpartneruser)  
     
@@ -2995,15 +2995,15 @@ class TransactionPartnerUser(t.TypedDict, total=False):
     type: t.Literal["user"]
     transaction_type: str
     user: "User"
-    affiliate: "AffiliateInfo"
-    invoice_payload: str
-    subscription_period: int
-    paid_media: list["PaidMedia"]
-    paid_media_payload: str
-    gift: "Gift"
-    premium_subscription_duration: int
+    affiliate: t.NotRequired["AffiliateInfo"]
+    invoice_payload: t.NotRequired[str]
+    subscription_period: t.NotRequired[int]
+    paid_media: t.NotRequired[list["PaidMedia"]]
+    paid_media_payload: t.NotRequired[str]
+    gift: t.NotRequired["Gift"]
+    premium_subscription_duration: t.NotRequired[int]
 
-class TransactionPartnerChat(t.TypedDict, total=False):
+class TransactionPartnerChat(t.TypedDict):
     """
     ### [TransactionPartnerChat](https://core.telegram.org/bots/api#transactionpartnerchat)  
     
@@ -3011,9 +3011,9 @@ class TransactionPartnerChat(t.TypedDict, total=False):
     """
     type: t.Literal["chat"]
     chat: "Chat"
-    gift: "Gift"
+    gift: t.NotRequired["Gift"]
 
-class TransactionPartnerAffiliateProgram(t.TypedDict, total=False):
+class TransactionPartnerAffiliateProgram(t.TypedDict):
     """
     ### [TransactionPartnerAffiliateProgram](https://core.telegram.org/bots/api#transactionpartneraffiliateprogram)  
     
@@ -3021,18 +3021,18 @@ class TransactionPartnerAffiliateProgram(t.TypedDict, total=False):
     """
     type: t.Literal["affiliate_program"]
     commission_per_mille: int
-    sponsor_user: "User"
+    sponsor_user: t.NotRequired["User"]
 
-class TransactionPartnerFragment(t.TypedDict, total=False):
+class TransactionPartnerFragment(t.TypedDict):
     """
     ### [TransactionPartnerFragment](https://core.telegram.org/bots/api#transactionpartnerfragment)  
     
     Describes a withdrawal transaction with Fragment.
     """
     type: t.Literal["fragment"]
-    withdrawal_state: "RevenueWithdrawalState"
+    withdrawal_state: t.NotRequired["RevenueWithdrawalState"]
 
-class TransactionPartnerTelegramAds(t.TypedDict, total=False):
+class TransactionPartnerTelegramAds(t.TypedDict):
     """
     ### [TransactionPartnerTelegramAds](https://core.telegram.org/bots/api#transactionpartnertelegramads)  
     
@@ -3040,7 +3040,7 @@ class TransactionPartnerTelegramAds(t.TypedDict, total=False):
     """
     type: t.Literal["telegram_ads"]
 
-class TransactionPartnerTelegramApi(t.TypedDict, total=False):
+class TransactionPartnerTelegramApi(t.TypedDict):
     """
     ### [TransactionPartnerTelegramApi](https://core.telegram.org/bots/api#transactionpartnertelegramapi)  
     
@@ -3049,7 +3049,7 @@ class TransactionPartnerTelegramApi(t.TypedDict, total=False):
     type: t.Literal["telegram_api"]
     request_count: int
 
-class TransactionPartnerOther(t.TypedDict, total=False):
+class TransactionPartnerOther(t.TypedDict):
     """
     ### [TransactionPartnerOther](https://core.telegram.org/bots/api#transactionpartnerother)  
     
@@ -3057,7 +3057,7 @@ class TransactionPartnerOther(t.TypedDict, total=False):
     """
     type: t.Literal["other"]
 
-class StarTransaction(t.TypedDict, total=False):
+class StarTransaction(t.TypedDict):
     """
     ### [StarTransaction](https://core.telegram.org/bots/api#startransaction)  
     
@@ -3066,11 +3066,11 @@ class StarTransaction(t.TypedDict, total=False):
     id: str
     amount: int
     date: int
-    nanostar_amount: int
-    source: "TransactionPartner"
-    receiver: "TransactionPartner"
+    nanostar_amount: t.NotRequired[int]
+    source: t.NotRequired["TransactionPartner"]
+    receiver: t.NotRequired["TransactionPartner"]
 
-class StarTransactions(t.TypedDict, total=False):
+class StarTransactions(t.TypedDict):
     """
     ### [StarTransactions](https://core.telegram.org/bots/api#startransactions)  
     
@@ -3080,7 +3080,7 @@ class StarTransactions(t.TypedDict, total=False):
     """
     transactions: list["StarTransaction"]
 
-class PassportData(t.TypedDict, total=False):
+class PassportData(t.TypedDict):
     """
     ### [PassportData](https://core.telegram.org/bots/api#passportdata)  
     
@@ -3089,7 +3089,7 @@ class PassportData(t.TypedDict, total=False):
     data: list["EncryptedPassportElement"]
     credentials: "EncryptedCredentials"
 
-class PassportFile(t.TypedDict, total=False):
+class PassportFile(t.TypedDict):
     """
     ### [PassportFile](https://core.telegram.org/bots/api#passportfile)  
     
@@ -3100,7 +3100,7 @@ class PassportFile(t.TypedDict, total=False):
     file_size: int
     file_date: int
 
-class EncryptedPassportElement(t.TypedDict, total=False):
+class EncryptedPassportElement(t.TypedDict):
     """
     ### [EncryptedPassportElement](https://core.telegram.org/bots/api#encryptedpassportelement)  
     
@@ -3108,16 +3108,16 @@ class EncryptedPassportElement(t.TypedDict, total=False):
     """
     type: str
     hash: str
-    data: str
-    phone_number: str
-    email: str
-    files: list["PassportFile"]
-    front_side: "PassportFile"
-    reverse_side: "PassportFile"
-    selfie: "PassportFile"
-    translation: list["PassportFile"]
+    data: t.NotRequired[str]
+    phone_number: t.NotRequired[str]
+    email: t.NotRequired[str]
+    files: t.NotRequired[list["PassportFile"]]
+    front_side: t.NotRequired["PassportFile"]
+    reverse_side: t.NotRequired["PassportFile"]
+    selfie: t.NotRequired["PassportFile"]
+    translation: t.NotRequired[list["PassportFile"]]
 
-class EncryptedCredentials(t.TypedDict, total=False):
+class EncryptedCredentials(t.TypedDict):
     """
     ### [EncryptedCredentials](https://core.telegram.org/bots/api#encryptedcredentials)  
     
@@ -3127,7 +3127,7 @@ class EncryptedCredentials(t.TypedDict, total=False):
     hash: str
     secret: str
 
-class PassportElementErrorDataField(t.TypedDict, total=False):
+class PassportElementErrorDataField(t.TypedDict):
     """
     ### [PassportElementErrorDataField](https://core.telegram.org/bots/api#passportelementerrordatafield)  
     
@@ -3139,7 +3139,7 @@ class PassportElementErrorDataField(t.TypedDict, total=False):
     data_hash: str
     message: str
 
-class PassportElementErrorFrontSide(t.TypedDict, total=False):
+class PassportElementErrorFrontSide(t.TypedDict):
     """
     ### [PassportElementErrorFrontSide](https://core.telegram.org/bots/api#passportelementerrorfrontside)  
     
@@ -3150,7 +3150,7 @@ class PassportElementErrorFrontSide(t.TypedDict, total=False):
     file_hash: str
     message: str
 
-class PassportElementErrorReverseSide(t.TypedDict, total=False):
+class PassportElementErrorReverseSide(t.TypedDict):
     """
     ### [PassportElementErrorReverseSide](https://core.telegram.org/bots/api#passportelementerrorreverseside)  
     
@@ -3161,7 +3161,7 @@ class PassportElementErrorReverseSide(t.TypedDict, total=False):
     file_hash: str
     message: str
 
-class PassportElementErrorSelfie(t.TypedDict, total=False):
+class PassportElementErrorSelfie(t.TypedDict):
     """
     ### [PassportElementErrorSelfie](https://core.telegram.org/bots/api#passportelementerrorselfie)  
     
@@ -3172,7 +3172,7 @@ class PassportElementErrorSelfie(t.TypedDict, total=False):
     file_hash: str
     message: str
 
-class PassportElementErrorFile(t.TypedDict, total=False):
+class PassportElementErrorFile(t.TypedDict):
     """
     ### [PassportElementErrorFile](https://core.telegram.org/bots/api#passportelementerrorfile)  
     
@@ -3183,7 +3183,7 @@ class PassportElementErrorFile(t.TypedDict, total=False):
     file_hash: str
     message: str
 
-class PassportElementErrorFiles(t.TypedDict, total=False):
+class PassportElementErrorFiles(t.TypedDict):
     """
     ### [PassportElementErrorFiles](https://core.telegram.org/bots/api#passportelementerrorfiles)  
     
@@ -3194,7 +3194,7 @@ class PassportElementErrorFiles(t.TypedDict, total=False):
     file_hashes: list[str]
     message: str
 
-class PassportElementErrorTranslationFile(t.TypedDict, total=False):
+class PassportElementErrorTranslationFile(t.TypedDict):
     """
     ### [PassportElementErrorTranslationFile](https://core.telegram.org/bots/api#passportelementerrortranslationfile)  
     
@@ -3205,7 +3205,7 @@ class PassportElementErrorTranslationFile(t.TypedDict, total=False):
     file_hash: str
     message: str
 
-class PassportElementErrorTranslationFiles(t.TypedDict, total=False):
+class PassportElementErrorTranslationFiles(t.TypedDict):
     """
     ### [PassportElementErrorTranslationFiles](https://core.telegram.org/bots/api#passportelementerrortranslationfiles)  
     
@@ -3216,7 +3216,7 @@ class PassportElementErrorTranslationFiles(t.TypedDict, total=False):
     file_hashes: list[str]
     message: str
 
-class PassportElementErrorUnspecified(t.TypedDict, total=False):
+class PassportElementErrorUnspecified(t.TypedDict):
     """
     ### [PassportElementErrorUnspecified](https://core.telegram.org/bots/api#passportelementerrorunspecified)  
     
@@ -3239,7 +3239,7 @@ class PassportElementErrorUnspecified(t.TypedDict, total=False):
     element_hash: str
     message: str
 
-class Game(t.TypedDict, total=False):
+class Game(t.TypedDict):
     """
     ### [Game](https://core.telegram.org/bots/api#game)  
     
@@ -3248,11 +3248,11 @@ class Game(t.TypedDict, total=False):
     title: str
     description: str
     photo: list["PhotoSize"]
-    text: str
-    text_entities: list["MessageEntity"]
-    animation: "Animation"
+    text: t.NotRequired[str]
+    text_entities: t.NotRequired[list["MessageEntity"]]
+    animation: t.NotRequired["Animation"]
 
-class CallbackGame(t.TypedDict, total=False):
+class CallbackGame(t.TypedDict):
     """
     ### [CallbackGame](https://core.telegram.org/bots/api#callbackgame)  
     
@@ -3260,7 +3260,7 @@ class CallbackGame(t.TypedDict, total=False):
     """
     
 
-class GameHighScore(t.TypedDict, total=False):
+class GameHighScore(t.TypedDict):
     """
     ### [GameHighScore](https://core.telegram.org/bots/api#gamehighscore)  
     
