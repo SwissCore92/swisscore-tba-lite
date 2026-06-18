@@ -19,6 +19,9 @@ from ..bot_api import objects
 T = t.TypeVar("T")
 JsonDict = dict[str, t.Any]
 
+P = t.ParamSpec("P")
+R = t.TypeVar("R")
+
 CLOUD_BOT_API_URL = "https://api.telegram.org"
 CLOUD_BOT_FILE_URL = "https://api.telegram.org/file"
 
@@ -97,7 +100,7 @@ def api_method_wrapper(
     check_input_files: list[str] | None = None,
     check_input_media: list[str] | None = None,
     convert_func: t.Callable[[t.Any], t.Any] | None = None,
-):
+) -> t.Callable[[t.Callable[P, R]], t.Callable[P, R]]:
     """
     **decorator** for api methods
     
