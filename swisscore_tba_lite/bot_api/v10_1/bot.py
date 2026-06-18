@@ -4,14 +4,13 @@ from asyncio import Task
 from pathlib import Path
 
 from . import objects as tg, literals
-from ...core.base_bot import BaseBot, api_method_wrapper
+from ...core.base_bot import BaseBot
 from ...utils.files import InputFile
 
 class Bot(BaseBot):
     """
     Telegram Bot API methods scraped from '**Bot API 10.1** *(June 11, 2026)*'
     """
-    @api_method_wrapper()
     def get_updates(
         self,
         *,
@@ -29,8 +28,16 @@ class Bot(BaseBot):
         > **1.** This method will not work if an outgoing webhook is set up.  
         > **2.** In order to avoid getting duplicate updates, recalculate *offset* after each server response.
         """
+        return self(
+            "getUpdates",
+            params={
+                "offset": offset,
+                "limit": limit,
+                "timeout": timeout,
+                "allowed_updates": allowed_updates
+            }, 
+        )
 
-    @api_method_wrapper(check_input_files=["certificate"])
     def set_webhook(
         self,
         url: str,
@@ -56,8 +63,20 @@ class Bot(BaseBot):
         >
         > If you're having any trouble setting up webhooks, please check out this [amazing guide to webhooks](https://core.telegram.org/bots/webhooks).
         """
+        return self(
+            "setWebhook",
+            params={
+                "url": url,
+                "certificate": certificate,
+                "ip_address": ip_address,
+                "max_connections": max_connections,
+                "allowed_updates": allowed_updates,
+                "drop_pending_updates": drop_pending_updates,
+                "secret_token": secret_token
+            }, 
+            check_input_files=["certificate"]
+        )
 
-    @api_method_wrapper()
     def delete_webhook(
         self,
         *,
@@ -68,40 +87,55 @@ class Bot(BaseBot):
         
         Use this method to remove webhook integration if you decide to switch back to [getUpdates](https://core.telegram.org/bots/api#getupdates). Returns *True* on success.
         """
+        return self(
+            "deleteWebhook",
+            params={"drop_pending_updates": drop_pending_updates}, 
+        )
 
-    @api_method_wrapper()
     def get_webhook_info(self) -> Task[tg.WebhookInfo]:
         """
         ### [getWebhookInfo](https://core.telegram.org/bots/api#getwebhookinfo)  
         
         Use this method to get current webhook status. Requires no parameters. On success, returns a [WebhookInfo](https://core.telegram.org/bots/api#webhookinfo) object. If the bot is using [getUpdates](https://core.telegram.org/bots/api#getupdates), will return an object with the *url* field empty.
         """
+        return self(
+            "getWebhookInfo",
+            params={}, 
+        )
 
-    @api_method_wrapper()
     def get_me(self) -> Task[tg.User]:
         """
         ### [getMe](https://core.telegram.org/bots/api#getme)  
         
         A simple method for testing your bot's authentication token. Requires no parameters. Returns basic information about the bot in form of a [User](https://core.telegram.org/bots/api#user) object.
         """
+        return self(
+            "getMe",
+            params={}, 
+        )
 
-    @api_method_wrapper()
     def log_out(self) -> Task[t.Literal[True]]:
         """
         ### [logOut](https://core.telegram.org/bots/api#logout)  
         
         Use this method to log out from the cloud Bot API server before launching the bot locally. You **must** log out the bot before running it locally, otherwise there is no guarantee that the bot will receive updates. After a successful call, you can immediately log in on a local server, but will not be able to log in back to the cloud Bot API server for 10 minutes. Returns *True* on success. Requires no parameters.
         """
+        return self(
+            "logOut",
+            params={}, 
+        )
 
-    @api_method_wrapper()
     def close(self) -> Task[t.Literal[True]]:
         """
         ### [close](https://core.telegram.org/bots/api#close)  
         
         Use this method to close the bot instance before moving it from one local server to another. You need to delete the webhook before calling this method to ensure that the bot isn't launched again after server restart. The method will return error 429 in the first 10 minutes after the bot is launched. Returns *True* on success. Requires no parameters.
         """
+        return self(
+            "close",
+            params={}, 
+        )
 
-    @api_method_wrapper()
     def send_message(
         self,
         chat_id: int | str,
@@ -119,15 +153,34 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendMessage](https://core.telegram.org/bots/api#sendmessage)  
         
         Use this method to send text messages. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendMessage",
+            params={
+                "chat_id": chat_id,
+                "text": text,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "parse_mode": parse_mode,
+                "entities": entities,
+                "link_preview_options": link_preview_options,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def forward_message(
         self,
         chat_id: int | str,
@@ -147,8 +200,22 @@ class Bot(BaseBot):
         
         Use this method to forward messages of any kind. Service messages and messages with protected content can't be forwarded. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "forwardMessage",
+            params={
+                "chat_id": chat_id,
+                "from_chat_id": from_chat_id,
+                "message_id": message_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "video_start_timestamp": video_start_timestamp,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters
+            }, 
+        )
 
-    @api_method_wrapper()
     def forward_messages(
         self,
         chat_id: int | str,
@@ -165,8 +232,19 @@ class Bot(BaseBot):
         
         Use this method to forward multiple messages of any kind. If some of the specified messages can't be found or forwarded, they are skipped. Service messages and messages with protected content can't be forwarded. Album grouping is kept for forwarded messages. On success, an array of [MessageId](https://core.telegram.org/bots/api#messageid) of the sent messages is returned.
         """
+        return self(
+            "forwardMessages",
+            params={
+                "chat_id": chat_id,
+                "from_chat_id": from_chat_id,
+                "message_ids": message_ids,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content
+            }, 
+        )
 
-    @api_method_wrapper()
     def copy_message(
         self,
         chat_id: int | str,
@@ -186,15 +264,36 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.MessageId]:
         """
         ### [copyMessage](https://core.telegram.org/bots/api#copymessage)  
         
         Use this method to copy messages of any kind. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz [poll](https://core.telegram.org/bots/api#poll) can be copied only if the value of the field *correct\\_option\\_id* is known to the bot. The method is analogous to the method [forwardMessage](https://core.telegram.org/bots/api#forwardmessage), but the copied message doesn't have a link to the original message. Returns the [MessageId](https://core.telegram.org/bots/api#messageid) of the sent message on success.
         """
+        return self(
+            "copyMessage",
+            params={
+                "chat_id": chat_id,
+                "from_chat_id": from_chat_id,
+                "message_id": message_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "video_start_timestamp": video_start_timestamp,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "show_caption_above_media": show_caption_above_media,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def copy_messages(
         self,
         chat_id: int | str,
@@ -212,12 +311,24 @@ class Bot(BaseBot):
         
         Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz [poll](https://core.telegram.org/bots/api#poll) can be copied only if the value of the field *correct\\_option\\_id* is known to the bot. The method is analogous to the method [forwardMessages](https://core.telegram.org/bots/api#forwardmessages), but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an array of [MessageId](https://core.telegram.org/bots/api#messageid) of the sent messages is returned.
         """
+        return self(
+            "copyMessages",
+            params={
+                "chat_id": chat_id,
+                "from_chat_id": from_chat_id,
+                "message_ids": message_ids,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "remove_caption": remove_caption
+            }, 
+        )
 
-    @api_method_wrapper(check_input_files=["photo"])
     def send_photo(
         self,
         chat_id: int | str,
-        photo: str | Path | bytes | tg.InputFile,
+        photo: Path | bytes | tg.InputFile | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -233,20 +344,42 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendPhoto](https://core.telegram.org/bots/api#sendphoto)  
         
         Use this method to send photos. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendPhoto",
+            params={
+                "chat_id": chat_id,
+                "photo": photo,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "show_caption_above_media": show_caption_above_media,
+                "has_spoiler": has_spoiler,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_files=["photo"]
+        )
 
-    @api_method_wrapper(check_input_files=["live_photo", "photo"])
     def send_live_photo(
         self,
         chat_id: int | str,
-        live_photo: str | Path | bytes | tg.InputFile,
-        photo: str | Path | bytes | tg.InputFile,
+        live_photo: Path | bytes | tg.InputFile | str,
+        photo: Path | bytes | tg.InputFile | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -262,19 +395,42 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendLivePhoto](https://core.telegram.org/bots/api#sendlivephoto)  
         
         Use this method to send live photos. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendLivePhoto",
+            params={
+                "chat_id": chat_id,
+                "live_photo": live_photo,
+                "photo": photo,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "show_caption_above_media": show_caption_above_media,
+                "has_spoiler": has_spoiler,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_files=["live_photo", "photo"]
+        )
 
-    @api_method_wrapper(check_input_files=["audio", "thumbnail"])
     def send_audio(
         self,
         chat_id: int | str,
-        audio: str | Path | bytes | tg.InputFile,
+        audio: Path | bytes | tg.InputFile | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -285,14 +441,14 @@ class Bot(BaseBot):
         duration: int | None = None,
         performer: str | None = None,
         title: str | None = None,
-        thumbnail: str | Path | bytes | tg.InputFile | None = None,
+        thumbnail: Path | bytes | tg.InputFile | str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendAudio](https://core.telegram.org/bots/api#sendaudio)  
@@ -301,17 +457,41 @@ class Bot(BaseBot):
         
         For sending voice messages, use the [sendVoice](https://core.telegram.org/bots/api#sendvoice) method instead.
         """
+        return self(
+            "sendAudio",
+            params={
+                "chat_id": chat_id,
+                "audio": audio,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "duration": duration,
+                "performer": performer,
+                "title": title,
+                "thumbnail": thumbnail,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_files=["audio", "thumbnail"]
+        )
 
-    @api_method_wrapper(check_input_files=["document", "thumbnail"])
     def send_document(
         self,
         chat_id: int | str,
-        document: str | Path | bytes | tg.InputFile,
+        document: Path | bytes | tg.InputFile | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
         direct_messages_topic_id: int | None = None,
-        thumbnail: str | Path | bytes | tg.InputFile | None = None,
+        thumbnail: Path | bytes | tg.InputFile | str | None = None,
         caption: str | None = None,
         parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"] | None = None,
         caption_entities: list[tg.MessageEntity] | None = None,
@@ -322,19 +502,41 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendDocument](https://core.telegram.org/bots/api#senddocument)  
         
         Use this method to send general files. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned. Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
         """
+        return self(
+            "sendDocument",
+            params={
+                "chat_id": chat_id,
+                "document": document,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "thumbnail": thumbnail,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "disable_content_type_detection": disable_content_type_detection,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_files=["document", "thumbnail"]
+        )
 
-    @api_method_wrapper(check_input_files=["video", "thumbnail", "cover"])
     def send_video(
         self,
         chat_id: int | str,
-        video: str | Path | bytes | tg.InputFile,
+        video: Path | bytes | tg.InputFile | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -342,8 +544,8 @@ class Bot(BaseBot):
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumbnail: str | Path | bytes | tg.InputFile | None = None,
-        cover: str | Path | bytes | tg.InputFile | None = None,
+        thumbnail: Path | bytes | tg.InputFile | str | None = None,
+        cover: Path | bytes | tg.InputFile | str | None = None,
         start_timestamp: int | None = None,
         caption: str | None = None,
         parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"] | None = None,
@@ -357,19 +559,48 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVideo](https://core.telegram.org/bots/api#sendvideo)  
         
         Use this method to send video files, Telegram clients support MPEG4 videos (other formats may be sent as [Document](https://core.telegram.org/bots/api#document)). On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned. Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         """
+        return self(
+            "sendVideo",
+            params={
+                "chat_id": chat_id,
+                "video": video,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "duration": duration,
+                "width": width,
+                "height": height,
+                "thumbnail": thumbnail,
+                "cover": cover,
+                "start_timestamp": start_timestamp,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "show_caption_above_media": show_caption_above_media,
+                "has_spoiler": has_spoiler,
+                "supports_streaming": supports_streaming,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_files=["video", "thumbnail", "cover"]
+        )
 
-    @api_method_wrapper(check_input_files=["animation", "thumbnail"])
     def send_animation(
         self,
         chat_id: int | str,
-        animation: str | Path | bytes | tg.InputFile,
+        animation: Path | bytes | tg.InputFile | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -377,7 +608,7 @@ class Bot(BaseBot):
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumbnail: str | Path | bytes | tg.InputFile | None = None,
+        thumbnail: Path | bytes | tg.InputFile | str | None = None,
         caption: str | None = None,
         parse_mode: t.Literal["HTML", "Markdown", "MarkdownV2"] | None = None,
         caption_entities: list[tg.MessageEntity] | None = None,
@@ -389,19 +620,45 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendAnimation](https://core.telegram.org/bots/api#sendanimation)  
         
         Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned. Bots can currently send animation files of up to 50 MB in size, this limit may be changed in the future.
         """
+        return self(
+            "sendAnimation",
+            params={
+                "chat_id": chat_id,
+                "animation": animation,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "duration": duration,
+                "width": width,
+                "height": height,
+                "thumbnail": thumbnail,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "show_caption_above_media": show_caption_above_media,
+                "has_spoiler": has_spoiler,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_files=["animation", "thumbnail"]
+        )
 
-    @api_method_wrapper(check_input_files=["voice"])
     def send_voice(
         self,
         chat_id: int | str,
-        voice: str | Path | bytes | tg.InputFile,
+        voice: Path | bytes | tg.InputFile | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -416,41 +673,82 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVoice](https://core.telegram.org/bots/api#sendvoice)  
         
         Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS, or in .MP3 format, or in .M4A format (other formats may be sent as [Audio](https://core.telegram.org/bots/api#audio) or [Document](https://core.telegram.org/bots/api#document)). On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
         """
+        return self(
+            "sendVoice",
+            params={
+                "chat_id": chat_id,
+                "voice": voice,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "duration": duration,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_files=["voice"]
+        )
 
-    @api_method_wrapper(check_input_files=["video_note", "thumbnail"])
     def send_video_note(
         self,
         chat_id: int | str,
-        video_note: str | Path | bytes | tg.InputFile,
+        video_note: Path | bytes | tg.InputFile | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
         direct_messages_topic_id: int | None = None,
         duration: int | None = None,
         length: int | None = None,
-        thumbnail: str | Path | bytes | tg.InputFile | None = None,
+        thumbnail: Path | bytes | tg.InputFile | str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVideoNote](https://core.telegram.org/bots/api#sendvideonote)  
         
         As of [v.4.0](https://telegram.org/blog/video-messages-and-telescope), Telegram clients support rounded square MPEG4 videos of up to 1 minute long. Use this method to send video messages. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendVideoNote",
+            params={
+                "chat_id": chat_id,
+                "video_note": video_note,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "duration": duration,
+                "length": length,
+                "thumbnail": thumbnail,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_files=["video_note", "thumbnail"]
+        )
 
-    @api_method_wrapper(check_input_media={"media": ["thumbnail", "photo", "media", "cover"]})
     def send_paid_media(
         self,
         chat_id: int | str,
@@ -470,15 +768,37 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendPaidMedia](https://core.telegram.org/bots/api#sendpaidmedia)  
         
         Use this method to send paid media. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendPaidMedia",
+            params={
+                "chat_id": chat_id,
+                "star_count": star_count,
+                "media": media,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "payload": payload,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "show_caption_above_media": show_caption_above_media,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_media={"media": ["cover", "thumbnail", "media", "photo"]}
+        )
 
-    @api_method_wrapper(check_input_media={"media": ["thumbnail", "photo", "media", "cover"]})
     def send_media_group(
         self,
         chat_id: int | str,
@@ -498,8 +818,23 @@ class Bot(BaseBot):
         
         Use this method to send a group of photos, live photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an array of [Message](https://core.telegram.org/bots/api#message) objects that were sent is returned.
         """
+        return self(
+            "sendMediaGroup",
+            params={
+                "chat_id": chat_id,
+                "media": media,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "reply_parameters": reply_parameters
+            }, 
+            check_input_media={"media": ["cover", "thumbnail", "media", "photo"]}
+        )
 
-    @api_method_wrapper()
     def send_location(
         self,
         chat_id: int | str,
@@ -519,15 +854,36 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendLocation](https://core.telegram.org/bots/api#sendlocation)  
         
         Use this method to send point on the map. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendLocation",
+            params={
+                "chat_id": chat_id,
+                "latitude": latitude,
+                "longitude": longitude,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "horizontal_accuracy": horizontal_accuracy,
+                "live_period": live_period,
+                "heading": heading,
+                "proximity_alert_radius": proximity_alert_radius,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def send_venue(
         self,
         chat_id: int | str,
@@ -549,15 +905,38 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVenue](https://core.telegram.org/bots/api#sendvenue)  
         
         Use this method to send information about a venue. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendVenue",
+            params={
+                "chat_id": chat_id,
+                "latitude": latitude,
+                "longitude": longitude,
+                "title": title,
+                "address": address,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "foursquare_id": foursquare_id,
+                "foursquare_type": foursquare_type,
+                "google_place_id": google_place_id,
+                "google_place_type": google_place_type,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def send_contact(
         self,
         chat_id: int | str,
@@ -575,15 +954,34 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendContact](https://core.telegram.org/bots/api#sendcontact)  
         
         Use this method to send phone contacts. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendContact",
+            params={
+                "chat_id": chat_id,
+                "phone_number": phone_number,
+                "first_name": first_name,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "last_name": last_name,
+                "vcard": vcard,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper(check_input_media={"explanation_media": ["thumbnail", "photo", "media", "cover"], "media": ["thumbnail", "photo", "media", "cover"]})
     def send_poll(
         self,
         chat_id: int | str,
@@ -620,15 +1018,54 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         message_effect_id: str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendPoll](https://core.telegram.org/bots/api#sendpoll)  
         
         Use this method to send a native poll. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendPoll",
+            params={
+                "chat_id": chat_id,
+                "question": question,
+                "options": options,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "question_parse_mode": question_parse_mode,
+                "question_entities": question_entities,
+                "is_anonymous": is_anonymous,
+                "type": type,
+                "allows_multiple_answers": allows_multiple_answers,
+                "allows_revoting": allows_revoting,
+                "shuffle_options": shuffle_options,
+                "allow_adding_options": allow_adding_options,
+                "hide_results_until_closes": hide_results_until_closes,
+                "members_only": members_only,
+                "country_codes": country_codes,
+                "correct_option_ids": correct_option_ids,
+                "explanation": explanation,
+                "explanation_parse_mode": explanation_parse_mode,
+                "explanation_entities": explanation_entities,
+                "explanation_media": explanation_media,
+                "open_period": open_period,
+                "close_date": close_date,
+                "is_closed": is_closed,
+                "description": description,
+                "description_parse_mode": description_parse_mode,
+                "description_entities": description_entities,
+                "media": media,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_media={"explanation_media": ["cover", "thumbnail", "media", "photo"], "media": ["cover", "thumbnail", "media", "photo"]}
+        )
 
-    @api_method_wrapper()
     def send_checklist(
         self,
         business_connection_id: str,
@@ -646,8 +1083,20 @@ class Bot(BaseBot):
         
         Use this method to send a checklist on behalf of a connected business account. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendChecklist",
+            params={
+                "business_connection_id": business_connection_id,
+                "chat_id": chat_id,
+                "checklist": checklist,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "message_effect_id": message_effect_id,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def send_dice(
         self,
         chat_id: int | str,
@@ -662,15 +1111,31 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendDice](https://core.telegram.org/bots/api#senddice)  
         
         Use this method to send an animated emoji that will display a random value. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendDice",
+            params={
+                "chat_id": chat_id,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "emoji": emoji,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def send_message_draft(
         self,
         chat_id: int,
@@ -686,8 +1151,18 @@ class Bot(BaseBot):
         
         Use this method to stream a partial message to a user while the message is being generated. Note that the streamed draft is ephemeral and acts as a temporary 30-second preview - once the output is finalized, you **must** call [sendMessage](https://core.telegram.org/bots/api#sendmessage) with the complete message to persist it in the user's chat. Returns *True* on success.
         """
+        return self(
+            "sendMessageDraft",
+            params={
+                "chat_id": chat_id,
+                "draft_id": draft_id,
+                "message_thread_id": message_thread_id,
+                "text": text,
+                "parse_mode": parse_mode,
+                "entities": entities
+            }, 
+        )
 
-    @api_method_wrapper()
     def send_chat_action(
         self,
         chat_id: int | str,
@@ -705,8 +1180,16 @@ class Bot(BaseBot):
         
         We only recommend using this method when a response from the bot will take a **noticeable** amount of time to arrive.
         """
+        return self(
+            "sendChatAction",
+            params={
+                "chat_id": chat_id,
+                "action": action,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_message_reaction(
         self,
         chat_id: int | str,
@@ -720,8 +1203,16 @@ class Bot(BaseBot):
         
         Use this method to change the chosen reactions on a message. Service messages of some types can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Bots can't use paid reactions. Returns *True* on success.
         """
+        return self(
+            "setMessageReaction",
+            params={
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "reaction": reaction,
+                "is_big": is_big
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_user_profile_photos(
         self,
         user_id: int,
@@ -734,8 +1225,15 @@ class Bot(BaseBot):
         
         Use this method to get a list of profile pictures for a user. Returns a [UserProfilePhotos](https://core.telegram.org/bots/api#userprofilephotos) object.
         """
+        return self(
+            "getUserProfilePhotos",
+            params={
+                "user_id": user_id,
+                "offset": offset,
+                "limit": limit
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_user_profile_audios(
         self,
         user_id: int,
@@ -748,8 +1246,15 @@ class Bot(BaseBot):
         
         Use this method to get a list of profile audios for a user. Returns a [UserProfileAudios](https://core.telegram.org/bots/api#userprofileaudios) object.
         """
+        return self(
+            "getUserProfileAudios",
+            params={
+                "user_id": user_id,
+                "offset": offset,
+                "limit": limit
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_user_emoji_status(
         self,
         user_id: int,
@@ -762,8 +1267,15 @@ class Bot(BaseBot):
         
         Changes the emoji status for a given user that previously allowed the bot to manage their emoji status via the Mini App method [requestEmojiStatusAccess](https://core.telegram.org/bots/webapps#initializing-mini-apps). Returns *True* on success.
         """
+        return self(
+            "setUserEmojiStatus",
+            params={
+                "user_id": user_id,
+                "emoji_status_custom_emoji_id": emoji_status_custom_emoji_id,
+                "emoji_status_expiration_date": emoji_status_expiration_date
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_file(self, file_id: str) -> Task[tg.File]:
         """
         ### [getFile](https://core.telegram.org/bots/api#getfile)  
@@ -772,8 +1284,11 @@ class Bot(BaseBot):
         
         **Note:** This function may not preserve the original file name and MIME type. You should save the file's MIME type and name (if available) when the File object is received.
         """
+        return self(
+            "getFile",
+            params={"file_id": file_id}, 
+        )
 
-    @api_method_wrapper()
     def ban_chat_member(
         self,
         chat_id: int | str,
@@ -787,8 +1302,16 @@ class Bot(BaseBot):
         
         Use this method to ban a user in a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless [unbanned](https://core.telegram.org/bots/api#unbanchatmember) first. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns *True* on success.
         """
+        return self(
+            "banChatMember",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id,
+                "until_date": until_date,
+                "revoke_messages": revoke_messages
+            }, 
+        )
 
-    @api_method_wrapper()
     def unban_chat_member(
         self,
         chat_id: int | str,
@@ -801,8 +1324,15 @@ class Bot(BaseBot):
         
         Use this method to unban a previously banned user in a supergroup or channel. The user will **not** return to the group or channel automatically, but will be able to join via link, etc. The bot must be an administrator for this to work. By default, this method guarantees that after the call the user is not a member of the chat, but will be able to join it. So if the user is a member of the chat they will also be **removed** from the chat. If you don't want this, use the parameter *only\\_if\\_banned*. Returns *True* on success.
         """
+        return self(
+            "unbanChatMember",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id,
+                "only_if_banned": only_if_banned
+            }, 
+        )
 
-    @api_method_wrapper()
     def restrict_chat_member(
         self,
         chat_id: int | str,
@@ -817,8 +1347,17 @@ class Bot(BaseBot):
         
         Use this method to restrict a user in a supergroup. The bot must be an administrator in the supergroup for this to work and must have the appropriate administrator rights. Pass *True* for all permissions to lift restrictions from a user. Returns *True* on success.
         """
+        return self(
+            "restrictChatMember",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id,
+                "permissions": permissions,
+                "use_independent_chat_permissions": use_independent_chat_permissions,
+                "until_date": until_date
+            }, 
+        )
 
-    @api_method_wrapper()
     def promote_chat_member(
         self,
         chat_id: int | str,
@@ -847,8 +1386,31 @@ class Bot(BaseBot):
         
         Use this method to promote or demote a user in a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Pass *False* for all boolean parameters to demote a user. Returns *True* on success.
         """
+        return self(
+            "promoteChatMember",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id,
+                "is_anonymous": is_anonymous,
+                "can_manage_chat": can_manage_chat,
+                "can_delete_messages": can_delete_messages,
+                "can_manage_video_chats": can_manage_video_chats,
+                "can_restrict_members": can_restrict_members,
+                "can_promote_members": can_promote_members,
+                "can_change_info": can_change_info,
+                "can_invite_users": can_invite_users,
+                "can_post_stories": can_post_stories,
+                "can_edit_stories": can_edit_stories,
+                "can_delete_stories": can_delete_stories,
+                "can_post_messages": can_post_messages,
+                "can_edit_messages": can_edit_messages,
+                "can_pin_messages": can_pin_messages,
+                "can_manage_topics": can_manage_topics,
+                "can_manage_direct_messages": can_manage_direct_messages,
+                "can_manage_tags": can_manage_tags
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_chat_administrator_custom_title(
         self,
         chat_id: int | str,
@@ -860,8 +1422,15 @@ class Bot(BaseBot):
         
         Use this method to set a custom title for an administrator in a supergroup promoted by the bot. Returns *True* on success.
         """
+        return self(
+            "setChatAdministratorCustomTitle",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id,
+                "custom_title": custom_title
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_chat_member_tag(
         self,
         chat_id: int | str,
@@ -874,8 +1443,15 @@ class Bot(BaseBot):
         
         Use this method to set a tag for a regular member in a group or a supergroup. The bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_tags* administrator right. Returns *True* on success.
         """
+        return self(
+            "setChatMemberTag",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id,
+                "tag": tag
+            }, 
+        )
 
-    @api_method_wrapper()
     def ban_chat_sender_chat(
         self,
         chat_id: int | str,
@@ -886,8 +1462,14 @@ class Bot(BaseBot):
         
         Use this method to ban a channel chat in a supergroup or a channel. Until the chat is [unbanned](https://core.telegram.org/bots/api#unbanchatsenderchat), the owner of the banned chat won't be able to send messages on behalf of **any of their channels**. The bot must be an administrator in the supergroup or channel for this to work and must have the appropriate administrator rights. Returns *True* on success.
         """
+        return self(
+            "banChatSenderChat",
+            params={
+                "chat_id": chat_id,
+                "sender_chat_id": sender_chat_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def unban_chat_sender_chat(
         self,
         chat_id: int | str,
@@ -898,8 +1480,14 @@ class Bot(BaseBot):
         
         Use this method to unban a previously banned channel chat in a supergroup or channel. The bot must be an administrator for this to work and must have the appropriate administrator rights. Returns *True* on success.
         """
+        return self(
+            "unbanChatSenderChat",
+            params={
+                "chat_id": chat_id,
+                "sender_chat_id": sender_chat_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_chat_permissions(
         self,
         chat_id: int | str,
@@ -912,8 +1500,15 @@ class Bot(BaseBot):
         
         Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the *can\\_restrict\\_members* administrator rights. Returns *True* on success.
         """
+        return self(
+            "setChatPermissions",
+            params={
+                "chat_id": chat_id,
+                "permissions": permissions,
+                "use_independent_chat_permissions": use_independent_chat_permissions
+            }, 
+        )
 
-    @api_method_wrapper()
     def export_chat_invite_link(self, chat_id: int | str) -> Task[str]:
         """
         ### [exportChatInviteLink](https://core.telegram.org/bots/api#exportchatinvitelink)  
@@ -922,8 +1517,11 @@ class Bot(BaseBot):
         
         > Note: Each administrator in a chat generates their own invite links. Bots can't use invite links generated by other administrators. If you want your bot to work with invite links, it will need to generate its own link using [exportChatInviteLink](https://core.telegram.org/bots/api#exportchatinvitelink) or by calling the [getChat](https://core.telegram.org/bots/api#getchat) method. If your bot needs to generate a new primary invite link replacing its previous one, use [exportChatInviteLink](https://core.telegram.org/bots/api#exportchatinvitelink) again.
         """
+        return self(
+            "exportChatInviteLink",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def create_chat_invite_link(
         self,
         chat_id: int | str,
@@ -938,8 +1536,17 @@ class Bot(BaseBot):
         
         Use this method to create an additional invite link for a chat. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. The link can be revoked using the method [revokeChatInviteLink](https://core.telegram.org/bots/api#revokechatinvitelink). Returns the new invite link as [ChatInviteLink](https://core.telegram.org/bots/api#chatinvitelink) object.
         """
+        return self(
+            "createChatInviteLink",
+            params={
+                "chat_id": chat_id,
+                "name": name,
+                "expire_date": expire_date,
+                "member_limit": member_limit,
+                "creates_join_request": creates_join_request
+            }, 
+        )
 
-    @api_method_wrapper()
     def edit_chat_invite_link(
         self,
         chat_id: int | str,
@@ -955,8 +1562,18 @@ class Bot(BaseBot):
         
         Use this method to edit a non-primary invite link created by the bot. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the edited invite link as a [ChatInviteLink](https://core.telegram.org/bots/api#chatinvitelink) object.
         """
+        return self(
+            "editChatInviteLink",
+            params={
+                "chat_id": chat_id,
+                "invite_link": invite_link,
+                "name": name,
+                "expire_date": expire_date,
+                "member_limit": member_limit,
+                "creates_join_request": creates_join_request
+            }, 
+        )
 
-    @api_method_wrapper()
     def create_chat_subscription_invite_link(
         self,
         chat_id: int | str,
@@ -970,8 +1587,16 @@ class Bot(BaseBot):
         
         Use this method to create a [subscription invite link](https://telegram.org/blog/superchannels-star-reactions-subscriptions#star-subscriptions) for a channel chat. The bot must have the *can\\_invite\\_users* administrator rights. The link can be edited using the method [editChatSubscriptionInviteLink](https://core.telegram.org/bots/api#editchatsubscriptioninvitelink) or revoked using the method [revokeChatInviteLink](https://core.telegram.org/bots/api#revokechatinvitelink). Returns the new invite link as a [ChatInviteLink](https://core.telegram.org/bots/api#chatinvitelink) object.
         """
+        return self(
+            "createChatSubscriptionInviteLink",
+            params={
+                "chat_id": chat_id,
+                "subscription_period": subscription_period,
+                "subscription_price": subscription_price,
+                "name": name
+            }, 
+        )
 
-    @api_method_wrapper()
     def edit_chat_subscription_invite_link(
         self,
         chat_id: int | str,
@@ -984,8 +1609,15 @@ class Bot(BaseBot):
         
         Use this method to edit a subscription invite link created by the bot. The bot must have the *can\\_invite\\_users* administrator rights. Returns the edited invite link as a [ChatInviteLink](https://core.telegram.org/bots/api#chatinvitelink) object.
         """
+        return self(
+            "editChatSubscriptionInviteLink",
+            params={
+                "chat_id": chat_id,
+                "invite_link": invite_link,
+                "name": name
+            }, 
+        )
 
-    @api_method_wrapper()
     def revoke_chat_invite_link(
         self,
         chat_id: int | str,
@@ -996,8 +1628,14 @@ class Bot(BaseBot):
         
         Use this method to revoke an invite link created by the bot. If the primary link is revoked, a new link is automatically generated. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the revoked invite link as [ChatInviteLink](https://core.telegram.org/bots/api#chatinvitelink) object.
         """
+        return self(
+            "revokeChatInviteLink",
+            params={
+                "chat_id": chat_id,
+                "invite_link": invite_link
+            }, 
+        )
 
-    @api_method_wrapper()
     def approve_chat_join_request(
         self,
         chat_id: int | str,
@@ -1008,8 +1646,14 @@ class Bot(BaseBot):
         
         Use this method to approve a chat join request. The bot must be an administrator in the chat for this to work and must have the *can\\_invite\\_users* administrator right. Returns *True* on success.
         """
+        return self(
+            "approveChatJoinRequest",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def decline_chat_join_request(
         self,
         chat_id: int | str,
@@ -1020,8 +1664,14 @@ class Bot(BaseBot):
         
         Use this method to decline a chat join request. The bot must be an administrator in the chat for this to work and must have the *can\\_invite\\_users* administrator right. Returns *True* on success.
         """
+        return self(
+            "declineChatJoinRequest",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def answer_chat_join_request_query(
         self,
         chat_join_request_query_id: str,
@@ -1032,8 +1682,14 @@ class Bot(BaseBot):
         
         Use this method to process a received chat join request query. Returns *True* on success.
         """
+        return self(
+            "answerChatJoinRequestQuery",
+            params={
+                "chat_join_request_query_id": chat_join_request_query_id,
+                "result": result
+            }, 
+        )
 
-    @api_method_wrapper()
     def send_chat_join_request_web_app(
         self,
         chat_join_request_query_id: str,
@@ -1042,10 +1698,16 @@ class Bot(BaseBot):
         """
         ### [sendChatJoinRequestWebApp](https://core.telegram.org/bots/api#sendchatjoinrequestwebapp)  
         
-        Use this method to process a received chat join request query by showing a Mini App to the user before deciding the outcome. Returns *True* on success.
+        Use this method to process a received chat join request query by showing a Mini App to the user before deciding the outcome. Call [answerChatJoinRequestQuery](https://core.telegram.org/bots/api#answerchatjoinrequestquery) to resolve the join request query based on the user interaction with the Mini App. Returns *True* on success.
         """
+        return self(
+            "sendChatJoinRequestWebApp",
+            params={
+                "chat_join_request_query_id": chat_join_request_query_id,
+                "web_app_url": web_app_url
+            }, 
+        )
 
-    @api_method_wrapper(check_input_files=["photo"])
     def set_chat_photo(
         self,
         chat_id: int | str,
@@ -1056,16 +1718,26 @@ class Bot(BaseBot):
         
         Use this method to set a new profile photo for the chat. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns *True* on success.
         """
+        return self(
+            "setChatPhoto",
+            params={
+                "chat_id": chat_id,
+                "photo": photo
+            }, 
+            check_input_files=["photo"]
+        )
 
-    @api_method_wrapper()
     def delete_chat_photo(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [deleteChatPhoto](https://core.telegram.org/bots/api#deletechatphoto)  
         
         Use this method to delete a chat photo. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns *True* on success.
         """
+        return self(
+            "deleteChatPhoto",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def set_chat_title(
         self,
         chat_id: int | str,
@@ -1076,8 +1748,14 @@ class Bot(BaseBot):
         
         Use this method to change the title of a chat. Titles can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns *True* on success.
         """
+        return self(
+            "setChatTitle",
+            params={
+                "chat_id": chat_id,
+                "title": title
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_chat_description(
         self,
         chat_id: int | str,
@@ -1089,8 +1767,14 @@ class Bot(BaseBot):
         
         Use this method to change the description of a group, a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns *True* on success.
         """
+        return self(
+            "setChatDescription",
+            params={
+                "chat_id": chat_id,
+                "description": description
+            }, 
+        )
 
-    @api_method_wrapper()
     def pin_chat_message(
         self,
         chat_id: int | str,
@@ -1104,8 +1788,16 @@ class Bot(BaseBot):
         
         Use this method to add a message to the list of pinned messages in a chat. In private chats and channel direct messages chats, all non-service messages can be pinned. Conversely, the bot must be an administrator with the 'can\\_pin\\_messages' right or the 'can\\_edit\\_messages' right to pin messages in groups and channels respectively. Returns *True* on success.
         """
+        return self(
+            "pinChatMessage",
+            params={
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "business_connection_id": business_connection_id,
+                "disable_notification": disable_notification
+            }, 
+        )
 
-    @api_method_wrapper()
     def unpin_chat_message(
         self,
         chat_id: int | str,
@@ -1118,32 +1810,48 @@ class Bot(BaseBot):
         
         Use this method to remove a message from the list of pinned messages in a chat. In private chats and channel direct messages chats, all messages can be unpinned. Conversely, the bot must be an administrator with the 'can\\_pin\\_messages' right or the 'can\\_edit\\_messages' right to unpin messages in groups and channels respectively. Returns *True* on success.
         """
+        return self(
+            "unpinChatMessage",
+            params={
+                "chat_id": chat_id,
+                "business_connection_id": business_connection_id,
+                "message_id": message_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def unpin_all_chat_messages(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [unpinAllChatMessages](https://core.telegram.org/bots/api#unpinallchatmessages)  
         
         Use this method to clear the list of pinned messages in a chat. In private chats and channel direct messages chats, no additional rights are required to unpin all pinned messages. Conversely, the bot must be an administrator with the 'can\\_pin\\_messages' right or the 'can\\_edit\\_messages' right to unpin all pinned messages in groups and channels respectively. Returns *True* on success.
         """
+        return self(
+            "unpinAllChatMessages",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def leave_chat(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [leaveChat](https://core.telegram.org/bots/api#leavechat)  
         
         Use this method for your bot to leave a group, supergroup or channel. Returns *True* on success.
         """
+        return self(
+            "leaveChat",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def get_chat(self, chat_id: int | str) -> Task[tg.ChatFullInfo]:
         """
         ### [getChat](https://core.telegram.org/bots/api#getchat)  
         
         Use this method to get up-to-date information about the chat. Returns a [ChatFullInfo](https://core.telegram.org/bots/api#chatfullinfo) object on success.
         """
+        return self(
+            "getChat",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def get_chat_administrators(
         self,
         chat_id: int | str,
@@ -1155,16 +1863,25 @@ class Bot(BaseBot):
         
         Use this method to get a list of administrators in a chat. Returns an Array of [ChatMember](https://core.telegram.org/bots/api#chatmember) objects.
         """
+        return self(
+            "getChatAdministrators",
+            params={
+                "chat_id": chat_id,
+                "return_bots": return_bots
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_chat_member_count(self, chat_id: int | str) -> Task[int]:
         """
         ### [getChatMemberCount](https://core.telegram.org/bots/api#getchatmembercount)  
         
         Use this method to get the number of members in a chat. Returns *Int* on success.
         """
+        return self(
+            "getChatMemberCount",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def get_chat_member(
         self,
         chat_id: int | str,
@@ -1175,8 +1892,14 @@ class Bot(BaseBot):
         
         Use this method to get information about a member of a chat. The method is only guaranteed to work for other users if the bot is an administrator in the chat. Returns a [ChatMember](https://core.telegram.org/bots/api#chatmember) object on success.
         """
+        return self(
+            "getChatMember",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_user_personal_chat_messages(
         self,
         user_id: int,
@@ -1187,8 +1910,14 @@ class Bot(BaseBot):
         
         Use this method to get the last messages from the personal chat (i.e., the chat currently added to their profile) of a given user. On success, an array of [Message](https://core.telegram.org/bots/api#message) objects is returned.
         """
+        return self(
+            "getUserPersonalChatMessages",
+            params={
+                "user_id": user_id,
+                "limit": limit
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_chat_sticker_set(
         self,
         chat_id: int | str,
@@ -1199,24 +1928,36 @@ class Bot(BaseBot):
         
         Use this method to set a new group sticker set for a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field *can\\_set\\_sticker\\_set* optionally returned in [getChat](https://core.telegram.org/bots/api#getchat) requests to check if the bot can use this method. Returns *True* on success.
         """
+        return self(
+            "setChatStickerSet",
+            params={
+                "chat_id": chat_id,
+                "sticker_set_name": sticker_set_name
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_chat_sticker_set(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [deleteChatStickerSet](https://core.telegram.org/bots/api#deletechatstickerset)  
         
         Use this method to delete a group sticker set from a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field *can\\_set\\_sticker\\_set* optionally returned in [getChat](https://core.telegram.org/bots/api#getchat) requests to check if the bot can use this method. Returns *True* on success.
         """
+        return self(
+            "deleteChatStickerSet",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def get_forum_topic_icon_stickers(self) -> Task[list[tg.Sticker]]:
         """
         ### [getForumTopicIconStickers](https://core.telegram.org/bots/api#getforumtopiciconstickers)  
         
         Use this method to get custom emoji stickers, which can be used as a forum topic icon by any user. Requires no parameters. Returns an Array of [Sticker](https://core.telegram.org/bots/api#sticker) objects.
         """
+        return self(
+            "getForumTopicIconStickers",
+            params={}, 
+        )
 
-    @api_method_wrapper()
     def create_forum_topic(
         self,
         chat_id: int | str,
@@ -1230,8 +1971,16 @@ class Bot(BaseBot):
         
         Use this method to create a topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_topics* administrator right. Returns information about the created topic as a [ForumTopic](https://core.telegram.org/bots/api#forumtopic) object.
         """
+        return self(
+            "createForumTopic",
+            params={
+                "chat_id": chat_id,
+                "name": name,
+                "icon_color": icon_color,
+                "icon_custom_emoji_id": icon_custom_emoji_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def edit_forum_topic(
         self,
         chat_id: int | str,
@@ -1245,8 +1994,16 @@ class Bot(BaseBot):
         
         Use this method to edit name and icon of a topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_topics* administrator rights, unless it is the creator of the topic. Returns *True* on success.
         """
+        return self(
+            "editForumTopic",
+            params={
+                "chat_id": chat_id,
+                "message_thread_id": message_thread_id,
+                "name": name,
+                "icon_custom_emoji_id": icon_custom_emoji_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def close_forum_topic(
         self,
         chat_id: int | str,
@@ -1257,8 +2014,14 @@ class Bot(BaseBot):
         
         Use this method to close an open topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_topics* administrator rights, unless it is the creator of the topic. Returns *True* on success.
         """
+        return self(
+            "closeForumTopic",
+            params={
+                "chat_id": chat_id,
+                "message_thread_id": message_thread_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def reopen_forum_topic(
         self,
         chat_id: int | str,
@@ -1269,8 +2032,14 @@ class Bot(BaseBot):
         
         Use this method to reopen a closed topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_topics* administrator rights, unless it is the creator of the topic. Returns *True* on success.
         """
+        return self(
+            "reopenForumTopic",
+            params={
+                "chat_id": chat_id,
+                "message_thread_id": message_thread_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_forum_topic(
         self,
         chat_id: int | str,
@@ -1281,8 +2050,14 @@ class Bot(BaseBot):
         
         Use this method to delete a forum topic along with all its messages in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the *can\\_delete\\_messages* administrator rights. Returns *True* on success.
         """
+        return self(
+            "deleteForumTopic",
+            params={
+                "chat_id": chat_id,
+                "message_thread_id": message_thread_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def unpin_all_forum_topic_messages(
         self,
         chat_id: int | str,
@@ -1293,8 +2068,14 @@ class Bot(BaseBot):
         
         Use this method to clear the list of pinned messages in a forum topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the *can\\_pin\\_messages* administrator right in the supergroup. Returns *True* on success.
         """
+        return self(
+            "unpinAllForumTopicMessages",
+            params={
+                "chat_id": chat_id,
+                "message_thread_id": message_thread_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def edit_general_forum_topic(
         self,
         chat_id: int | str,
@@ -1305,48 +2086,69 @@ class Bot(BaseBot):
         
         Use this method to edit the name of the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_topics* administrator rights. Returns *True* on success.
         """
+        return self(
+            "editGeneralForumTopic",
+            params={
+                "chat_id": chat_id,
+                "name": name
+            }, 
+        )
 
-    @api_method_wrapper()
     def close_general_forum_topic(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [closeGeneralForumTopic](https://core.telegram.org/bots/api#closegeneralforumtopic)  
         
         Use this method to close an open 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_topics* administrator rights. Returns *True* on success.
         """
+        return self(
+            "closeGeneralForumTopic",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def reopen_general_forum_topic(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [reopenGeneralForumTopic](https://core.telegram.org/bots/api#reopengeneralforumtopic)  
         
         Use this method to reopen a closed 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_topics* administrator rights. The topic will be automatically unhidden if it was hidden. Returns *True* on success.
         """
+        return self(
+            "reopenGeneralForumTopic",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def hide_general_forum_topic(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [hideGeneralForumTopic](https://core.telegram.org/bots/api#hidegeneralforumtopic)  
         
         Use this method to hide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_topics* administrator rights. The topic will be automatically closed if it was open. Returns *True* on success.
         """
+        return self(
+            "hideGeneralForumTopic",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def unhide_general_forum_topic(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [unhideGeneralForumTopic](https://core.telegram.org/bots/api#unhidegeneralforumtopic)  
         
         Use this method to unhide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the *can\\_manage\\_topics* administrator rights. Returns *True* on success.
         """
+        return self(
+            "unhideGeneralForumTopic",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def unpin_all_general_forum_topic_messages(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [unpinAllGeneralForumTopicMessages](https://core.telegram.org/bots/api#unpinallgeneralforumtopicmessages)  
         
         Use this method to clear the list of pinned messages in a General forum topic. The bot must be an administrator in the chat for this to work and must have the *can\\_pin\\_messages* administrator right in the supergroup. Returns *True* on success.
         """
+        return self(
+            "unpinAllGeneralForumTopicMessages",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def answer_callback_query(
         self,
         callback_query_id: str,
@@ -1363,8 +2165,17 @@ class Bot(BaseBot):
         
         > Alternatively, the user can be redirected to the specified Game URL. For this option to work, you must first create a game for your bot via [@BotFather](https://t.me/botfather) and accept the terms. Otherwise, you may use links like `t.me/your_bot?start=XXXX` that open your bot with a parameter.
         """
+        return self(
+            "answerCallbackQuery",
+            params={
+                "callback_query_id": callback_query_id,
+                "text": text,
+                "show_alert": show_alert,
+                "url": url,
+                "cache_time": cache_time
+            }, 
+        )
 
-    @api_method_wrapper()
     def answer_guest_query(
         self,
         guest_query_id: str,
@@ -1375,8 +2186,14 @@ class Bot(BaseBot):
         
         Use this method to reply to a received guest message. On success, a [SentGuestMessage](https://core.telegram.org/bots/api#sentguestmessage) object is returned.
         """
+        return self(
+            "answerGuestQuery",
+            params={
+                "guest_query_id": guest_query_id,
+                "result": result
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_user_chat_boosts(
         self,
         chat_id: int | str,
@@ -1387,40 +2204,58 @@ class Bot(BaseBot):
         
         Use this method to get the list of boosts added to a chat by a user. Requires administrator rights in the chat. Returns a [UserChatBoosts](https://core.telegram.org/bots/api#userchatboosts) object.
         """
+        return self(
+            "getUserChatBoosts",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_business_connection(self, business_connection_id: str) -> Task[tg.BusinessConnection]:
         """
         ### [getBusinessConnection](https://core.telegram.org/bots/api#getbusinessconnection)  
         
         Use this method to get information about the connection of the bot with a business account. Returns a [BusinessConnection](https://core.telegram.org/bots/api#businessconnection) object on success.
         """
+        return self(
+            "getBusinessConnection",
+            params={"business_connection_id": business_connection_id}, 
+        )
 
-    @api_method_wrapper()
     def get_managed_bot_token(self, user_id: int) -> Task[str]:
         """
         ### [getManagedBotToken](https://core.telegram.org/bots/api#getmanagedbottoken)  
         
         Use this method to get the token of a managed bot. Returns the token as *String* on success.
         """
+        return self(
+            "getManagedBotToken",
+            params={"user_id": user_id}, 
+        )
 
-    @api_method_wrapper()
     def replace_managed_bot_token(self, user_id: int) -> Task[str]:
         """
         ### [replaceManagedBotToken](https://core.telegram.org/bots/api#replacemanagedbottoken)  
         
         Use this method to revoke the current token of a managed bot and generate a new one. Returns the new token as *String* on success.
         """
+        return self(
+            "replaceManagedBotToken",
+            params={"user_id": user_id}, 
+        )
 
-    @api_method_wrapper()
     def get_managed_bot_access_settings(self, user_id: int) -> Task[tg.BotAccessSettings]:
         """
         ### [getManagedBotAccessSettings](https://core.telegram.org/bots/api#getmanagedbotaccesssettings)  
         
         Use this method to get the access settings of a managed bot. Returns a [BotAccessSettings](https://core.telegram.org/bots/api#botaccesssettings) object on success.
         """
+        return self(
+            "getManagedBotAccessSettings",
+            params={"user_id": user_id}, 
+        )
 
-    @api_method_wrapper()
     def set_managed_bot_access_settings(
         self,
         user_id: int,
@@ -1433,8 +2268,15 @@ class Bot(BaseBot):
         
         Use this method to change the access settings of a managed bot. Returns *True* on success.
         """
+        return self(
+            "setManagedBotAccessSettings",
+            params={
+                "user_id": user_id,
+                "is_access_restricted": is_access_restricted,
+                "added_user_ids": added_user_ids
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_my_commands(
         self,
         commands: list[tg.BotCommand],
@@ -1447,8 +2289,15 @@ class Bot(BaseBot):
         
         Use this method to change the list of the bot's commands. See [this manual](https://core.telegram.org/bots/features#commands) for more details about bot commands. Returns *True* on success.
         """
+        return self(
+            "setMyCommands",
+            params={
+                "commands": commands,
+                "scope": scope,
+                "language_code": language_code
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_my_commands(
         self,
         *,
@@ -1460,8 +2309,14 @@ class Bot(BaseBot):
         
         Use this method to delete the list of the bot's commands for the given scope and user language. After deletion, [higher level commands](https://core.telegram.org/bots/api#determining-list-of-commands) will be shown to affected users. Returns *True* on success.
         """
+        return self(
+            "deleteMyCommands",
+            params={
+                "scope": scope,
+                "language_code": language_code
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_my_commands(
         self,
         *,
@@ -1473,8 +2328,14 @@ class Bot(BaseBot):
         
         Use this method to get the current list of the bot's commands for the given scope and user language. Returns an Array of [BotCommand](https://core.telegram.org/bots/api#botcommand) objects. If commands aren't set, an empty list is returned.
         """
+        return self(
+            "getMyCommands",
+            params={
+                "scope": scope,
+                "language_code": language_code
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_my_name(
         self,
         *,
@@ -1486,8 +2347,14 @@ class Bot(BaseBot):
         
         Use this method to change the bot's name. Returns *True* on success.
         """
+        return self(
+            "setMyName",
+            params={
+                "name": name,
+                "language_code": language_code
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_my_name(
         self,
         *,
@@ -1498,8 +2365,11 @@ class Bot(BaseBot):
         
         Use this method to get the current bot name for the given user language. Returns [BotName](https://core.telegram.org/bots/api#botname) on success.
         """
+        return self(
+            "getMyName",
+            params={"language_code": language_code}, 
+        )
 
-    @api_method_wrapper()
     def set_my_description(
         self,
         *,
@@ -1511,8 +2381,14 @@ class Bot(BaseBot):
         
         Use this method to change the bot's description, which is shown in the chat with the bot if the chat is empty. Returns *True* on success.
         """
+        return self(
+            "setMyDescription",
+            params={
+                "description": description,
+                "language_code": language_code
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_my_description(
         self,
         *,
@@ -1523,8 +2399,11 @@ class Bot(BaseBot):
         
         Use this method to get the current bot description for the given user language. Returns [BotDescription](https://core.telegram.org/bots/api#botdescription) on success.
         """
+        return self(
+            "getMyDescription",
+            params={"language_code": language_code}, 
+        )
 
-    @api_method_wrapper()
     def set_my_short_description(
         self,
         *,
@@ -1536,8 +2415,14 @@ class Bot(BaseBot):
         
         Use this method to change the bot's short description, which is shown on the bot's profile page and is sent together with the link when users share the bot. Returns *True* on success.
         """
+        return self(
+            "setMyShortDescription",
+            params={
+                "short_description": short_description,
+                "language_code": language_code
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_my_short_description(
         self,
         *,
@@ -1548,24 +2433,34 @@ class Bot(BaseBot):
         
         Use this method to get the current bot short description for the given user language. Returns [BotShortDescription](https://core.telegram.org/bots/api#botshortdescription) on success.
         """
+        return self(
+            "getMyShortDescription",
+            params={"language_code": language_code}, 
+        )
 
-    @api_method_wrapper(check_input_media={"photo": ["photo", "animation"]})
     def set_my_profile_photo(self, photo: tg.InputProfilePhoto) -> Task[t.Literal[True]]:
         """
         ### [setMyProfilePhoto](https://core.telegram.org/bots/api#setmyprofilephoto)  
         
         Changes the profile photo of the bot. Returns *True* on success.
         """
+        return self(
+            "setMyProfilePhoto",
+            params={"photo": photo}, 
+            check_input_media={"photo": ["animation", "photo"]}
+        )
 
-    @api_method_wrapper()
     def remove_my_profile_photo(self) -> Task[t.Literal[True]]:
         """
         ### [removeMyProfilePhoto](https://core.telegram.org/bots/api#removemyprofilephoto)  
         
         Removes the profile photo of the bot. Requires no parameters. Returns *True* on success.
         """
+        return self(
+            "removeMyProfilePhoto",
+            params={}, 
+        )
 
-    @api_method_wrapper()
     def set_chat_menu_button(
         self,
         *,
@@ -1577,8 +2472,14 @@ class Bot(BaseBot):
         
         Use this method to change the bot's menu button in a private chat, or the default menu button. Returns *True* on success.
         """
+        return self(
+            "setChatMenuButton",
+            params={
+                "chat_id": chat_id,
+                "menu_button": menu_button
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_chat_menu_button(
         self,
         *,
@@ -1589,8 +2490,11 @@ class Bot(BaseBot):
         
         Use this method to get the current value of the bot's menu button in a private chat, or the default menu button. Returns [MenuButton](https://core.telegram.org/bots/api#menubutton) on success.
         """
+        return self(
+            "getChatMenuButton",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def set_my_default_administrator_rights(
         self,
         *,
@@ -1602,8 +2506,14 @@ class Bot(BaseBot):
         
         Use this method to change the default administrator rights requested by the bot when it's added as an administrator to groups or channels. These rights will be suggested to users, but they are free to modify the list before adding the bot. Returns *True* on success.
         """
+        return self(
+            "setMyDefaultAdministratorRights",
+            params={
+                "rights": rights,
+                "for_channels": for_channels
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_my_default_administrator_rights(
         self,
         *,
@@ -1614,16 +2524,22 @@ class Bot(BaseBot):
         
         Use this method to get the current default administrator rights of the bot. Returns [ChatAdministratorRights](https://core.telegram.org/bots/api#chatadministratorrights) on success.
         """
+        return self(
+            "getMyDefaultAdministratorRights",
+            params={"for_channels": for_channels}, 
+        )
 
-    @api_method_wrapper()
     def get_available_gifts(self) -> Task[tg.Gifts]:
         """
         ### [getAvailableGifts](https://core.telegram.org/bots/api#getavailablegifts)  
         
         Returns the list of gifts that can be sent by the bot to users and channel chats. Requires no parameters. Returns a [Gifts](https://core.telegram.org/bots/api#gifts) object.
         """
+        return self(
+            "getAvailableGifts",
+            params={}, 
+        )
 
-    @api_method_wrapper()
     def send_gift(
         self,
         gift_id: str,
@@ -1640,8 +2556,19 @@ class Bot(BaseBot):
         
         Sends a gift to the given user or channel chat. The gift can't be converted to Telegram Stars by the receiver. Returns *True* on success.
         """
+        return self(
+            "sendGift",
+            params={
+                "gift_id": gift_id,
+                "user_id": user_id,
+                "chat_id": chat_id,
+                "pay_for_upgrade": pay_for_upgrade,
+                "text": text,
+                "text_parse_mode": text_parse_mode,
+                "text_entities": text_entities
+            }, 
+        )
 
-    @api_method_wrapper()
     def gift_premium_subscription(
         self,
         user_id: int,
@@ -1657,8 +2584,18 @@ class Bot(BaseBot):
         
         Gifts a Telegram Premium subscription to the given user. Returns *True* on success.
         """
+        return self(
+            "giftPremiumSubscription",
+            params={
+                "user_id": user_id,
+                "month_count": month_count,
+                "star_count": star_count,
+                "text": text,
+                "text_parse_mode": text_parse_mode,
+                "text_entities": text_entities
+            }, 
+        )
 
-    @api_method_wrapper()
     def verify_user(
         self,
         user_id: int,
@@ -1670,8 +2607,14 @@ class Bot(BaseBot):
         
         Verifies a user [on behalf of the organization](https://telegram.org/verify#third-party-verification) which is represented by the bot. Returns *True* on success.
         """
+        return self(
+            "verifyUser",
+            params={
+                "user_id": user_id,
+                "custom_description": custom_description
+            }, 
+        )
 
-    @api_method_wrapper()
     def verify_chat(
         self,
         chat_id: int | str,
@@ -1683,24 +2626,36 @@ class Bot(BaseBot):
         
         Verifies a chat [on behalf of the organization](https://telegram.org/verify#third-party-verification) which is represented by the bot. Returns *True* on success.
         """
+        return self(
+            "verifyChat",
+            params={
+                "chat_id": chat_id,
+                "custom_description": custom_description
+            }, 
+        )
 
-    @api_method_wrapper()
     def remove_user_verification(self, user_id: int) -> Task[t.Literal[True]]:
         """
         ### [removeUserVerification](https://core.telegram.org/bots/api#removeuserverification)  
         
         Removes verification from a user who is currently verified [on behalf of the organization](https://telegram.org/verify#third-party-verification) represented by the bot. Returns *True* on success.
         """
+        return self(
+            "removeUserVerification",
+            params={"user_id": user_id}, 
+        )
 
-    @api_method_wrapper()
     def remove_chat_verification(self, chat_id: int | str) -> Task[t.Literal[True]]:
         """
         ### [removeChatVerification](https://core.telegram.org/bots/api#removechatverification)  
         
         Removes verification from a chat that is currently verified [on behalf of the organization](https://telegram.org/verify#third-party-verification) represented by the bot. Returns *True* on success.
         """
+        return self(
+            "removeChatVerification",
+            params={"chat_id": chat_id}, 
+        )
 
-    @api_method_wrapper()
     def read_business_message(
         self,
         business_connection_id: str,
@@ -1712,8 +2667,15 @@ class Bot(BaseBot):
         
         Marks incoming message as read on behalf of a business account. Requires the *can\\_read\\_messages* business bot right. Returns *True* on success.
         """
+        return self(
+            "readBusinessMessage",
+            params={
+                "business_connection_id": business_connection_id,
+                "chat_id": chat_id,
+                "message_id": message_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_business_messages(
         self,
         business_connection_id: str,
@@ -1724,8 +2686,14 @@ class Bot(BaseBot):
         
         Delete messages on behalf of a business account. Requires the *can\\_delete\\_sent\\_messages* business bot right to delete messages sent by the bot itself, or the *can\\_delete\\_all\\_messages* business bot right to delete any message. Returns *True* on success.
         """
+        return self(
+            "deleteBusinessMessages",
+            params={
+                "business_connection_id": business_connection_id,
+                "message_ids": message_ids
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_business_account_name(
         self,
         business_connection_id: str,
@@ -1738,8 +2706,15 @@ class Bot(BaseBot):
         
         Changes the first and last name of a managed business account. Requires the *can\\_change\\_name* business bot right. Returns *True* on success.
         """
+        return self(
+            "setBusinessAccountName",
+            params={
+                "business_connection_id": business_connection_id,
+                "first_name": first_name,
+                "last_name": last_name
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_business_account_username(
         self,
         business_connection_id: str,
@@ -1751,8 +2726,14 @@ class Bot(BaseBot):
         
         Changes the username of a managed business account. Requires the *can\\_change\\_username* business bot right. Returns *True* on success.
         """
+        return self(
+            "setBusinessAccountUsername",
+            params={
+                "business_connection_id": business_connection_id,
+                "username": username
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_business_account_bio(
         self,
         business_connection_id: str,
@@ -1764,8 +2745,14 @@ class Bot(BaseBot):
         
         Changes the bio of a managed business account. Requires the *can\\_change\\_bio* business bot right. Returns *True* on success.
         """
+        return self(
+            "setBusinessAccountBio",
+            params={
+                "business_connection_id": business_connection_id,
+                "bio": bio
+            }, 
+        )
 
-    @api_method_wrapper(check_input_media={"photo": ["photo", "animation"]})
     def set_business_account_profile_photo(
         self,
         business_connection_id: str,
@@ -1778,8 +2765,16 @@ class Bot(BaseBot):
         
         Changes the profile photo of a managed business account. Requires the *can\\_edit\\_profile\\_photo* business bot right. Returns *True* on success.
         """
+        return self(
+            "setBusinessAccountProfilePhoto",
+            params={
+                "business_connection_id": business_connection_id,
+                "photo": photo,
+                "is_public": is_public
+            }, 
+            check_input_media={"photo": ["animation", "photo"]}
+        )
 
-    @api_method_wrapper()
     def remove_business_account_profile_photo(
         self,
         business_connection_id: str,
@@ -1791,8 +2786,14 @@ class Bot(BaseBot):
         
         Removes the current profile photo of a managed business account. Requires the *can\\_edit\\_profile\\_photo* business bot right. Returns *True* on success.
         """
+        return self(
+            "removeBusinessAccountProfilePhoto",
+            params={
+                "business_connection_id": business_connection_id,
+                "is_public": is_public
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_business_account_gift_settings(
         self,
         business_connection_id: str,
@@ -1804,16 +2805,26 @@ class Bot(BaseBot):
         
         Changes the privacy settings pertaining to incoming gifts in a managed business account. Requires the *can\\_change\\_gift\\_settings* business bot right. Returns *True* on success.
         """
+        return self(
+            "setBusinessAccountGiftSettings",
+            params={
+                "business_connection_id": business_connection_id,
+                "show_gift_button": show_gift_button,
+                "accepted_gift_types": accepted_gift_types
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_business_account_star_balance(self, business_connection_id: str) -> Task[tg.StarAmount]:
         """
         ### [getBusinessAccountStarBalance](https://core.telegram.org/bots/api#getbusinessaccountstarbalance)  
         
         Returns the amount of Telegram Stars owned by a managed business account. Requires the *can\\_view\\_gifts\\_and\\_stars* business bot right. Returns [StarAmount](https://core.telegram.org/bots/api#staramount) on success.
         """
+        return self(
+            "getBusinessAccountStarBalance",
+            params={"business_connection_id": business_connection_id}, 
+        )
 
-    @api_method_wrapper()
     def transfer_business_account_stars(
         self,
         business_connection_id: str,
@@ -1824,8 +2835,14 @@ class Bot(BaseBot):
         
         Transfers Telegram Stars from the business account balance to the bot's balance. Requires the *can\\_transfer\\_stars* business bot right. Returns *True* on success.
         """
+        return self(
+            "transferBusinessAccountStars",
+            params={
+                "business_connection_id": business_connection_id,
+                "star_count": star_count
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_business_account_gifts(
         self,
         business_connection_id: str,
@@ -1846,8 +2863,23 @@ class Bot(BaseBot):
         
         Returns the gifts received and owned by a managed business account. Requires the *can\\_view\\_gifts\\_and\\_stars* business bot right. Returns [OwnedGifts](https://core.telegram.org/bots/api#ownedgifts) on success.
         """
+        return self(
+            "getBusinessAccountGifts",
+            params={
+                "business_connection_id": business_connection_id,
+                "exclude_unsaved": exclude_unsaved,
+                "exclude_saved": exclude_saved,
+                "exclude_unlimited": exclude_unlimited,
+                "exclude_limited_upgradable": exclude_limited_upgradable,
+                "exclude_limited_non_upgradable": exclude_limited_non_upgradable,
+                "exclude_unique": exclude_unique,
+                "exclude_from_blockchain": exclude_from_blockchain,
+                "sort_by_price": sort_by_price,
+                "offset": offset,
+                "limit": limit
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_user_gifts(
         self,
         user_id: int,
@@ -1866,8 +2898,21 @@ class Bot(BaseBot):
         
         Returns the gifts owned and hosted by a user. Returns [OwnedGifts](https://core.telegram.org/bots/api#ownedgifts) on success.
         """
+        return self(
+            "getUserGifts",
+            params={
+                "user_id": user_id,
+                "exclude_unlimited": exclude_unlimited,
+                "exclude_limited_upgradable": exclude_limited_upgradable,
+                "exclude_limited_non_upgradable": exclude_limited_non_upgradable,
+                "exclude_from_blockchain": exclude_from_blockchain,
+                "exclude_unique": exclude_unique,
+                "sort_by_price": sort_by_price,
+                "offset": offset,
+                "limit": limit
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_chat_gifts(
         self,
         chat_id: int | str,
@@ -1888,8 +2933,23 @@ class Bot(BaseBot):
         
         Returns the gifts owned by a chat. Returns [OwnedGifts](https://core.telegram.org/bots/api#ownedgifts) on success.
         """
+        return self(
+            "getChatGifts",
+            params={
+                "chat_id": chat_id,
+                "exclude_unsaved": exclude_unsaved,
+                "exclude_saved": exclude_saved,
+                "exclude_unlimited": exclude_unlimited,
+                "exclude_limited_upgradable": exclude_limited_upgradable,
+                "exclude_limited_non_upgradable": exclude_limited_non_upgradable,
+                "exclude_from_blockchain": exclude_from_blockchain,
+                "exclude_unique": exclude_unique,
+                "sort_by_price": sort_by_price,
+                "offset": offset,
+                "limit": limit
+            }, 
+        )
 
-    @api_method_wrapper()
     def convert_gift_to_stars(
         self,
         business_connection_id: str,
@@ -1900,8 +2960,14 @@ class Bot(BaseBot):
         
         Converts a given regular gift to Telegram Stars. Requires the *can\\_convert\\_gifts\\_to\\_stars* business bot right. Returns *True* on success.
         """
+        return self(
+            "convertGiftToStars",
+            params={
+                "business_connection_id": business_connection_id,
+                "owned_gift_id": owned_gift_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def upgrade_gift(
         self,
         business_connection_id: str,
@@ -1915,8 +2981,16 @@ class Bot(BaseBot):
         
         Upgrades a given regular gift to a unique gift. Requires the *can\\_transfer\\_and\\_upgrade\\_gifts* business bot right. Additionally requires the *can\\_transfer\\_stars* business bot right if the upgrade is paid. Returns *True* on success.
         """
+        return self(
+            "upgradeGift",
+            params={
+                "business_connection_id": business_connection_id,
+                "owned_gift_id": owned_gift_id,
+                "keep_original_details": keep_original_details,
+                "star_count": star_count
+            }, 
+        )
 
-    @api_method_wrapper()
     def transfer_gift(
         self,
         business_connection_id: str,
@@ -1930,8 +3004,16 @@ class Bot(BaseBot):
         
         Transfers an owned unique gift to another user. Requires the *can\\_transfer\\_and\\_upgrade\\_gifts* business bot right. Requires *can\\_transfer\\_stars* business bot right if the transfer is paid. Returns *True* on success.
         """
+        return self(
+            "transferGift",
+            params={
+                "business_connection_id": business_connection_id,
+                "owned_gift_id": owned_gift_id,
+                "new_owner_chat_id": new_owner_chat_id,
+                "star_count": star_count
+            }, 
+        )
 
-    @api_method_wrapper(check_input_media={"content": ["video", "photo"]})
     def post_story(
         self,
         business_connection_id: str,
@@ -1950,8 +3032,22 @@ class Bot(BaseBot):
         
         Posts a story on behalf of a managed business account. Requires the *can\\_manage\\_stories* business bot right. Returns [Story](https://core.telegram.org/bots/api#story) on success.
         """
+        return self(
+            "postStory",
+            params={
+                "business_connection_id": business_connection_id,
+                "content": content,
+                "active_period": active_period,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "areas": areas,
+                "post_to_chat_page": post_to_chat_page,
+                "protect_content": protect_content
+            }, 
+            check_input_media={"content": ["video", "photo"]}
+        )
 
-    @api_method_wrapper()
     def repost_story(
         self,
         business_connection_id: str,
@@ -1967,8 +3063,18 @@ class Bot(BaseBot):
         
         Reposts a story on behalf of a business account from another business account. Both business accounts must be managed by the same bot, and the story on the source account must have been posted (or reposted) by the bot. Requires the *can\\_manage\\_stories* business bot right for both business accounts. Returns [Story](https://core.telegram.org/bots/api#story) on success.
         """
+        return self(
+            "repostStory",
+            params={
+                "business_connection_id": business_connection_id,
+                "from_chat_id": from_chat_id,
+                "from_story_id": from_story_id,
+                "active_period": active_period,
+                "post_to_chat_page": post_to_chat_page,
+                "protect_content": protect_content
+            }, 
+        )
 
-    @api_method_wrapper(check_input_media={"content": ["video", "photo"]})
     def edit_story(
         self,
         business_connection_id: str,
@@ -1985,8 +3091,20 @@ class Bot(BaseBot):
         
         Edits a story previously posted by the bot on behalf of a managed business account. Requires the *can\\_manage\\_stories* business bot right. Returns [Story](https://core.telegram.org/bots/api#story) on success.
         """
+        return self(
+            "editStory",
+            params={
+                "business_connection_id": business_connection_id,
+                "story_id": story_id,
+                "content": content,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "areas": areas
+            }, 
+            check_input_media={"content": ["video", "photo"]}
+        )
 
-    @api_method_wrapper()
     def delete_story(
         self,
         business_connection_id: str,
@@ -1997,8 +3115,14 @@ class Bot(BaseBot):
         
         Deletes a story previously posted by the bot on behalf of a managed business account. Requires the *can\\_manage\\_stories* business bot right. Returns *True* on success.
         """
+        return self(
+            "deleteStory",
+            params={
+                "business_connection_id": business_connection_id,
+                "story_id": story_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def answer_web_app_query(
         self,
         web_app_query_id: str,
@@ -2009,8 +3133,14 @@ class Bot(BaseBot):
         
         Use this method to set the result of an interaction with a [Web App](https://core.telegram.org/bots/webapps) and send a corresponding message on behalf of the user to the chat from which the query originated. On success, a [SentWebAppMessage](https://core.telegram.org/bots/api#sentwebappmessage) object is returned.
         """
+        return self(
+            "answerWebAppQuery",
+            params={
+                "web_app_query_id": web_app_query_id,
+                "result": result
+            }, 
+        )
 
-    @api_method_wrapper()
     def save_prepared_inline_message(
         self,
         user_id: int,
@@ -2026,8 +3156,18 @@ class Bot(BaseBot):
         
         Stores a message that can be sent by a user of a Mini App. Returns a [PreparedInlineMessage](https://core.telegram.org/bots/api#preparedinlinemessage) object.
         """
+        return self(
+            "savePreparedInlineMessage",
+            params={
+                "user_id": user_id,
+                "result": result,
+                "allow_user_chats": allow_user_chats,
+                "allow_bot_chats": allow_bot_chats,
+                "allow_group_chats": allow_group_chats,
+                "allow_channel_chats": allow_channel_chats
+            }, 
+        )
 
-    @api_method_wrapper()
     def save_prepared_keyboard_button(
         self,
         user_id: int,
@@ -2038,8 +3178,14 @@ class Bot(BaseBot):
         
         Stores a keyboard button that can be used by a user within a Mini App. Returns a [PreparedKeyboardButton](https://core.telegram.org/bots/api#preparedkeyboardbutton) object.
         """
+        return self(
+            "savePreparedKeyboardButton",
+            params={
+                "user_id": user_id,
+                "button": button
+            }, 
+        )
 
-    @api_method_wrapper()
     def edit_message_text(
         self,
         *,
@@ -2053,14 +3199,28 @@ class Bot(BaseBot):
         link_preview_options: tg.LinkPreviewOptions | None = None,
         rich_message: tg.InputRichMessage | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageText](https://core.telegram.org/bots/api#editmessagetext)  
         
         Use this method to edit text, rich and [game](https://core.telegram.org/bots/api#games) messages. On success, if the edited message is not an inline message, the edited [Message](https://core.telegram.org/bots/api#message) is returned, otherwise *True* is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within **48 hours** from the time they were sent.
         """
+        return self(
+            "editMessageText",
+            params={
+                "business_connection_id": business_connection_id,
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "inline_message_id": inline_message_id,
+                "text": text,
+                "parse_mode": parse_mode,
+                "entities": entities,
+                "link_preview_options": link_preview_options,
+                "rich_message": rich_message,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def edit_message_caption(
         self,
         *,
@@ -2073,14 +3233,27 @@ class Bot(BaseBot):
         caption_entities: list[tg.MessageEntity] | None = None,
         show_caption_above_media: bool | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageCaption](https://core.telegram.org/bots/api#editmessagecaption)  
         
         Use this method to edit captions of messages. On success, if the edited message is not an inline message, the edited [Message](https://core.telegram.org/bots/api#message) is returned, otherwise *True* is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within **48 hours** from the time they were sent.
         """
+        return self(
+            "editMessageCaption",
+            params={
+                "business_connection_id": business_connection_id,
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "inline_message_id": inline_message_id,
+                "caption": caption,
+                "parse_mode": parse_mode,
+                "caption_entities": caption_entities,
+                "show_caption_above_media": show_caption_above_media,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper(check_input_media={"media": ["thumbnail", "photo", "media", "cover"]})
     def edit_message_media(
         self,
         media: tg.InputMedia,
@@ -2090,14 +3263,25 @@ class Bot(BaseBot):
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageMedia](https://core.telegram.org/bots/api#editmessagemedia)  
         
         Use this method to edit animation, audio, document, live photo, photo, or video messages, or to replace a text or a rich message with a media. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo, a live photo, or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file\\_id or specify a URL. On success, if the edited message is not an inline message, the edited [Message](https://core.telegram.org/bots/api#message) is returned, otherwise *True* is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within **48 hours** from the time they were sent.
         """
+        return self(
+            "editMessageMedia",
+            params={
+                "media": media,
+                "business_connection_id": business_connection_id,
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "inline_message_id": inline_message_id,
+                "reply_markup": reply_markup
+            }, 
+            check_input_media={"media": ["cover", "thumbnail", "media", "photo"]}
+        )
 
-    @api_method_wrapper()
     def edit_message_live_location(
         self,
         latitude: float,
@@ -2112,14 +3296,29 @@ class Bot(BaseBot):
         heading: int | None = None,
         proximity_alert_radius: int | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageLiveLocation](https://core.telegram.org/bots/api#editmessagelivelocation)  
         
         Use this method to edit live location messages. A location can be edited until its *live\\_period* expires or editing is explicitly disabled by a call to [stopMessageLiveLocation](https://core.telegram.org/bots/api#stopmessagelivelocation). On success, if the edited message is not an inline message, the edited [Message](https://core.telegram.org/bots/api#message) is returned, otherwise *True* is returned.
         """
+        return self(
+            "editMessageLiveLocation",
+            params={
+                "latitude": latitude,
+                "longitude": longitude,
+                "business_connection_id": business_connection_id,
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "inline_message_id": inline_message_id,
+                "live_period": live_period,
+                "horizontal_accuracy": horizontal_accuracy,
+                "heading": heading,
+                "proximity_alert_radius": proximity_alert_radius,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def stop_message_live_location(
         self,
         *,
@@ -2128,14 +3327,23 @@ class Bot(BaseBot):
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [stopMessageLiveLocation](https://core.telegram.org/bots/api#stopmessagelivelocation)  
         
         Use this method to stop updating a live location message before *live\\_period* expires. On success, if the message is not an inline message, the edited [Message](https://core.telegram.org/bots/api#message) is returned, otherwise *True* is returned.
         """
+        return self(
+            "stopMessageLiveLocation",
+            params={
+                "business_connection_id": business_connection_id,
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "inline_message_id": inline_message_id,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def edit_message_checklist(
         self,
         business_connection_id: str,
@@ -2150,8 +3358,17 @@ class Bot(BaseBot):
         
         Use this method to edit a checklist on behalf of a connected business account. On success, the edited [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "editMessageChecklist",
+            params={
+                "business_connection_id": business_connection_id,
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "checklist": checklist,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def edit_message_reply_markup(
         self,
         *,
@@ -2160,14 +3377,23 @@ class Bot(BaseBot):
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [editMessageReplyMarkup](https://core.telegram.org/bots/api#editmessagereplymarkup)  
         
         Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited [Message](https://core.telegram.org/bots/api#message) is returned, otherwise *True* is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within **48 hours** from the time they were sent.
         """
+        return self(
+            "editMessageReplyMarkup",
+            params={
+                "business_connection_id": business_connection_id,
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "inline_message_id": inline_message_id,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def stop_poll(
         self,
         chat_id: int | str,
@@ -2181,8 +3407,16 @@ class Bot(BaseBot):
         
         Use this method to stop a poll which was sent by the bot. On success, the stopped [Poll](https://core.telegram.org/bots/api#poll) is returned.
         """
+        return self(
+            "stopPoll",
+            params={
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "business_connection_id": business_connection_id,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def approve_suggested_post(
         self,
         chat_id: int,
@@ -2195,8 +3429,15 @@ class Bot(BaseBot):
         
         Use this method to approve a suggested post in a direct messages chat. The bot must have the 'can\\_post\\_messages' administrator right in the corresponding channel chat. Returns *True* on success.
         """
+        return self(
+            "approveSuggestedPost",
+            params={
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "send_date": send_date
+            }, 
+        )
 
-    @api_method_wrapper()
     def decline_suggested_post(
         self,
         chat_id: int,
@@ -2209,8 +3450,15 @@ class Bot(BaseBot):
         
         Use this method to decline a suggested post in a direct messages chat. The bot must have the 'can\\_manage\\_direct\\_messages' administrator right in the corresponding channel chat. Returns *True* on success.
         """
+        return self(
+            "declineSuggestedPost",
+            params={
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "comment": comment
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_message(
         self,
         chat_id: int | str,
@@ -2231,8 +3479,14 @@ class Bot(BaseBot):
         - If the bot has *can\\_manage\\_direct\\_messages* administrator right in a channel, it can delete any message in the corresponding direct messages chat.  
         Returns *True* on success.
         """
+        return self(
+            "deleteMessage",
+            params={
+                "chat_id": chat_id,
+                "message_id": message_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_messages(
         self,
         chat_id: int | str,
@@ -2243,8 +3497,14 @@ class Bot(BaseBot):
         
         Use this method to delete multiple messages simultaneously. If some of the specified messages can't be found, they are skipped. Returns *True* on success.
         """
+        return self(
+            "deleteMessages",
+            params={
+                "chat_id": chat_id,
+                "message_ids": message_ids
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_message_reaction(
         self,
         chat_id: int | str,
@@ -2258,8 +3518,16 @@ class Bot(BaseBot):
         
         Use this method to remove a reaction from a message in a group or a supergroup chat. The bot must have the 'can\\_delete\\_messages' administrator right in the chat. Returns *True* on success.
         """
+        return self(
+            "deleteMessageReaction",
+            params={
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "user_id": user_id,
+                "actor_chat_id": actor_chat_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_all_message_reactions(
         self,
         chat_id: int | str,
@@ -2274,12 +3542,19 @@ class Bot(BaseBot):
         
         The following methods and objects allow your bot to handle stickers and sticker sets.
         """
+        return self(
+            "deleteAllMessageReactions",
+            params={
+                "chat_id": chat_id,
+                "user_id": user_id,
+                "actor_chat_id": actor_chat_id
+            }, 
+        )
 
-    @api_method_wrapper(check_input_files=["sticker"])
     def send_sticker(
         self,
         chat_id: int | str,
-        sticker: str | Path | bytes | tg.InputFile,
+        sticker: Path | bytes | tg.InputFile | str,
         *,
         business_connection_id: str | None = None,
         message_thread_id: int | None = None,
@@ -2291,31 +3566,55 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendSticker](https://core.telegram.org/bots/api#sendsticker)  
         
         Use this method to send static .WEBP, [animated](https://telegram.org/blog/animated-stickers) .TGS, or [video](https://telegram.org/blog/video-stickers-better-reactions) .WEBM stickers. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendSticker",
+            params={
+                "chat_id": chat_id,
+                "sticker": sticker,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "emoji": emoji,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+            check_input_files=["sticker"]
+        )
 
-    @api_method_wrapper()
     def get_sticker_set(self, name: str) -> Task[tg.StickerSet]:
         """
         ### [getStickerSet](https://core.telegram.org/bots/api#getstickerset)  
         
         Use this method to get a sticker set. On success, a [StickerSet](https://core.telegram.org/bots/api#stickerset) object is returned.
         """
+        return self(
+            "getStickerSet",
+            params={"name": name}, 
+        )
 
-    @api_method_wrapper()
     def get_custom_emoji_stickers(self, custom_emoji_ids: list[str]) -> Task[list[tg.Sticker]]:
         """
         ### [getCustomEmojiStickers](https://core.telegram.org/bots/api#getcustomemojistickers)  
         
         Use this method to get information about custom emoji stickers by their identifiers. Returns an Array of [Sticker](https://core.telegram.org/bots/api#sticker) objects.
         """
+        return self(
+            "getCustomEmojiStickers",
+            params={"custom_emoji_ids": custom_emoji_ids}, 
+        )
 
-    @api_method_wrapper(check_input_files=["sticker"])
     def upload_sticker_file(
         self,
         user_id: int,
@@ -2327,8 +3626,16 @@ class Bot(BaseBot):
         
         Use this method to upload a file with a sticker for later use in the [createNewStickerSet](https://core.telegram.org/bots/api#createnewstickerset), [addStickerToSet](https://core.telegram.org/bots/api#addstickertoset), or [replaceStickerInSet](https://core.telegram.org/bots/api#replacestickerinset) methods (the file can be used multiple times). Returns the uploaded [File](https://core.telegram.org/bots/api#file) on success.
         """
+        return self(
+            "uploadStickerFile",
+            params={
+                "user_id": user_id,
+                "sticker": sticker,
+                "sticker_format": sticker_format
+            }, 
+            check_input_files=["sticker"]
+        )
 
-    @api_method_wrapper(check_input_media={"stickers": ["sticker"]})
     def create_new_sticker_set(
         self,
         user_id: int,
@@ -2344,8 +3651,19 @@ class Bot(BaseBot):
         
         Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. Returns *True* on success.
         """
+        return self(
+            "createNewStickerSet",
+            params={
+                "user_id": user_id,
+                "name": name,
+                "title": title,
+                "stickers": stickers,
+                "sticker_type": sticker_type,
+                "needs_repainting": needs_repainting
+            }, 
+            check_input_media={"stickers": ["sticker"]}
+        )
 
-    @api_method_wrapper(check_input_media={"sticker": ["sticker"]})
     def add_sticker_to_set(
         self,
         user_id: int,
@@ -2357,8 +3675,16 @@ class Bot(BaseBot):
         
         Use this method to add a new sticker to a set created by the bot. Emoji sticker sets can have up to 200 stickers. Other sticker sets can have up to 120 stickers. Returns *True* on success.
         """
+        return self(
+            "addStickerToSet",
+            params={
+                "user_id": user_id,
+                "name": name,
+                "sticker": sticker
+            }, 
+            check_input_media={"sticker": ["sticker"]}
+        )
 
-    @api_method_wrapper()
     def set_sticker_position_in_set(
         self,
         sticker: str,
@@ -2369,16 +3695,25 @@ class Bot(BaseBot):
         
         Use this method to move a sticker in a set created by the bot to a specific position. Returns *True* on success.
         """
+        return self(
+            "setStickerPositionInSet",
+            params={
+                "sticker": sticker,
+                "position": position
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_sticker_from_set(self, sticker: str) -> Task[t.Literal[True]]:
         """
         ### [deleteStickerFromSet](https://core.telegram.org/bots/api#deletestickerfromset)  
         
         Use this method to delete a sticker from a set created by the bot. Returns *True* on success.
         """
+        return self(
+            "deleteStickerFromSet",
+            params={"sticker": sticker}, 
+        )
 
-    @api_method_wrapper(check_input_media={"sticker": ["sticker"]})
     def replace_sticker_in_set(
         self,
         user_id: int,
@@ -2391,8 +3726,17 @@ class Bot(BaseBot):
         
         Use this method to replace an existing sticker in a sticker set with a new one. The method is equivalent to calling [deleteStickerFromSet](https://core.telegram.org/bots/api#deletestickerfromset), then [addStickerToSet](https://core.telegram.org/bots/api#addstickertoset), then [setStickerPositionInSet](https://core.telegram.org/bots/api#setstickerpositioninset). Returns *True* on success.
         """
+        return self(
+            "replaceStickerInSet",
+            params={
+                "user_id": user_id,
+                "name": name,
+                "old_sticker": old_sticker,
+                "sticker": sticker
+            }, 
+            check_input_media={"sticker": ["sticker"]}
+        )
 
-    @api_method_wrapper()
     def set_sticker_emoji_list(
         self,
         sticker: str,
@@ -2403,8 +3747,14 @@ class Bot(BaseBot):
         
         Use this method to change the list of emoji assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns *True* on success.
         """
+        return self(
+            "setStickerEmojiList",
+            params={
+                "sticker": sticker,
+                "emoji_list": emoji_list
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_sticker_keywords(
         self,
         sticker: str,
@@ -2416,8 +3766,14 @@ class Bot(BaseBot):
         
         Use this method to change search keywords assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns *True* on success.
         """
+        return self(
+            "setStickerKeywords",
+            params={
+                "sticker": sticker,
+                "keywords": keywords
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_sticker_mask_position(
         self,
         sticker: str,
@@ -2429,8 +3785,14 @@ class Bot(BaseBot):
         
         Use this method to change the [mask position](https://core.telegram.org/bots/api#maskposition) of a mask sticker. The sticker must belong to a sticker set that was created by the bot. Returns *True* on success.
         """
+        return self(
+            "setStickerMaskPosition",
+            params={
+                "sticker": sticker,
+                "mask_position": mask_position
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_sticker_set_title(
         self,
         name: str,
@@ -2441,23 +3803,38 @@ class Bot(BaseBot):
         
         Use this method to set the title of a created sticker set. Returns *True* on success.
         """
+        return self(
+            "setStickerSetTitle",
+            params={
+                "name": name,
+                "title": title
+            }, 
+        )
 
-    @api_method_wrapper(check_input_files=["thumbnail"])
     def set_sticker_set_thumbnail(
         self,
         name: str,
         user_id: int,
         format: literals.StickerFormat,
         *,
-        thumbnail: str | Path | bytes | tg.InputFile | None = None
+        thumbnail: Path | bytes | tg.InputFile | str | None = None
     ) -> Task[t.Literal[True]]:
         """
         ### [setStickerSetThumbnail](https://core.telegram.org/bots/api#setstickersetthumbnail)  
         
         Use this method to set the thumbnail of a regular or mask sticker set. The format of the thumbnail file must match the format of the stickers in the set. Returns *True* on success.
         """
+        return self(
+            "setStickerSetThumbnail",
+            params={
+                "name": name,
+                "user_id": user_id,
+                "format": format,
+                "thumbnail": thumbnail
+            }, 
+            check_input_files=["thumbnail"]
+        )
 
-    @api_method_wrapper()
     def set_custom_emoji_sticker_set_thumbnail(
         self,
         name: str,
@@ -2469,8 +3846,14 @@ class Bot(BaseBot):
         
         Use this method to set the thumbnail of a custom emoji sticker set. Returns *True* on success.
         """
+        return self(
+            "setCustomEmojiStickerSetThumbnail",
+            params={
+                "name": name,
+                "custom_emoji_id": custom_emoji_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def delete_sticker_set(self, name: str) -> Task[t.Literal[True]]:
         """
         ### [deleteStickerSet](https://core.telegram.org/bots/api#deletestickerset)  
@@ -2479,8 +3862,11 @@ class Bot(BaseBot):
         
         The following methods and objects allow your bot to handle and send rich messages.
         """
+        return self(
+            "deleteStickerSet",
+            params={"name": name}, 
+        )
 
-    @api_method_wrapper()
     def send_rich_message(
         self,
         chat_id: int | str,
@@ -2495,15 +3881,31 @@ class Bot(BaseBot):
         message_effect_id: str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.ReplyKeyboardRemove | tg.ReplyKeyboardMarkup | tg.InlineKeyboardMarkup | None = None
+        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendRichMessage](https://core.telegram.org/bots/api#sendrichmessage)  
         
         Use this method to send rich messages. If the message contains a block with a media element, then the bot must have the right to send the media to the chat. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendRichMessage",
+            params={
+                "chat_id": chat_id,
+                "rich_message": rich_message,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def send_rich_message_draft(
         self,
         chat_id: int,
@@ -2517,8 +3919,16 @@ class Bot(BaseBot):
         
         Use this method to stream a partial rich message to a user while the message is being generated. Note that the streamed draft is ephemeral and acts as a temporary 30-second preview - once the output is finalized, you **must** call [sendRichMessage](https://core.telegram.org/bots/api#sendrichmessage) with the complete message to persist it in the user's chat. Returns *True* on success.
         """
+        return self(
+            "sendRichMessageDraft",
+            params={
+                "chat_id": chat_id,
+                "draft_id": draft_id,
+                "rich_message": rich_message,
+                "message_thread_id": message_thread_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def answer_inline_query(
         self,
         inline_query_id: str,
@@ -2535,8 +3945,18 @@ class Bot(BaseBot):
         Use this method to send answers to an inline query. On success, *True* is returned.  
         No more than **50** results per query are allowed.
         """
+        return self(
+            "answerInlineQuery",
+            params={
+                "inline_query_id": inline_query_id,
+                "results": results,
+                "cache_time": cache_time,
+                "is_personal": is_personal,
+                "next_offset": next_offset,
+                "button": button
+            }, 
+        )
 
-    @api_method_wrapper()
     def send_invoice(
         self,
         chat_id: int | str,
@@ -2577,8 +3997,43 @@ class Bot(BaseBot):
         
         Use this method to send invoices. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendInvoice",
+            params={
+                "chat_id": chat_id,
+                "title": title,
+                "description": description,
+                "payload": payload,
+                "currency": currency,
+                "prices": prices,
+                "message_thread_id": message_thread_id,
+                "direct_messages_topic_id": direct_messages_topic_id,
+                "provider_token": provider_token,
+                "max_tip_amount": max_tip_amount,
+                "suggested_tip_amounts": suggested_tip_amounts,
+                "start_parameter": start_parameter,
+                "provider_data": provider_data,
+                "photo_url": photo_url,
+                "photo_size": photo_size,
+                "photo_width": photo_width,
+                "photo_height": photo_height,
+                "need_name": need_name,
+                "need_phone_number": need_phone_number,
+                "need_email": need_email,
+                "need_shipping_address": need_shipping_address,
+                "send_phone_number_to_provider": send_phone_number_to_provider,
+                "send_email_to_provider": send_email_to_provider,
+                "is_flexible": is_flexible,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "suggested_post_parameters": suggested_post_parameters,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def create_invoice_link(
         self,
         title: str,
@@ -2610,8 +4065,34 @@ class Bot(BaseBot):
         
         Use this method to create a link for an invoice. Returns the created invoice link as *String* on success.
         """
+        return self(
+            "createInvoiceLink",
+            params={
+                "title": title,
+                "description": description,
+                "payload": payload,
+                "currency": currency,
+                "prices": prices,
+                "business_connection_id": business_connection_id,
+                "provider_token": provider_token,
+                "subscription_period": subscription_period,
+                "max_tip_amount": max_tip_amount,
+                "suggested_tip_amounts": suggested_tip_amounts,
+                "provider_data": provider_data,
+                "photo_url": photo_url,
+                "photo_size": photo_size,
+                "photo_width": photo_width,
+                "photo_height": photo_height,
+                "need_name": need_name,
+                "need_phone_number": need_phone_number,
+                "need_email": need_email,
+                "need_shipping_address": need_shipping_address,
+                "send_phone_number_to_provider": send_phone_number_to_provider,
+                "send_email_to_provider": send_email_to_provider,
+                "is_flexible": is_flexible
+            }, 
+        )
 
-    @api_method_wrapper()
     def answer_shipping_query(
         self,
         shipping_query_id: str,
@@ -2625,8 +4106,16 @@ class Bot(BaseBot):
         
         If you sent an invoice requesting a shipping address and the parameter *is\\_flexible* was specified, the Bot API will send an [Update](https://core.telegram.org/bots/api#update) with a *shipping\\_query* field to the bot. Use this method to reply to shipping queries. On success, *True* is returned.
         """
+        return self(
+            "answerShippingQuery",
+            params={
+                "shipping_query_id": shipping_query_id,
+                "ok": ok,
+                "shipping_options": shipping_options,
+                "error_message": error_message
+            }, 
+        )
 
-    @api_method_wrapper()
     def answer_pre_checkout_query(
         self,
         pre_checkout_query_id: str,
@@ -2639,16 +4128,26 @@ class Bot(BaseBot):
         
         Once the user has confirmed their payment and shipping details, the Bot API sends the final confirmation in the form of an [Update](https://core.telegram.org/bots/api#update) with the field *pre\\_checkout\\_query*. Use this method to respond to such pre-checkout queries. On success, *True* is returned. **Note:** The Bot API must receive an answer within 10 seconds after the pre-checkout query was sent.
         """
+        return self(
+            "answerPreCheckoutQuery",
+            params={
+                "pre_checkout_query_id": pre_checkout_query_id,
+                "ok": ok,
+                "error_message": error_message
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_my_star_balance(self) -> Task[tg.StarAmount]:
         """
         ### [getMyStarBalance](https://core.telegram.org/bots/api#getmystarbalance)  
         
         A method to get the current Telegram Stars balance of the bot. Requires no parameters. On success, returns a [StarAmount](https://core.telegram.org/bots/api#staramount) object.
         """
+        return self(
+            "getMyStarBalance",
+            params={}, 
+        )
 
-    @api_method_wrapper()
     def get_star_transactions(
         self,
         *,
@@ -2660,8 +4159,14 @@ class Bot(BaseBot):
         
         Returns the bot's Telegram Star transactions in chronological order. On success, returns a [StarTransactions](https://core.telegram.org/bots/api#startransactions) object.
         """
+        return self(
+            "getStarTransactions",
+            params={
+                "offset": offset,
+                "limit": limit
+            }, 
+        )
 
-    @api_method_wrapper()
     def refund_star_payment(
         self,
         user_id: int,
@@ -2672,8 +4177,14 @@ class Bot(BaseBot):
         
         Refunds a successful payment in [Telegram Stars](https://t.me/BotNews/90). Returns *True* on success.
         """
+        return self(
+            "refundStarPayment",
+            params={
+                "user_id": user_id,
+                "telegram_payment_charge_id": telegram_payment_charge_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def edit_user_star_subscription(
         self,
         user_id: int,
@@ -2685,8 +4196,15 @@ class Bot(BaseBot):
         
         Allows the bot to cancel or re-enable extension of a subscription paid in Telegram Stars. Returns *True* on success.
         """
+        return self(
+            "editUserStarSubscription",
+            params={
+                "user_id": user_id,
+                "telegram_payment_charge_id": telegram_payment_charge_id,
+                "is_canceled": is_canceled
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_passport_data_errors(
         self,
         user_id: int,
@@ -2699,8 +4217,14 @@ class Bot(BaseBot):
         
         Use this if the data submitted by the user doesn't satisfy the standards your service requires for any reason. For example, if a birthday date seems invalid, a submitted document is blurry, a scan shows evidence of tampering, etc. Supply some details in the error message to make sure the user knows how to correct the issues.
         """
+        return self(
+            "setPassportDataErrors",
+            params={
+                "user_id": user_id,
+                "errors": errors
+            }, 
+        )
 
-    @api_method_wrapper()
     def send_game(
         self,
         chat_id: int | str,
@@ -2720,8 +4244,22 @@ class Bot(BaseBot):
         
         Use this method to send a game. On success, the sent [Message](https://core.telegram.org/bots/api#message) is returned.
         """
+        return self(
+            "sendGame",
+            params={
+                "chat_id": chat_id,
+                "game_short_name": game_short_name,
+                "business_connection_id": business_connection_id,
+                "message_thread_id": message_thread_id,
+                "disable_notification": disable_notification,
+                "protect_content": protect_content,
+                "allow_paid_broadcast": allow_paid_broadcast,
+                "message_effect_id": message_effect_id,
+                "reply_parameters": reply_parameters,
+                "reply_markup": reply_markup
+            }, 
+        )
 
-    @api_method_wrapper()
     def set_game_score(
         self,
         user_id: int,
@@ -2732,14 +4270,25 @@ class Bot(BaseBot):
         chat_id: int | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None
-    ) -> Task[tg.Message | t.Literal[True]]:
+    ) -> Task[t.Literal[True] | tg.Message]:
         """
         ### [setGameScore](https://core.telegram.org/bots/api#setgamescore)  
         
         Use this method to set the score of the specified user in a game message. On success, if the message is not an inline message, the [Message](https://core.telegram.org/bots/api#message) is returned, otherwise *True* is returned. Returns an error, if the new score is not greater than the user's current score in the chat and *force* is *False*.
         """
+        return self(
+            "setGameScore",
+            params={
+                "user_id": user_id,
+                "score": score,
+                "force": force,
+                "disable_edit_message": disable_edit_message,
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "inline_message_id": inline_message_id
+            }, 
+        )
 
-    @api_method_wrapper()
     def get_game_high_scores(
         self,
         user_id: int,
@@ -2755,5 +4304,14 @@ class Bot(BaseBot):
         
         > This method will currently return scores for the target user, plus two of their closest neighbors on each side. Will also return the top three users if the user and their neighbors are not among them. Please note that this behavior is subject to change.
         """
+        return self(
+            "getGameHighScores",
+            params={
+                "user_id": user_id,
+                "chat_id": chat_id,
+                "message_id": message_id,
+                "inline_message_id": inline_message_id
+            }, 
+        )
 
 
