@@ -4,8 +4,6 @@
 ![Telegram Bot API](https://img.shields.io/badge/Telegram%20Bot%20API-v10.1-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)
 <!-- ![PyPI](https://img.shields.io/badge/PyPI-1.0.0-2CA5E0?style=for-the-badge&logo=pypi&logoColor=white) -->
 
-> ⚠️ This repository will soon be rewritten from scratch.
-
 A minimal, async-native **Telegram Bot API** library — built for developers who want power without the clutter.
 
 ## Table of contents
