@@ -90,76 +90,7 @@ def request_task_wrapper(catch_errors: bool, rate_control: asyncio.Semaphore):
         return inner
     
     return wrapper
-        
-# decorator
-def api_method_wrapper(
-    name: str | None = None,
-    *,
-    check_input_files: list[str] | None = None,
-    check_input_media: list[str] | None = None,
-    convert_func: t.Callable[[t.Any], t.Any] | None = None,
-):
-    """
-    **decorator** for api methods
-    
-    ⚠️ ***Can only be applied to methods of `BaseBot` or is's subclasses***
-    
-    It's purpose is to make it very easy to extend the `BaseBot` class.
-    
-    **Usage:**
-    ```python
 
-    class Message:
-        def __init__(self, message_id, ...):
-            ...
-    
-    class Bot(BaseBot):
-        @api_method_wrapper(convert_func=lambda d: Message(**d))
-        def send_message(self, chat_id: int | str, text: str, ...):
-            \"""
-            Just add the doc sting.  
-            No Code needed, the decorator handles the request
-            \"""
-        
-        @api_method_wrapper(check_input_files=["photo"], convert_func=lambda d: Message(**d))
-        def send_photo(self, chat_id: int | str, photo: str | Path | bytes, ...):
-            \"""
-            Just add the doc sting.  
-            No Code needed, the decorator handles the request
-            \"""
-        
-        ...
-    ```
-    """
-    def wrapper(func):
-        method_name = name or utils.snake_to_camel(func.__name__)
-        @wraps(func)
-        def inner(*args, **kwargs):
-            params = dict(zip(func.__code__.co_varnames, args))
-            params.update(kwargs)
-            
-            bot: BaseBot = params.pop("self")
-            
-            if not isinstance(bot, BaseBot):
-                raise TypeError(f"This decorator can only be applied to instances of BaseBot.")
-            
-            return bot(
-                method_name, 
-                params=params,
-                check_input_files=check_input_files,
-                check_input_media=check_input_media,
-                convert_func=convert_func,
-            )
-
-        ### IDE signature hack
-        sig = inspect.signature(func)
-        params = list(sig.parameters.values())[1:]
-        sig.replace(parameters=params)
-        inner.__signature__ = sig
-        ### 
-
-        return inner
-    return wrapper
 
 # helper function
 def serialize_params(params: JsonDict) -> JsonDict:
