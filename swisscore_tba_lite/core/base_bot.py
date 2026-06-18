@@ -2,6 +2,7 @@ import asyncio
 import typing as t
 import subprocess
 import sys
+import inspect
 from functools import wraps
 
 import httpx
@@ -18,9 +19,6 @@ from ..bot_api import objects
 
 T = t.TypeVar("T")
 JsonDict = dict[str, t.Any]
-
-P = t.ParamSpec("P")
-R = t.TypeVar("R")
 
 CLOUD_BOT_API_URL = "https://api.telegram.org"
 CLOUD_BOT_FILE_URL = "https://api.telegram.org/file"
@@ -100,7 +98,7 @@ def api_method_wrapper(
     check_input_files: list[str] | None = None,
     check_input_media: list[str] | None = None,
     convert_func: t.Callable[[t.Any], t.Any] | None = None,
-) -> t.Callable[[t.Callable[P, R]], t.Callable[P, R]]:
+):
     """
     **decorator** for api methods
     
@@ -152,7 +150,14 @@ def api_method_wrapper(
                 check_input_media=check_input_media,
                 convert_func=convert_func,
             )
-            
+
+        ### IDE signature hack
+        sig = inspect.signature(func)
+        params = list(sig.parameters.values())[1:]
+        sig.replace(parameters=params)
+        inner.__signature__ = sig
+        ### 
+
         return inner
     return wrapper
 
