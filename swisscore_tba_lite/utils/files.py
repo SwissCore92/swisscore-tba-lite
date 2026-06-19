@@ -56,6 +56,7 @@ async def prepare_files(params: dict[str, t.Any], check_files: list[str] | None,
         return params, {**files_1, **files_2} or None
 
     except Exception as e:
+        print(repr(e))
         raise FileProcessingError(f"Error while preparing files: {e}") from e
 
 async def prepare_input_files(check_files: list[str] | None, params: dict[str, t.Any]) -> tuple[dict[str, t.Any], dict[str, HttpXFile]]:
@@ -70,6 +71,9 @@ async def prepare_input_files(check_files: list[str] | None, params: dict[str, t
             continue
 
         val = params[key]
+
+        if val is None:
+            continue
 
         filename: str | None = None
 
