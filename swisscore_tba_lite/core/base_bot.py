@@ -28,6 +28,15 @@ USE_CLOUD_URL = frozenset({"logout"})
 methods that always must be dispatched to the cloud telegram bot api server
 """
 
+free_effects = {
+    "❤️": "5159385139981059251",
+    "👍": "5107584321108051014",
+    "🔥": "5104841245755180586",
+    "🎉": "5046509860389126442",
+    "👎": "5104858069142078462",
+    "💩": "5046589136895476101"
+} 
+
 # decorator
 def request_task_wrapper(catch_errors: bool, rate_control: asyncio.Semaphore):
     """
@@ -91,6 +100,9 @@ def request_task_wrapper(catch_errors: bool, rate_control: asyncio.Semaphore):
     
     return wrapper
 
+
+def get_free_effect(key: str):
+    return free_effects.get(key, key)
 
 # helper function
 def serialize_params(params: JsonDict) -> JsonDict:
@@ -302,6 +314,11 @@ class BaseBot:
         timeout: int | None = kwargs.get("timeout", None)
         auto_prepare: bool = kwargs.get("auto_prepare", True)
         catch_errors: bool = kwargs.get("catch_errors", True)
+
+        
+
+        if "message_effect_id" in params:
+            params["message_effect_id"] = get_free_effect(params["message_effect_id"])
 
         @request_task_wrapper(catch_errors=catch_errors, rate_control=self.__rate_control)
         async def request():

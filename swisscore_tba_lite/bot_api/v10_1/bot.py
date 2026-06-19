@@ -150,10 +150,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendMessage](https://core.telegram.org/bots/api#sendmessage)  
@@ -192,7 +192,7 @@ class Bot(BaseBot):
         video_start_timestamp: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None
     ) -> Task[tg.Message]:
         """
@@ -261,10 +261,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.MessageId]:
         """
         ### [copyMessage](https://core.telegram.org/bots/api#copymessage)  
@@ -341,10 +341,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendPhoto](https://core.telegram.org/bots/api#sendphoto)  
@@ -392,10 +392,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendLivePhoto](https://core.telegram.org/bots/api#sendlivephoto)  
@@ -445,10 +445,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendAudio](https://core.telegram.org/bots/api#sendaudio)  
@@ -499,10 +499,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendDocument](https://core.telegram.org/bots/api#senddocument)  
@@ -556,10 +556,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVideo](https://core.telegram.org/bots/api#sendvideo)  
@@ -617,10 +617,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendAnimation](https://core.telegram.org/bots/api#sendanimation)  
@@ -670,10 +670,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVoice](https://core.telegram.org/bots/api#sendvoice)  
@@ -717,10 +717,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVideoNote](https://core.telegram.org/bots/api#sendvideonote)  
@@ -768,7 +768,7 @@ class Bot(BaseBot):
         allow_paid_broadcast: bool | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendPaidMedia](https://core.telegram.org/bots/api#sendpaidmedia)  
@@ -796,7 +796,7 @@ class Bot(BaseBot):
                 "reply_parameters": reply_parameters,
                 "reply_markup": reply_markup
             }, 
-            check_input_media={"media": ["cover", "thumbnail", "media", "photo"]}
+            check_input_media={"media": ["media", "cover", "thumbnail", "photo"]}
         )
 
     def send_media_group(
@@ -810,7 +810,7 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         reply_parameters: tg.ReplyParameters | None = None
     ) -> Task[list[tg.Message]]:
         """
@@ -832,7 +832,7 @@ class Bot(BaseBot):
                 "message_effect_id": message_effect_id,
                 "reply_parameters": reply_parameters
             }, 
-            check_input_media={"media": ["cover", "thumbnail", "media", "photo"]}
+            check_input_media={"media": ["media", "cover", "thumbnail", "photo"]}
         )
 
     def send_location(
@@ -851,10 +851,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendLocation](https://core.telegram.org/bots/api#sendlocation)  
@@ -902,10 +902,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendVenue](https://core.telegram.org/bots/api#sendvenue)  
@@ -951,10 +951,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendContact](https://core.telegram.org/bots/api#sendcontact)  
@@ -1016,9 +1016,9 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendPoll](https://core.telegram.org/bots/api#sendpoll)  
@@ -1063,7 +1063,7 @@ class Bot(BaseBot):
                 "reply_parameters": reply_parameters,
                 "reply_markup": reply_markup
             }, 
-            check_input_media={"explanation_media": ["cover", "thumbnail", "media", "photo"], "media": ["cover", "thumbnail", "media", "photo"]}
+            check_input_media={"explanation_media": ["media", "cover", "thumbnail", "photo"], "media": ["media", "cover", "thumbnail", "photo"]}
         )
 
     def send_checklist(
@@ -1074,7 +1074,7 @@ class Bot(BaseBot):
         *,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
@@ -1108,10 +1108,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendDice](https://core.telegram.org/bots/api#senddice)  
@@ -3199,7 +3199,7 @@ class Bot(BaseBot):
         link_preview_options: tg.LinkPreviewOptions | None = None,
         rich_message: tg.InputRichMessage | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageText](https://core.telegram.org/bots/api#editmessagetext)  
         
@@ -3233,7 +3233,7 @@ class Bot(BaseBot):
         caption_entities: list[tg.MessageEntity] | None = None,
         show_caption_above_media: bool | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageCaption](https://core.telegram.org/bots/api#editmessagecaption)  
         
@@ -3263,7 +3263,7 @@ class Bot(BaseBot):
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageMedia](https://core.telegram.org/bots/api#editmessagemedia)  
         
@@ -3279,7 +3279,7 @@ class Bot(BaseBot):
                 "inline_message_id": inline_message_id,
                 "reply_markup": reply_markup
             }, 
-            check_input_media={"media": ["cover", "thumbnail", "media", "photo"]}
+            check_input_media={"media": ["media", "cover", "thumbnail", "photo"]}
         )
 
     def edit_message_live_location(
@@ -3296,7 +3296,7 @@ class Bot(BaseBot):
         heading: int | None = None,
         proximity_alert_radius: int | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageLiveLocation](https://core.telegram.org/bots/api#editmessagelivelocation)  
         
@@ -3327,7 +3327,7 @@ class Bot(BaseBot):
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [stopMessageLiveLocation](https://core.telegram.org/bots/api#stopmessagelivelocation)  
         
@@ -3377,7 +3377,7 @@ class Bot(BaseBot):
         message_id: int | None = None,
         inline_message_id: str | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [editMessageReplyMarkup](https://core.telegram.org/bots/api#editmessagereplymarkup)  
         
@@ -3563,10 +3563,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendSticker](https://core.telegram.org/bots/api#sendsticker)  
@@ -3878,10 +3878,10 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
-        reply_markup: tg.ForceReply | tg.InlineKeyboardMarkup | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | None = None
+        reply_markup: tg.ForceReply | tg.ReplyKeyboardMarkup | tg.ReplyKeyboardRemove | tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
         """
         ### [sendRichMessage](https://core.telegram.org/bots/api#sendrichmessage)  
@@ -3987,7 +3987,7 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         suggested_post_parameters: tg.SuggestedPostParameters | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
@@ -4235,7 +4235,7 @@ class Bot(BaseBot):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         allow_paid_broadcast: bool | None = None,
-        message_effect_id: str | None = None,
+        message_effect_id: literals.MessageEffect | str | None = None,
         reply_parameters: tg.ReplyParameters | None = None,
         reply_markup: tg.InlineKeyboardMarkup | None = None
     ) -> Task[tg.Message]:
@@ -4270,7 +4270,7 @@ class Bot(BaseBot):
         chat_id: int | None = None,
         message_id: int | None = None,
         inline_message_id: str | None = None
-    ) -> Task[t.Literal[True] | tg.Message]:
+    ) -> Task[tg.Message | t.Literal[True]]:
         """
         ### [setGameScore](https://core.telegram.org/bots/api#setgamescore)  
         

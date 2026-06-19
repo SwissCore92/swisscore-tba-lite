@@ -314,6 +314,15 @@ ReactionEmoji = Literal[
     "😡",
 ]
 
+MessageEffect = Literal[
+    "❤️",
+    "👍",
+    "🔥",
+    "🎉",
+    "👎",
+    "💩",
+]
+
 StickerFormat = Literal[
     "static",
     "animated",
