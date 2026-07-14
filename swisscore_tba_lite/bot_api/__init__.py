@@ -1,5 +1,5 @@
 """
-Bot API 10.1 (June 11, 2026)
+Bot API 10.2 (July 14, 2026)
 """
 
-from .v10_1 import objects, literals
+from .v10_2 import objects, literals
